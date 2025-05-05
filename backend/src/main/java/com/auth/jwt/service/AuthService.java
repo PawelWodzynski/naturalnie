@@ -6,8 +6,8 @@ import com.auth.jwt.data.entity.auth.employee.Address;
 import com.auth.jwt.data.entity.auth.employee.Employee;
 import com.auth.jwt.data.entity.auth.employee.EmployeeConsent;
 import com.auth.jwt.data.entity.auth.employee.Role;
-import com.auth.jwt.data.repository.AddressRepository; // Import AddressRepository
-import com.auth.jwt.data.repository.EmployeeConsentRepository; // Import EmployeeConsentRepository
+import com.auth.jwt.data.repository.auth.employee.AddressRepository; // Import AddressRepository
+import com.auth.jwt.data.repository.auth.employee.EmployeeConsentRepository; // Import EmployeeConsentRepository
 import com.auth.jwt.data.repository.auth.employee.EmployeeJpaRepository;
 import com.auth.jwt.exception.RegistrationException;
 import com.auth.jwt.exception.AuthenticationException;

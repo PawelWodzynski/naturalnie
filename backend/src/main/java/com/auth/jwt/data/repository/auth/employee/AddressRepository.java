@@ -1,4 +1,4 @@
-package com.auth.jwt.data.repository;
+package com.auth.jwt.data.repository.auth.employee;
 
 import com.auth.jwt.data.entity.auth.employee.Address;
 import org.springframework.data.jpa.repository.JpaRepository;
