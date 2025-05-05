@@ -1,4 +1,4 @@
-package com.auth.jwt.data.entity;
+package com.auth.jwt.data.entity.auth.employee;
 
 import jakarta.persistence.*;
 import java.sql.Timestamp;

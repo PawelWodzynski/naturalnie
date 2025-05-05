@@ -1,7 +1,5 @@
 package com.auth.jwt.data.entity.auth.employee;
 
-import com.auth.jwt.data.entity.Address; // Import Address entity
-import com.auth.jwt.data.entity.EmployeeConsent; // Import EmployeeConsent entity
 import jakarta.persistence.*;
 
 import java.util.Collection;
