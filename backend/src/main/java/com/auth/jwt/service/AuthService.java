@@ -13,7 +13,8 @@ import com.auth.jwt.exception.RegistrationException;
 import com.auth.jwt.exception.AuthenticationException;
 import com.auth.jwt.security.UserAuthProvider;
 import com.auth.jwt.util.ValidationUtil;
-import jakarta.transaction.Transactional; // Import Transactional
+import org.springframework.transaction.annotation.Transactional; // Import Spring Transactional
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -47,7 +48,7 @@ public class AuthService {
         return userAuthProvider.createToken(employee.getUserName());
     }
 
-    @Transactional // Ensure atomicity
+    @Transactional("authTransactionManager") // Specify the transaction manager
     public String register(RegisterEmployeeDto registerEmployeeDto) throws RegistrationException {
         // 0. Check if passwords match
         if (registerEmployeeDto.getPassword() == null || !registerEmployeeDto.getPassword().equals(registerEmployeeDto.getConfirmPassword())) {
