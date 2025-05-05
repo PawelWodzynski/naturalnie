@@ -100,18 +100,11 @@ CREATE TABLE addresses (
 );
 
 
--- Modify employees table to add references to consents and a primary address
--- Note: The primary relationships are defined by foreign keys in employee_consents and addresses tables.
--- Adding columns here might be for specific linking purposes (e.g., primary address).
+-- Modify employees table to add references and enforce one-to-one relationships
 ALTER TABLE employees
-ADD COLUMN consent_id INT NULL COMMENT 'Reference to the specific consent record for this employee',
-ADD COLUMN primary_address_id INT NULL COMMENT 'Reference to the primary address for this employee';
-
--- Optional: Add foreign key constraints if a strict link from employee is required.
--- Ensure these constraints align with the intended data model (e.g., one-to-one vs. one-to-many).
--- ALTER TABLE employees
--- ADD CONSTRAINT fk_employee_consent FOREIGN KEY (consent_id) REFERENCES employee_consents(consent_id) ON DELETE SET NULL;
--- ALTER TABLE employees
--- ADD CONSTRAINT fk_employee_primary_address FOREIGN KEY (primary_address_id) REFERENCES addresses(address_id) ON DELETE SET NULL;
+ADD COLUMN consent_id INT NULL UNIQUE COMMENT 'Reference to the specific consent record (one-to-one)',
+ADD COLUMN primary_address_id INT NULL UNIQUE COMMENT 'Reference to the primary address (one-to-one)',
+ADD CONSTRAINT fk_employee_consent FOREIGN KEY (consent_id) REFERENCES employee_consents(consent_id) ON DELETE SET NULL,
+ADD CONSTRAINT fk_employee_primary_address FOREIGN KEY (primary_address_id) REFERENCES addresses(address_id) ON DELETE SET NULL;
 
 
