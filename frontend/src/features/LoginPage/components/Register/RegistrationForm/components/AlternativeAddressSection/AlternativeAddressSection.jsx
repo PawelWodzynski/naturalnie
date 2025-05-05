@@ -38,10 +38,21 @@ const AlternativeAddressSection = ({ formData, handleChange }) => {
         <label htmlFor="altCommune">Gmina</label>
         <input type="text" id="altCommune" name="altCommune" value={formData.altCommune} onChange={handleChange} />
       </div>
-      {/* Phone number */}
-      <div className={`${styles.formGroup} ${styles.phoneNumberGroup}`}> 
-        <label htmlFor="altPhoneNumber">Numer telefonu</label>
-        <input type="tel" id="altPhoneNumber" name="altPhoneNumber" value={formData.altPhoneNumber} onChange={handleChange} required /> 
+
+      {/* Centered row for Phone, NIP, Company Name */}
+      <div className={styles.centeredRow}>
+        <div className={styles.formGroup}>
+          <label htmlFor="altPhoneNumber">Numer telefonu</label>
+          <input type="tel" id="altPhoneNumber" name="altPhoneNumber" value={formData.altPhoneNumber} onChange={handleChange} required />
+        </div>
+        <div className={styles.formGroup}>
+          <label htmlFor="altNip">NIP</label>
+          <input type="text" id="altNip" name="altNip" value={formData.altNip} onChange={handleChange} />
+        </div>
+        <div className={styles.formGroup}>
+          <label htmlFor="altCompanyName">Nazwa firmy</label>
+          <input type="text" id="altCompanyName" name="altCompanyName" value={formData.altCompanyName} onChange={handleChange} />
+        </div>
       </div>
     </fieldset>
   );

@@ -27,6 +27,8 @@ const RegistrationForm = ({ onSuccess }) => {
     district: '',
     commune: '',
     phoneNumber: '',
+    nip: '', // Added NIP
+    companyName: '', // Added Company Name
     // Alternative Address details (Initialize with empty strings)
     altStreet: '',
     altBuildingNumber: '',
@@ -37,6 +39,8 @@ const RegistrationForm = ({ onSuccess }) => {
     altDistrict: '',
     altCommune: '',
     altPhoneNumber: '',
+    altNip: '', // Added Alt NIP
+    altCompanyName: '', // Added Alt Company Name
     // Consent details
     rodoConsent: false,
     termsConsent: false,

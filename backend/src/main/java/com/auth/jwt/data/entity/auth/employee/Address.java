@@ -47,6 +47,12 @@ public class Address {
     @Column(name = "phone_number", length = 15)
     private String phoneNumber;
 
+    @Column(name = "nip", length = 10) // Added NIP field
+    private String nip;
+
+    @Column(name = "company_name", length = 255) // Added company_name field
+    private String companyName;
+
     // Getters and Setters
 
     public Integer getAddressId() {
@@ -143,6 +149,22 @@ public class Address {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getNip() {
+        return nip;
+    }
+
+    public void setNip(String nip) {
+        this.nip = nip;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
     }
 }
 

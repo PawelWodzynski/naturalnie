@@ -14,7 +14,6 @@ const AddressSection = ({ formData, handleChange }) => {
         <input type="text" id="buildingNumber" name="buildingNumber" value={formData.buildingNumber} onChange={handleChange} required />
       </div>
       <div className={styles.formGroup}>
-        {/* Removed (opcjonalnie) from label */}
         <label htmlFor="apartmentNumber">Numer mieszkania</label>
         <input type="text" id="apartmentNumber" name="apartmentNumber" value={formData.apartmentNumber} onChange={handleChange} />
       </div>
@@ -28,25 +27,32 @@ const AddressSection = ({ formData, handleChange }) => {
         <input type="text" id="city" name="city" value={formData.city} onChange={handleChange} required />
       </div>
       <div className={styles.formGroup}>
-        {/* Removed (opcjonalnie) */}
         <label htmlFor="voivodeship">Województwo</label>
         <input type="text" id="voivodeship" name="voivodeship" value={formData.voivodeship} onChange={handleChange} />
       </div>
       <div className={styles.formGroup}>
-        {/* Removed (opcjonalnie) */}
         <label htmlFor="district">Powiat</label>
         <input type="text" id="district" name="district" value={formData.district} onChange={handleChange} />
       </div>
       <div className={styles.formGroup}>
-        {/* Removed (opcjonalnie) */}
         <label htmlFor="commune">Gmina</label>
         <input type="text" id="commune" name="commune" value={formData.commune} onChange={handleChange} />
       </div>
-      {/* Phone number moved to the end to appear below the above row */}
-      <div className={`${styles.formGroup} ${styles.phoneNumberGroup}`}> 
-        {/* Removed (opcjonalnie) from label */}
-        <label htmlFor="phoneNumber">Numer telefonu</label>
-        <input type="tel" id="phoneNumber" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required /> 
+      
+      {/* Centered row for Phone, NIP, Company Name */}
+      <div className={styles.centeredRow}>
+        <div className={styles.formGroup}>
+          <label htmlFor="phoneNumber">Numer telefonu</label>
+          <input type="tel" id="phoneNumber" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
+        </div>
+        <div className={styles.formGroup}>
+          <label htmlFor="nip">NIP</label>
+          <input type="text" id="nip" name="nip" value={formData.nip} onChange={handleChange} />
+        </div>
+        <div className={styles.formGroup}>
+          <label htmlFor="companyName">Nazwa firmy</label>
+          <input type="text" id="companyName" name="companyName" value={formData.companyName} onChange={handleChange} />
+        </div>
       </div>
     </fieldset>
   );

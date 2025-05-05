@@ -22,6 +22,8 @@ public class RegisterEmployeeDto {
     private String district; // Optional
     private String commune; // Optional
     private String phoneNumber; // Optional
+    private String nip; // Added NIP for primary address
+    private String companyName; // Added Company Name for primary address
 
     // Alternative Address details (Optional)
     private String altStreet;
@@ -33,6 +35,8 @@ public class RegisterEmployeeDto {
     private String altDistrict;
     private String altCommune;
     private String altPhoneNumber;
+    private String altNip; // Added NIP for alternative address
+    private String altCompanyName; // Added Company Name for alternative address
 
     // Consent details
     private Boolean rodoConsent;

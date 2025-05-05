@@ -79,6 +79,8 @@ CREATE TABLE `addresses` (
     `commune` VARCHAR(100),
     `country` VARCHAR(255) NULL, -- Added country based on previous script
     `phone_number` VARCHAR(15),
+    `nip` VARCHAR(10) NULL COMMENT 'NIP (Tax Identification Number), optional',
+    `company_name` VARCHAR(255) NULL COMMENT 'Company Name, optional',
     FOREIGN KEY (`employee_id`) REFERENCES `employee`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; -- Set UTF8MB4 encoding
 
@@ -98,7 +100,9 @@ CREATE TABLE `alternative_addresses` (
     `district` VARCHAR(100),
     `commune` VARCHAR(100),
     `country` VARCHAR(255) NULL,
-    `phone_number` VARCHAR(15)
+    `phone_number` VARCHAR(15),
+    `nip` VARCHAR(10) NULL COMMENT 'NIP (Tax Identification Number), optional',
+    `company_name` VARCHAR(255) NULL COMMENT 'Company Name, optional'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; -- Set UTF8MB4 encoding
 
 -- Add foreign key constraints to employee table after all tables are created

@@ -61,14 +61,14 @@ public class AuthService {
         String confirmPassword = registerEmployeeDto.getConfirmPassword();
 
         // Add Debug Logging
-        log.debug("Password validation: Raw password=\'{}\' (length={}), Raw confirmPassword=\'{}\' (length={})", 
+        log.debug("Password validation: Raw password=\\'{}}\\' (length={}), Raw confirmPassword=\\'{}}\\' (length={})", 
                   password, (password != null ? password.length() : "null"), 
                   confirmPassword, (confirmPassword != null ? confirmPassword.length() : "null"));
         
         String trimmedPassword = (password != null) ? password.trim() : null;
         String trimmedConfirmPassword = (confirmPassword != null) ? confirmPassword.trim() : null;
 
-        log.debug("Password validation: Trimmed password=\'{}\' (length={}), Trimmed confirmPassword=\'{}\' (length={})",
+        log.debug("Password validation: Trimmed password=\\'{}}\\' (length={}), Trimmed confirmPassword=\\'{}}\\' (length={})",
                   trimmedPassword, (trimmedPassword != null ? trimmedPassword.length() : "null"),
                   trimmedConfirmPassword, (trimmedConfirmPassword != null ? trimmedConfirmPassword.length() : "null"));
 
@@ -110,7 +110,7 @@ public class AuthService {
         newEmployee.setEmail(registerEmployeeDto.getEmail());
         // Don't save employee yet, need to link addresses first
 
-        // 6. Create and save Primary Address
+        // 6. Create Primary Address
         Address newAddress = new Address();
         // Set employeeId after saving employee
         newAddress.setStreet(registerEmployeeDto.getStreet());
@@ -122,10 +122,13 @@ public class AuthService {
         newAddress.setDistrict(registerEmployeeDto.getDistrict());
         newAddress.setCommune(registerEmployeeDto.getCommune());
         newAddress.setPhoneNumber(registerEmployeeDto.getPhoneNumber());
+        newAddress.setNip(registerEmployeeDto.getNip()); // Set NIP
+        newAddress.setCompanyName(registerEmployeeDto.getCompanyName()); // Set Company Name
         // Don't save address yet
 
         // 7. Create Alternative Address if any alt field is present
         AlternativeAddress newAlternativeAddress = null;
+        // Check if *any* alternative address field (including NIP/Company Name) has text
         if (StringUtils.hasText(registerEmployeeDto.getAltStreet()) ||
             StringUtils.hasText(registerEmployeeDto.getAltBuildingNumber()) ||
             StringUtils.hasText(registerEmployeeDto.getAltApartmentNumber()) ||
@@ -134,7 +137,9 @@ public class AuthService {
             StringUtils.hasText(registerEmployeeDto.getAltVoivodeship()) ||
             StringUtils.hasText(registerEmployeeDto.getAltDistrict()) ||
             StringUtils.hasText(registerEmployeeDto.getAltCommune()) ||
-            StringUtils.hasText(registerEmployeeDto.getAltPhoneNumber()))
+            StringUtils.hasText(registerEmployeeDto.getAltPhoneNumber()) ||
+            StringUtils.hasText(registerEmployeeDto.getAltNip()) || // Check Alt NIP
+            StringUtils.hasText(registerEmployeeDto.getAltCompanyName())) // Check Alt Company Name
         {
             log.info("Alternative address data found, creating AlternativeAddress entity.");
             newAlternativeAddress = new AlternativeAddress();
@@ -147,6 +152,8 @@ public class AuthService {
             newAlternativeAddress.setDistrict(registerEmployeeDto.getAltDistrict());
             newAlternativeAddress.setCommune(registerEmployeeDto.getAltCommune());
             newAlternativeAddress.setPhoneNumber(registerEmployeeDto.getAltPhoneNumber());
+            newAlternativeAddress.setNip(registerEmployeeDto.getAltNip()); // Set Alt NIP
+            newAlternativeAddress.setCompanyName(registerEmployeeDto.getAltCompanyName()); // Set Alt Company Name
             // Save alternative address first to get ID
             newAlternativeAddress = alternativeAddressRepository.save(newAlternativeAddress);
             newEmployee.setAlternativeAddress(newAlternativeAddress); // Link to employee
@@ -154,7 +161,7 @@ public class AuthService {
             log.info("No alternative address data provided.");
         }
 
-        // 8. Create and save EmployeeConsent
+        // 8. Create EmployeeConsent
         EmployeeConsent newConsent = new EmployeeConsent();
         // Set employeeId after saving employee
         newConsent.setRodoConsent(registerEmployeeDto.getRodoConsent() != null && registerEmployeeDto.getRodoConsent());

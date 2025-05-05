@@ -44,26 +44,37 @@
   box-sizing: border-box; /* Include padding and border in element's total width and height */
 }
 
-/* Specific styling for the phone number group */
-.phoneNumberGroup {
+/* New centered row for Phone, NIP, Company Name */
+.centeredRow {
   grid-column: 1 / -1; /* Span full width */
-  max-width: 400px; /* Limit width if spanning full */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 equal columns */
+  gap: 15px;
+  max-width: 900px; /* Limit max width for better centering */
   margin-left: auto;
   margin-right: auto;
+  margin-top: 10px; /* Add some space above this row */
 }
 
-/* Responsive adjustments for the grid */
+/* Responsive adjustments */
 @media (max-width: 900px) { /* Adjust breakpoint as needed */
   .fieldset {
     grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
   }
-  .phoneNumberGroup {
-     grid-column: 1 / -1; /* Still span full width */
+  .centeredRow {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
+    /* NIP and Company Name will wrap */
+  }
+  .centeredRow > .formGroup:nth-child(1) { /* Phone number */
+    grid-column: 1 / -1; /* Span full width on medium screens */
   }
 }
 
 @media (max-width: 600px) {
   .fieldset {
+    grid-template-columns: 1fr; /* 1 column on small screens */
+  }
+  .centeredRow {
     grid-template-columns: 1fr; /* 1 column on small screens */
   }
 }
