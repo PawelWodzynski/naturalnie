@@ -63,33 +63,63 @@ const RegistrationForm = ({ onSuccess }) => {
   };
 
   const nextStep = () => {
-    // Add validation for the current step before proceeding
+    setError(''); // Clear previous errors before validation
+
+    // Validation for Step 1
     if (currentStep === 1) {
       if (!formData.userName || !formData.password || !formData.confirmPassword || !formData.firstName || !formData.lastName || !formData.email) {
         setError('Proszę wypełnić wszystkie pola danych podstawowych.');
         return;
       }
-      // Trim whitespace before comparing passwords
       if (formData.password.trim() !== formData.confirmPassword.trim()) {
         setError('Hasła nie są identyczne.');
         return;
       }
     }
+
+    // Validation for Step 2 (Address)
     if (currentStep === 2) {
-       // Basic check for primary address
+      // Basic required fields for primary address
       if (!formData.street || !formData.buildingNumber || !formData.postalCode || !formData.city || !formData.phoneNumber) {
         setError('Proszę wypełnić wymagane pola adresu podstawowego (ulica, nr budynku, kod pocztowy, miasto, telefon).');
         return;
       }
-      // Basic check for alternative address if shown
+
+      // NIP and Company Name validation for primary address
+      if (formData.nip) { // If NIP is filled
+        if (!/^\d{10}$/.test(formData.nip)) { // Check if exactly 10 digits
+          setError('Błędnie wpisany numer NIP w adresie podstawowym, wymagane 10 cyfr.');
+          return;
+        }
+        if (!formData.companyName) { // Check if Company Name is filled
+          setError('Nazwa firmy w adresie podstawowym musi być uzupełniona, jeśli podano NIP.');
+          return;
+        }
+      }
+
+      // Validation for alternative address if shown
       if (showAlternativeAddress) {
-          if (!formData.altStreet || !formData.altBuildingNumber || !formData.altPostalCode || !formData.altCity || !formData.altPhoneNumber) {
-            setError('Proszę wypełnić wymagane pola adresu alternatywnego (ulica, nr budynku, kod pocztowy, miasto, telefon).');
+        // Basic required fields for alternative address
+        if (!formData.altStreet || !formData.altBuildingNumber || !formData.altPostalCode || !formData.altCity || !formData.altPhoneNumber) {
+          setError('Proszę wypełnić wymagane pola adresu alternatywnego (ulica, nr budynku, kod pocztowy, miasto, telefon).');
+          return;
+        }
+
+        // NIP and Company Name validation for alternative address
+        if (formData.altNip) { // If Alt NIP is filled
+          if (!/^\d{10}$/.test(formData.altNip)) { // Check if exactly 10 digits
+            setError('Błędnie wpisany numer NIP w adresie alternatywnym, wymagane 10 cyfr.');
             return;
           }
+          if (!formData.altCompanyName) { // Check if Alt Company Name is filled
+            setError('Nazwa firmy w adresie alternatywnym musi być uzupełniona, jeśli podano NIP.');
+            return;
+          }
+        }
       }
     }
-    setError(''); // Clear error if validation passes
+
+    // If validation passes, proceed to the next step
     setCurrentStep((prev) => prev + 1);
   };
 
@@ -108,10 +138,9 @@ const RegistrationForm = ({ onSuccess }) => {
       return;
     }
 
-    // Password match validation is already done in step 1 validation
+    // NIP/Company Name validation is already done in step 2 validation
 
     try {
-      // Send the complete formData including alternative address fields
       const dataToSend = formData;
 
       const response = await fetch('http://localhost:8080/register', {
@@ -157,7 +186,6 @@ const RegistrationForm = ({ onSuccess }) => {
         {currentStep === 2 && (
           <>
             <AddressSection formData={formData} handleChange={handleChange} />
-            {/* Checkbox to show alternative address */}
             <div className={styles.checkboxContainer}>
               <input
                 type="checkbox"
@@ -171,7 +199,6 @@ const RegistrationForm = ({ onSuccess }) => {
                 Dodaj alternatywny adres dostawy
               </label>
             </div>
-            {/* Conditionally render AlternativeAddressSection */}
             {showAlternativeAddress && (
               <AlternativeAddressSection formData={formData} handleChange={handleChange} />
             )}

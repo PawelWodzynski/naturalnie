@@ -47,8 +47,8 @@ const AlternativeAddressSection = ({ formData, handleChange }) => {
         </div>
         <div className={styles.formGroup}>
           <label htmlFor="altNip">NIP</label>
-          {/* Added maxLength validation */}
-          <input type="text" id="altNip" name="altNip" value={formData.altNip} onChange={handleChange} maxLength="10" />
+          {/* Removed maxLength validation */}
+          <input type="text" id="altNip" name="altNip" value={formData.altNip} onChange={handleChange} />
         </div>
         <div className={styles.formGroup}>
           <label htmlFor="altCompanyName">Nazwa firmy</label>
