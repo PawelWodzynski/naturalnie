@@ -1,34 +1,48 @@
-/* Styles for UserDataSection */
+/* UserDataSection.module.css */
 
 .fieldset {
   border: 1px solid #ccc;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  display: grid; /* Use grid for layout within the section */
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive columns for fields */
+  gap: 15px; /* Gap between form groups */
 }
 
 .fieldset legend {
   font-weight: bold;
-  padding: 0 0.5rem;
+  margin-bottom: 10px;
+  padding: 0 5px;
+  color: #333;
+  grid-column: 1 / -1; /* Make legend span full width */
 }
 
 .formGroup {
-  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column; /* Stack label above input */
+  margin-bottom: 0; /* Remove bottom margin as grid gap handles spacing */
 }
 
 .formGroup label {
-  display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: 5px;
   font-weight: 500;
+  color: #555;
 }
 
 .formGroup input[type="text"],
 .formGroup input[type="password"],
 .formGroup input[type="email"] {
-  width: 100%;
-  padding: 0.5rem;
+  padding: 8px 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  font-size: 14px;
+  width: 100%; /* Make input take full width of its grid cell */
   box-sizing: border-box; /* Include padding and border in element's total width and height */
 }
+
+/* Adjustments for potentially wider fields like email or username */
+/* Example: Make email span two columns if needed */
+/* .formGroupEmail { grid-column: span 2; } */
+/* Add corresponding className="formGroupEmail" in JSX if needed */
 

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import styles from './RegistrationForm.module.css';
 import { useNavigate } from 'react-router-dom';
-import UserDataSection from './components/UserDataSection'; // Import UserDataSection
-import AddressSection from './components/AddressSection';   // Import AddressSection
-import ConsentSection from './components/ConsentSection';   // Import ConsentSection
+import UserDataSection from './components/UserDataSection';
+import AddressSection from './components/AddressSection';
+import ConsentSection from './components/ConsentSection';
 
 const RegistrationForm = ({ onSuccess }) => {
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     // Employee details
     userName: '',
@@ -30,7 +31,6 @@ const RegistrationForm = ({ onSuccess }) => {
     marketingConsent: false,
   });
   const [error, setError] = useState('');
-  const [currentStep, setCurrentStep] = useState(1); // 1: UserData, 2: Address, 3: Consents
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -42,33 +42,46 @@ const RegistrationForm = ({ onSuccess }) => {
   };
 
   const nextStep = () => {
-    // Add validation for current step if needed before proceeding
-    setCurrentStep((prevStep) => prevStep + 1);
+    // Add validation for the current step before proceeding
+    if (currentStep === 1) {
+      if (!formData.userName || !formData.password || !formData.confirmPassword || !formData.firstName || !formData.lastName || !formData.email) {
+        setError('Proszę wypełnić wszystkie pola danych podstawowych.');
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        setError('Hasła nie są identyczne.');
+        return;
+      }
+    }
+    if (currentStep === 2) {
+       // Basic check, more specific validation might be needed
+      if (!formData.street || !formData.buildingNumber || !formData.postalCode || !formData.city || !formData.phoneNumber) {
+        setError('Proszę wypełnić wymagane pola adresowe (ulica, nr budynku, kod pocztowy, miasto, telefon).');
+        return;
+      }
+    }
+    setError(''); // Clear error if validation passes
+    setCurrentStep((prev) => prev + 1);
   };
 
   const prevStep = () => {
-    setCurrentStep((prevStep) => prevStep - 1);
+    setError(''); // Clear error when going back
+    setCurrentStep((prev) => prev - 1);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); // Clear previous errors
 
-    // Final validation before submitting
-    if (formData.password !== formData.confirmPassword) {
-      setError('Hasła nie są identyczne.');
-      setCurrentStep(1); // Go back to user data step
-      return;
-    }
+    // Final validation before submitting (Consent step)
     if (!formData.rodoConsent || !formData.termsConsent) {
       setError('Zgody RODO i regulaminu są wymagane.');
-      setCurrentStep(3); // Stay on consent step
       return;
     }
 
     try {
-      // Prepare data for backend - include all fields
-      const dataToSend = { ...formData }; // Send the whole state
+      // Remove confirmPassword before sending
+      const { confirmPassword, ...dataToSend } = formData;
 
       const response = await fetch('http://localhost:8080/register', {
         method: 'POST',
@@ -80,11 +93,8 @@ const RegistrationForm = ({ onSuccess }) => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(
-          errorData?.message || 
-          `Rejestracja nie powiodła się (status: ${response.status})`
-        );
+        const errorData = await response.json().catch(() => ({ message: `Rejestracja nie powiodła się (status: ${response.status})` }));
+        throw new Error(errorData.message);
       }
 
       const data = await response.json();
@@ -98,17 +108,11 @@ const RegistrationForm = ({ onSuccess }) => {
 
       navigate('/dashboard');
       if (onSuccess) {
-        onSuccess();
+        onSuccess(); // Close modal or perform other success actions
       }
     } catch (err) {
       console.error('Registration failed:', err);
-      if (err.name === 'TypeError' && err.message.includes('NetworkError')) {
-        setError('Błąd sieci. Sprawdź połączenie internetowe.');
-      } else if (err.name === 'SyntaxError') {
-        setError('Otrzymano nieprawidłową odpowiedź z serwera.');
-      } else {
-        setError(err.message || 'Rejestracja nie powiodła się. Spróbuj ponownie.');
-      }
+      setError(err.message || 'Rejestracja nie powiodła się. Spróbuj ponownie.');
     }
   };
 
@@ -116,31 +120,27 @@ const RegistrationForm = ({ onSuccess }) => {
     <form onSubmit={handleSubmit} className={styles.registrationForm}>
       {error && <p className={styles.errorMessage}>{error}</p>}
 
-      {/* Render current step */} 
-      {currentStep === 1 && (
-        <UserDataSection formData={formData} handleChange={handleChange} />
-      )}
-      {currentStep === 2 && (
-        <AddressSection formData={formData} handleChange={handleChange} />
-      )}
-      {currentStep === 3 && (
-        <ConsentSection formData={formData} handleChange={handleChange} />
-      )}
+      {/* Render the current step's section */}
+      <div className={styles.formSectionContainer}>
+        {currentStep === 1 && <UserDataSection formData={formData} handleChange={handleChange} />}
+        {currentStep === 2 && <AddressSection formData={formData} handleChange={handleChange} />}
+        {currentStep === 3 && <ConsentSection formData={formData} handleChange={handleChange} />}
+      </div>
 
       {/* Navigation Buttons */}
       <div className={styles.navigationButtons}>
         {currentStep > 1 && (
-          <button type="button" onClick={prevStep} className={styles.prevButton}>
+          <button type="button" onClick={prevStep} className={`${styles.navButton} ${styles.prevButton}`}>
             Wstecz
           </button>
         )}
         {currentStep < 3 && (
-          <button type="button" onClick={nextStep} className={styles.nextButton}>
+          <button type="button" onClick={nextStep} className={`${styles.navButton} ${styles.nextButton}`}>
             Dalej
           </button>
         )}
         {currentStep === 3 && (
-          <button type="submit" className={styles.submitButton}>
+          <button type="submit" className={`${styles.navButton} ${styles.submitButton}`}>
             Zarejestruj
           </button>
         )}

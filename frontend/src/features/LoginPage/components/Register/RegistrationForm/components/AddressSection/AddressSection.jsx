@@ -14,32 +14,39 @@ const AddressSection = ({ formData, handleChange }) => {
         <input type="text" id="buildingNumber" name="buildingNumber" value={formData.buildingNumber} onChange={handleChange} required />
       </div>
       <div className={styles.formGroup}>
-        <label htmlFor="apartmentNumber">Numer mieszkania (opcjonalnie)</label>
+        {/* Removed (opcjonalnie) from label */}
+        <label htmlFor="apartmentNumber">Numer mieszkania</label>
         <input type="text" id="apartmentNumber" name="apartmentNumber" value={formData.apartmentNumber} onChange={handleChange} />
       </div>
       <div className={styles.formGroup}>
         <label htmlFor="postalCode">Kod pocztowy</label>
         <input type="text" id="postalCode" name="postalCode" value={formData.postalCode} onChange={handleChange} required pattern="\d{2}-\d{3}" title="Format XX-XXX" />
       </div>
+      {/* Row with City, Voivodeship, District, Commune */}
       <div className={styles.formGroup}>
         <label htmlFor="city">Miasto</label>
         <input type="text" id="city" name="city" value={formData.city} onChange={handleChange} required />
       </div>
       <div className={styles.formGroup}>
-        <label htmlFor="voivodeship">Województwo (opcjonalnie)</label>
+        {/* Removed (opcjonalnie) */}
+        <label htmlFor="voivodeship">Województwo</label>
         <input type="text" id="voivodeship" name="voivodeship" value={formData.voivodeship} onChange={handleChange} />
       </div>
       <div className={styles.formGroup}>
-        <label htmlFor="district">Powiat (opcjonalnie)</label>
+        {/* Removed (opcjonalnie) */}
+        <label htmlFor="district">Powiat</label>
         <input type="text" id="district" name="district" value={formData.district} onChange={handleChange} />
       </div>
       <div className={styles.formGroup}>
-        <label htmlFor="commune">Gmina (opcjonalnie)</label>
+        {/* Removed (opcjonalnie) */}
+        <label htmlFor="commune">Gmina</label>
         <input type="text" id="commune" name="commune" value={formData.commune} onChange={handleChange} />
       </div>
-      <div className={styles.formGroup}>
-        <label htmlFor="phoneNumber">Numer telefonu (opcjonalnie)</label>
-        <input type="tel" id="phoneNumber" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} />
+      {/* Phone number moved to the end to appear below the above row */}
+      <div className={`${styles.formGroup} ${styles.phoneNumberGroup}`}> 
+        {/* Removed (opcjonalnie) from label */}
+        <label htmlFor="phoneNumber">Numer telefonu</label>
+        <input type="tel" id="phoneNumber" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required /> 
       </div>
     </fieldset>
   );
