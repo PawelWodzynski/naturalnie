@@ -47,7 +47,8 @@ const AddressSection = ({ formData, handleChange }) => {
         </div>
         <div className={styles.formGroup}>
           <label htmlFor="nip">NIP</label>
-          <input type="text" id="nip" name="nip" value={formData.nip} onChange={handleChange} />
+          {/* Added maxLength validation */}
+          <input type="text" id="nip" name="nip" value={formData.nip} onChange={handleChange} maxLength="10" />
         </div>
         <div className={styles.formGroup}>
           <label htmlFor="companyName">Nazwa firmy</label>
