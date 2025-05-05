@@ -1,6 +1,6 @@
 package com.auth.jwt.data.repository;
 
-import com.auth.jwt.data.entity.EmployeeConsent;
+import com.auth.jwt.data.entity.auth.employee.EmployeeConsent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
