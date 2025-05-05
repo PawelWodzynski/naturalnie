@@ -1,7 +1,8 @@
 import React from 'react';
 import styles from './AlternativeAddressSection.module.css'; // Use its own CSS module
 
-const AlternativeAddressSection = ({ formData, handleChange }) => {
+// Receive isAltCompanyAddress prop
+const AlternativeAddressSection = ({ formData, handleChange, isAltCompanyAddress }) => {
   return (
     <fieldset className={styles.fieldset}>
       <legend>Adres Alternatywny</legend> {/* Changed legend */}
@@ -45,14 +46,41 @@ const AlternativeAddressSection = ({ formData, handleChange }) => {
           <label htmlFor="altPhoneNumber">Numer telefonu</label>
           <input type="tel" id="altPhoneNumber" name="altPhoneNumber" value={formData.altPhoneNumber} onChange={handleChange} required />
         </div>
-        <div className={styles.formGroup}>
+        {/* Apply conditional class and disabled attribute */}
+        <div className={`${styles.formGroup} ${!isAltCompanyAddress ? styles.disabledField : ''}`}>
           <label htmlFor="altNip">NIP</label>
-          {/* Removed maxLength validation */}
-          <input type="text" id="altNip" name="altNip" value={formData.altNip} onChange={handleChange} />
+          <input
+            type="text"
+            id="altNip"
+            name="altNip"
+            value={formData.altNip}
+            onChange={handleChange}
+            disabled={!isAltCompanyAddress} // Disable if not alt company address
+          />
         </div>
-        <div className={styles.formGroup}>
+        {/* Apply conditional class and disabled attribute */}
+        <div className={`${styles.formGroup} ${!isAltCompanyAddress ? styles.disabledField : ''}`}>
           <label htmlFor="altCompanyName">Nazwa firmy</label>
-          <input type="text" id="altCompanyName" name="altCompanyName" value={formData.altCompanyName} onChange={handleChange} />
+          <input
+            type="text"
+            id="altCompanyName"
+            name="altCompanyName"
+            value={formData.altCompanyName}
+            onChange={handleChange}
+            disabled={!isAltCompanyAddress} // Disable if not alt company address
+          />
+          {/* Add radio button (using checkbox for toggle behavior) */}
+          <div className={styles.radioContainer}>
+            <input
+              type="checkbox" // Using checkbox as a toggle
+              id="isAltCompanyAddressRadio"
+              name="isAltCompanyAddressRadio"
+              checked={isAltCompanyAddress}
+              onChange={handleChange}
+              className={styles.radioInput}
+            />
+            <label htmlFor="isAltCompanyAddressRadio" className={styles.radioLabel}>firma</label>
+          </div>
         </div>
       </div>
     </fieldset>

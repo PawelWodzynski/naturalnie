@@ -1,7 +1,8 @@
 import React from 'react';
 import styles from './AddressSection.module.css';
 
-const AddressSection = ({ formData, handleChange }) => {
+// Receive isCompanyAddress prop
+const AddressSection = ({ formData, handleChange, isCompanyAddress }) => {
   return (
     <fieldset className={styles.fieldset}>
       <legend>Adres</legend>
@@ -38,21 +39,48 @@ const AddressSection = ({ formData, handleChange }) => {
         <label htmlFor="commune">Gmina</label>
         <input type="text" id="commune" name="commune" value={formData.commune} onChange={handleChange} />
       </div>
-      
+
       {/* Centered row for Phone, NIP, Company Name */}
       <div className={styles.centeredRow}>
         <div className={styles.formGroup}>
           <label htmlFor="phoneNumber">Numer telefonu</label>
           <input type="tel" id="phoneNumber" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
         </div>
-        <div className={styles.formGroup}>
+        {/* Apply conditional class and disabled attribute */}
+        <div className={`${styles.formGroup} ${!isCompanyAddress ? styles.disabledField : ''}`}>
           <label htmlFor="nip">NIP</label>
-          {/* Removed maxLength validation */}
-          <input type="text" id="nip" name="nip" value={formData.nip} onChange={handleChange} />
+          <input
+            type="text"
+            id="nip"
+            name="nip"
+            value={formData.nip}
+            onChange={handleChange}
+            disabled={!isCompanyAddress} // Disable if not company address
+          />
         </div>
-        <div className={styles.formGroup}>
+        {/* Apply conditional class and disabled attribute */}
+        <div className={`${styles.formGroup} ${!isCompanyAddress ? styles.disabledField : ''}`}>
           <label htmlFor="companyName">Nazwa firmy</label>
-          <input type="text" id="companyName" name="companyName" value={formData.companyName} onChange={handleChange} />
+          <input
+            type="text"
+            id="companyName"
+            name="companyName"
+            value={formData.companyName}
+            onChange={handleChange}
+            disabled={!isCompanyAddress} // Disable if not company address
+          />
+          {/* Add radio button (using checkbox for toggle behavior) */}
+          <div className={styles.radioContainer}>
+            <input
+              type="checkbox" // Using checkbox as a toggle
+              id="isCompanyAddressRadio"
+              name="isCompanyAddressRadio"
+              checked={isCompanyAddress}
+              onChange={handleChange}
+              className={styles.radioInput}
+            />
+            <label htmlFor="isCompanyAddressRadio" className={styles.radioLabel}>firma</label>
+          </div>
         </div>
       </div>
     </fieldset>

@@ -4,11 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import UserDataSection from './components/UserDataSection';
 import AddressSection from './components/AddressSection';
 import ConsentSection from './components/ConsentSection';
-import AlternativeAddressSection from './components/AlternativeAddressSection'; // Import the new component
+import AlternativeAddressSection from './components/AlternativeAddressSection';
 
 const RegistrationForm = ({ onSuccess }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [showAlternativeAddress, setShowAlternativeAddress] = useState(false); // State for checkbox
+  const [showAlternativeAddress, setShowAlternativeAddress] = useState(false);
+  const [isCompanyAddress, setIsCompanyAddress] = useState(false); // State for primary address company radio
+  const [isAltCompanyAddress, setIsAltCompanyAddress] = useState(false); // State for alternative address company radio
   const [formData, setFormData] = useState({
     // Employee details
     userName: '',
@@ -27,9 +29,9 @@ const RegistrationForm = ({ onSuccess }) => {
     district: '',
     commune: '',
     phoneNumber: '',
-    nip: '', // Added NIP
-    companyName: '', // Added Company Name
-    // Alternative Address details (Initialize with empty strings)
+    nip: '',
+    companyName: '',
+    // Alternative Address details
     altStreet: '',
     altBuildingNumber: '',
     altApartmentNumber: '',
@@ -39,8 +41,8 @@ const RegistrationForm = ({ onSuccess }) => {
     altDistrict: '',
     altCommune: '',
     altPhoneNumber: '',
-    altNip: '', // Added Alt NIP
-    altCompanyName: '', // Added Alt Company Name
+    altNip: '',
+    altCompanyName: '',
     // Consent details
     rodoConsent: false,
     termsConsent: false,
@@ -51,9 +53,29 @@ const RegistrationForm = ({ onSuccess }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    // Handle the checkbox separately
+
     if (name === 'showAlternativeAddressCheckbox') {
       setShowAlternativeAddress(checked);
+    } else if (name === 'isCompanyAddressRadio') {
+      setIsCompanyAddress(checked);
+      // Clear NIP/Company Name if unchecked
+      if (!checked) {
+        setFormData((prevData) => ({
+          ...prevData,
+          nip: '',
+          companyName: '',
+        }));
+      }
+    } else if (name === 'isAltCompanyAddressRadio') {
+      setIsAltCompanyAddress(checked);
+      // Clear Alt NIP/Company Name if unchecked
+      if (!checked) {
+        setFormData((prevData) => ({
+          ...prevData,
+          altNip: '',
+          altCompanyName: '',
+        }));
+      }
     } else {
       setFormData((prevData) => ({
         ...prevData,
@@ -85,14 +107,18 @@ const RegistrationForm = ({ onSuccess }) => {
         return;
       }
 
-      // NIP and Company Name validation for primary address
-      if (formData.nip) { // If NIP is filled
-        if (!/^\d{10}$/.test(formData.nip)) { // Check if exactly 10 digits
+      // NIP and Company Name validation for primary address (only if company radio is checked)
+      if (isCompanyAddress) {
+        if (!formData.nip) {
+          setError('Proszę podać NIP dla adresu podstawowego.');
+          return;
+        }
+        if (!/^\d{10}$/.test(formData.nip)) {
           setError('Błędnie wpisany numer NIP w adresie podstawowym, wymagane 10 cyfr.');
           return;
         }
-        if (!formData.companyName) { // Check if Company Name is filled
-          setError('Nazwa firmy w adresie podstawowym musi być uzupełniona, jeśli podano NIP.');
+        if (!formData.companyName) {
+          setError('Nazwa firmy w adresie podstawowym musi być uzupełniona, jeśli zaznaczono opcję firma.');
           return;
         }
       }
@@ -105,14 +131,18 @@ const RegistrationForm = ({ onSuccess }) => {
           return;
         }
 
-        // NIP and Company Name validation for alternative address
-        if (formData.altNip) { // If Alt NIP is filled
-          if (!/^\d{10}$/.test(formData.altNip)) { // Check if exactly 10 digits
+        // NIP and Company Name validation for alternative address (only if alt company radio is checked)
+        if (isAltCompanyAddress) {
+          if (!formData.altNip) {
+            setError('Proszę podać NIP dla adresu alternatywnego.');
+            return;
+          }
+          if (!/^\d{10}$/.test(formData.altNip)) {
             setError('Błędnie wpisany numer NIP w adresie alternatywnym, wymagane 10 cyfr.');
             return;
           }
-          if (!formData.altCompanyName) { // Check if Alt Company Name is filled
-            setError('Nazwa firmy w adresie alternatywnym musi być uzupełniona, jeśli podano NIP.');
+          if (!formData.altCompanyName) {
+            setError('Nazwa firmy w adresie alternatywnym musi być uzupełniona, jeśli zaznaczono opcję firma.');
             return;
           }
         }
@@ -180,12 +210,15 @@ const RegistrationForm = ({ onSuccess }) => {
     <form onSubmit={handleSubmit} className={styles.registrationForm}>
       {error && <p className={styles.errorMessage}>{error}</p>}
 
-      {/* Render the current step's section */}
       <div className={styles.formSectionContainer}>
         {currentStep === 1 && <UserDataSection formData={formData} handleChange={handleChange} />}
         {currentStep === 2 && (
           <>
-            <AddressSection formData={formData} handleChange={handleChange} />
+            <AddressSection
+              formData={formData}
+              handleChange={handleChange}
+              isCompanyAddress={isCompanyAddress} // Pass state
+            />
             <div className={styles.checkboxContainer}>
               <input
                 type="checkbox"
@@ -200,14 +233,17 @@ const RegistrationForm = ({ onSuccess }) => {
               </label>
             </div>
             {showAlternativeAddress && (
-              <AlternativeAddressSection formData={formData} handleChange={handleChange} />
+              <AlternativeAddressSection
+                formData={formData}
+                handleChange={handleChange}
+                isAltCompanyAddress={isAltCompanyAddress} // Pass state
+              />
             )}
           </>
         )}
         {currentStep === 3 && <ConsentSection formData={formData} handleChange={handleChange} />}
       </div>
 
-      {/* Navigation Buttons */}
       <div className={styles.navigationButtons}>
         {currentStep > 1 && (
           <button type="button" onClick={prevStep} className={`${styles.navButton} ${styles.prevButton}`}>

@@ -3,14 +3,12 @@
 .fieldset {
   border: 1px solid #ccc;
   padding: 15px;
-  margin-top: 20px; /* Add some space above the alternative section */
   margin-bottom: 20px;
   border-radius: 5px;
   display: grid; /* Use grid for layout within the section */
   grid-template-columns: repeat(4, 1fr); /* Explicitly 4 columns */
   gap: 15px; /* Gap between form groups */
   align-items: start; /* Align items to the start of the grid cell (helps with alignment) */
-  background-color: #f9f9f9; /* Slightly different background to distinguish */
 }
 
 .fieldset legend {
@@ -25,6 +23,7 @@
   display: flex;
   flex-direction: column; /* Stack label above input */
   margin-bottom: 0; /* Remove bottom margin as grid gap handles spacing */
+  position: relative; /* Needed for radio button positioning */
 }
 
 .formGroup label {
@@ -42,6 +41,7 @@
   font-size: 14px;
   width: 100%; /* Make input take full width of its grid cell */
   box-sizing: border-box; /* Include padding and border in element's total width and height */
+  transition: background-color 0.3s ease, border-color 0.3s ease; /* Smooth transition */
 }
 
 /* New centered row for Phone, NIP, Company Name */
@@ -54,6 +54,39 @@
   margin-left: auto;
   margin-right: auto;
   margin-top: 10px; /* Add some space above this row */
+}
+
+/* Styles for disabled fields */
+.disabledField label,
+.disabledField input {
+  opacity: 0.6;
+  pointer-events: none; /* Prevent interaction */
+  background-color: #f0f0f0; /* Light grey background */
+  cursor: not-allowed;
+}
+
+/* Styles for radio button container */
+.radioContainer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  height: 100%; /* Match the height of the form group */
+  padding-right: 5px; /* Add some padding */
+}
+
+.radioInput {
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.radioLabel {
+  font-size: 12px; /* Smaller label */
+  font-weight: normal;
+  color: #666;
+  cursor: pointer;
+  margin-bottom: 0 !important; /* Override default label margin */
 }
 
 /* Responsive adjustments */
@@ -76,6 +109,11 @@
   }
   .centeredRow {
     grid-template-columns: 1fr; /* 1 column on small screens */
+  }
+  .radioContainer {
+    position: static; /* Reset position on small screens */
+    margin-top: 5px;
+    justify-content: flex-start;
   }
 }
 
