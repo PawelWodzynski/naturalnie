@@ -16,6 +16,7 @@ import com.auth.jwt.util.ValidationUtil;
 import org.springframework.transaction.annotation.Transactional; // Import Spring Transactional
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j; // Import Slf4j
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j // Add Slf4j annotation for logging
 public class AuthService {
 
     private final EmployeeJpaRepository employeeRepository;
@@ -54,12 +56,25 @@ public class AuthService {
         String password = registerEmployeeDto.getPassword();
         String confirmPassword = registerEmployeeDto.getConfirmPassword();
 
-        if (password == null || confirmPassword == null || !password.trim().equals(confirmPassword.trim())) {
+        // Add Debug Logging
+        log.debug("Password validation: Raw password='{}' (length={}), Raw confirmPassword='{}' (length={})", 
+                  password, (password != null ? password.length() : "null"), 
+                  confirmPassword, (confirmPassword != null ? confirmPassword.length() : "null"));
+        
+        String trimmedPassword = (password != null) ? password.trim() : null;
+        String trimmedConfirmPassword = (confirmPassword != null) ? confirmPassword.trim() : null;
+
+        log.debug("Password validation: Trimmed password='{}' (length={}), Trimmed confirmPassword='{}' (length={})",
+                  trimmedPassword, (trimmedPassword != null ? trimmedPassword.length() : "null"),
+                  trimmedConfirmPassword, (trimmedConfirmPassword != null ? trimmedConfirmPassword.length() : "null"));
+
+        if (trimmedPassword == null || trimmedConfirmPassword == null || !trimmedPassword.equals(trimmedConfirmPassword)) {
+             log.error("Password mismatch detected: Trimmed password and trimmed confirmPassword are not equal.");
             throw new RegistrationException("Podane hasła nie są identyczne.");
         }
 
         // Use the trimmed password for validation and encoding
-        String trimmedPassword = password.trim();
+        // String trimmedPassword = password.trim(); // Already defined above
 
         // 1. Validate Password Complexity
         if (!validationUtil.isPasswordValid(trimmedPassword)) {
