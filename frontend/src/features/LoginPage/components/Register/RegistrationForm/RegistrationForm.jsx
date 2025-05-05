@@ -48,7 +48,8 @@ const RegistrationForm = ({ onSuccess }) => {
         setError('Proszę wypełnić wszystkie pola danych podstawowych.');
         return;
       }
-      if (formData.password !== formData.confirmPassword) {
+      // Trim whitespace before comparing passwords
+      if (formData.password.trim() !== formData.confirmPassword.trim()) {
         setError('Hasła nie są identyczne.');
         return;
       }
@@ -79,9 +80,18 @@ const RegistrationForm = ({ onSuccess }) => {
       return;
     }
 
+    // Also check password match on final submit, just in case?
+    // It's better to rely on the step validation, but adding it here won't hurt.
+    if (formData.password.trim() !== formData.confirmPassword.trim()) {
+        setError('Hasła nie są identyczne. Proszę wrócić do kroku 1 i poprawić.');
+        return;
+    }
+
     try {
       // Remove confirmPassword before sending
+      // Trim password before sending? Depends on backend requirements.
       const { confirmPassword, ...dataToSend } = formData;
+      // dataToSend.password = dataToSend.password.trim(); // Optional: Trim password before sending
 
       const response = await fetch('http://localhost:8080/register', {
         method: 'POST',
