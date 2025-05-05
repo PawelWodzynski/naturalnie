@@ -93,6 +93,10 @@ const RegistrationForm = ({ onSuccess }) => {
       const { confirmPassword, ...dataToSend } = formData;
       // dataToSend.password = dataToSend.password.trim(); // Optional: Trim password before sending
 
+      // Add console log to check the data being sent
+      console.log('Data being sent to backend:', dataToSend);
+      console.log('Password being sent:', dataToSend.password);
+
       const response = await fetch('http://localhost:8080/register', {
         method: 'POST',
         headers: {
