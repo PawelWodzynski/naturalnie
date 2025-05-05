@@ -1,0 +1,42 @@
+/* Styles for the logout button */
+.logoutButton {
+  /* Base button styling */
+  display: inline-flex; /* Use inline-flex for icon alignment */
+  align-items: center;
+  gap: 0.5rem; /* space-x-2 */
+  padding: 0.5rem 1rem; /* px-4 py-2 */
+  border-radius: 0.375rem; /* rounded-md */
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+  font-weight: 500; /* Medium font weight */
+  color: #ffffff; /* White text */
+
+  /* Red color scheme */
+  background-color: #e53e3e; /* red-600 */
+  border-color: #c53030; /* red-700 */
+}
+
+.logoutButton:hover {
+  background-color: #c53030; /* red-700 */
+  border-color: #9b2c2c; /* red-800 */
+}
+
+/* Optional: Add focus styles for accessibility */
+.logoutButton:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.5); /* Red focus ring */
+}
+
+/* Styles for the icon inside the button */
+.logoutIcon {
+  width: 1rem; /* w-4 */
+  height: 1rem; /* h-4 */
+}
+
+/* Styles for the text inside the button */
+.logoutText {
+  /* No specific styles needed, inherits color */
+}
+

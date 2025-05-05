@@ -1,0 +1,30 @@
+.formGroup {
+  margin-bottom: 1rem; /* Adjusted margin */
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.375rem; /* Adjusted margin */
+  font-weight: 500;
+  color: #d1d5db;
+  font-size: 0.875rem; /* Adjusted font size */
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem; /* Adjusted padding */
+  border: 1px solid #374151;
+  background-color: #111827;
+  border-radius: 0.375rem;
+  font-size: 1rem; /* Adjusted font size */
+  color: white;
+  box-sizing: border-box; /* Ensure padding doesn't increase width */
+}
+
+/* Add focus styles if needed */
+.input:focus {
+  outline: none;
+  border-color: #ef4444; /* Example focus color */
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5); /* Example focus shadow */
+}
+

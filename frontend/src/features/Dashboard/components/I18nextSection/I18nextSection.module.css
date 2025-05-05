@@ -1,0 +1,41 @@
+/* Styles specific to the I18next section */
+.i18nextSection {
+  /* Tailwind handles bg-gray-800, rounded-xl */
+}
+
+.header {
+  /* Tailwind handles flex, justify-between, items-center, p-4 */
+}
+
+.titleContainer {
+  /* Tailwind handles flex, items-center, space-x-3 */
+}
+
+.icon {
+  /* Tailwind handles h-8, w-8, text-purple-400 */
+}
+
+.title {
+  /* Tailwind handles text-xl, font-bold */
+}
+
+.toggleButton {
+  /* Tailwind handles text-gray-400, hover:text-white */
+}
+
+.content {
+  /* Tailwind handles p-4, space-y-4 */
+}
+
+.translationDemo {
+  /* Tailwind handles bg-gray-700, p-4, rounded-lg */
+}
+
+.languageInfo {
+  /* Tailwind handles text color */
+}
+
+.testText {
+  /* Tailwind handles text color */
+}
+

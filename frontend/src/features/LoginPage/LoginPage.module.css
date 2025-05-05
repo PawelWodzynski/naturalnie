@@ -1,0 +1,20 @@
+/* LoginPage specific styles */
+.loginPage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-image: linear-gradient(to bottom, #111827, #1f2937);
+}
+
+.loginContainer {
+  width: 100%;
+  max-width: 450px;
+  padding: 20px;
+  display: flex; /* Use flexbox for centering children */
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Center children horizontally */
+}
+
+/* Styles for the header (h1) will be moved to LoginHeader component */
+

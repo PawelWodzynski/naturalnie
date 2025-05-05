@@ -1,0 +1,19 @@
+.loginForm {
+  /* Renamed from .login-form */
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #1f2937;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #374151;
+}
+
+/* Styles for h2 are now in FormHeader.module.css */
+
+/* Styles for .form-group are now in UsernameField.module.css and PasswordField.module.css */
+
+/* Styles for .login-button are now in LoginButton.module.css */
+
+/* Styles for .error-message are now in ErrorMessage.module.css */
+

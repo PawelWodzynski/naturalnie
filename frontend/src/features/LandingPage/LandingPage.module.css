@@ -1,0 +1,22 @@
+/* Styles for the LandingPage component */
+
+.landingPageContainer {
+  min-height: 100vh; /* Ensure it takes full viewport height */
+  width: 100%;
+  /* Apply the same background gradient as the login page */
+  background-image: linear-gradient(to bottom, #111827, #1f2937);
+  color: white; /* Default text color */
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  width: 100%;
+  padding: 1rem 2rem; /* Add some padding */
+  display: flex;
+  justify-content: flex-end; /* Align button to the right */
+  align-items: center;
+}
+
+/* Add other styles as needed */
+

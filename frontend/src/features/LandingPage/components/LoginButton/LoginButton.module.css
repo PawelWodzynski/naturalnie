@@ -1,0 +1,19 @@
+/* Styles for the LoginButton component */
+
+.loginButton {
+  padding: 0.5rem 1rem; /* py-2 px-4 */
+  background-color: #4f46e5; /* bg-indigo-600 - Same as ApiTestButton */
+  color: white; /* text-white */
+  font-weight: bold; /* font-bold */
+  border-radius: 0.375rem; /* rounded-md */
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.loginButton:hover {
+  background-color: #4338ca; /* bg-indigo-700 - Same as ApiTestButton hover */
+}
+
+/* Add other styles if needed */
+

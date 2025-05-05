@@ -1,0 +1,18 @@
+/* Styles for the RegisterLink component */
+
+.registerLink {
+  background: none;
+  border: none;
+  color: #4f46e5; /* indigo-600 */
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.875rem; /* text-sm */
+  margin-top: 0.5rem; /* Add some space above the link */
+  text-align: center; /* Center the link */
+}
+
+.registerLink:hover {
+  color: #3730a3; /* indigo-800 */
+}
+

@@ -1,0 +1,44 @@
+/* Styles for the header container */
+.headerContainer {
+  display: flex;
+  justify-content: space-between; /* Pushes logo/title left and actions right */
+  align-items: center;
+  margin-bottom: 2.5rem; /* mb-10 */
+  padding: 1rem 0; /* Add some vertical padding */
+  border-bottom: 1px solid #4a5568; /* gray-700 border */
+}
+
+/* Styles for the logo and title container */
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* space-x-4 */
+}
+
+/* Styles for the logo icon */
+.logoIcon {
+  height: 3rem; /* h-12 - Larger logo */
+  width: 3rem; /* w-12 - Larger logo */
+  color: #61dafb; /* React blue color */
+  /* Add animation if desired */
+  /* animation: spin 20s linear infinite; */
+}
+
+/* Keyframes for potential spin animation */
+/* @keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+} */
+
+/* Styles for the main title */
+.title {
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 700; /* font-bold */
+  color: #e2e8f0; /* gray-200 */
+}
+
+/* Styles for the actions container on the right */
+.actionsContainer {
+  /* Flexbox handled by parent, just need to contain the button */
+}
+

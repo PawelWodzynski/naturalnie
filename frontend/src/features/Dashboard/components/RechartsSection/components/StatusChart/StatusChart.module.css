@@ -1,0 +1,30 @@
+/* Styles specific to the StatusChart component */
+.chartWrapper {
+  /* Tailwind handles h-64, w-full */
+}
+
+.noDataMessage {
+  /* Tailwind handles text-center, text-gray-500, py-4 */
+}
+
+/* Specific styles for Recharts elements if needed, e.g., overriding default fills/strokes */
+.xAxis .recharts-text {
+  /* fill: #9ca3af; /* Example if Tailwind stroke="#9ca3af" isn't sufficient */
+}
+
+.yAxis .recharts-text {
+  /* fill: #9ca3af; */
+}
+
+.tooltipContent {
+  /* background-color: #1f2937; border: 1px solid #374151; */
+}
+
+.tooltipItem {
+  /* color: #d1d5db; */
+}
+
+.legendWrapper {
+  /* color: #d1d5db; */
+}
+

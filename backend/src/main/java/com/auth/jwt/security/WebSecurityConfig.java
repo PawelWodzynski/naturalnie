@@ -1,0 +1,108 @@
+package com.auth.jwt.security;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+
+import javax.sql.DataSource;
+
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor // Use Lombok for constructor injection
+public class WebSecurityConfig {
+
+    private final UserAuthenticationEntryPoint userAuthenticationEntryPoint;
+    // Inject the Spring-managed JwtAuthFilter bean instead of UserAuthProvider
+    private final JwtAuthFilter jwtAuthFilter; 
+
+    // Removed constructor that manually created JwtAuthFilter
+
+    @Bean
+    public UserDetailsManager userDetailsManager(@Qualifier("authDataSource")DataSource dataSource) {
+        JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
+
+        jdbcUserDetailsManager.setUsersByUsernameQuery(
+                "select username, password, 1 as enabled from employee where username=?"
+        );
+
+        jdbcUserDetailsManager.setAuthoritiesByUsernameQuery(
+                "select u.username, r.name from employee_roles ur " +
+                        "join employee u on ur.user_id = u.id " +
+                        "join role r on ur.role_id = r.id " +
+                        "where u.username=?"
+        );
+
+        return jdbcUserDetailsManager;
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService(@Qualifier("authDataSource")DataSource dataSource) {
+        return userDetailsManager(dataSource);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder encoder) throws Exception {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(encoder);
+        return new ProviderManager(provider);
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authorize ->
+                        authorize
+                                .requestMatchers("/login", "/register").permitAll()
+                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
+                                .anyRequest().authenticated())
+                // Use the injected jwtAuthFilter bean
+                .addFilterBefore(jwtAuthFilter, BasicAuthenticationFilter.class) 
+                .exceptionHandling(exception ->
+                        exception.authenticationEntryPoint(userAuthenticationEntryPoint))
+                .formLogin(form ->
+                        form.loginPage("/login")
+                                .permitAll())
+                .logout(logout ->
+                        logout.permitAll())
+                .exceptionHandling(configurer ->
+                        configurer.accessDeniedPage("/access-denied"));
+
+        return http.build();
+    }
+
+    @Bean
+    public WebSecurityCustomizer ignoringCustomizer() {
+        return (web) -> web.ignoring()
+//                .requestMatchers("/")
+                .requestMatchers("/login", "/register")
+                .requestMatchers("/swagger-ui.html")
+                .requestMatchers("/swagger-ui/**")
+                .requestMatchers("/v3/api-docs/**")
+                .requestMatchers("/swagger-resources/**");
+    }
+}
+

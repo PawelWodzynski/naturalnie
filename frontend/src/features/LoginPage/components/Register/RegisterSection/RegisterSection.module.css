@@ -1,0 +1,9 @@
+/* Styles for the RegisterSection component */
+
+.registerSectionContainer {
+  /* Changed from display: contents to ensure the container renders */
+  display: block; 
+  width: 100%; /* Ensure it takes full width within its parent */
+  text-align: center; /* Center the link inside if needed, though RegisterLink also has text-align */
+}
+

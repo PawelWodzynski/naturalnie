@@ -1,0 +1,37 @@
+/* Styles specific to the ReactIcons section */
+.reactIconsSection {
+  /* Tailwind handles bg-gray-800, rounded-xl */
+}
+
+.header {
+  /* Tailwind handles flex, justify-between, items-center, p-4 */
+}
+
+.titleContainer {
+  /* Tailwind handles flex, items-center, space-x-3 */
+}
+
+.icon {
+  /* Tailwind handles h-8, w-8, text-blue-400 */
+}
+
+.title {
+  /* Tailwind handles text-xl, font-bold */
+}
+
+.toggleButton {
+  /* Tailwind handles text-gray-400, hover:text-white */
+}
+
+.content {
+  /* Tailwind handles p-4, grid, grid-cols-4, gap-4, items-center */
+}
+
+.statusContainer {
+  /* Tailwind handles col-span-4, mb-4 */
+}
+
+.iconItem {
+  /* Tailwind handles h-12, w-12, justify-self-center and specific text colors */
+}
+

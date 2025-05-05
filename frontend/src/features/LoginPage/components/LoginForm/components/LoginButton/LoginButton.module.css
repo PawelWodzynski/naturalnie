@@ -1,0 +1,24 @@
+.loginButton {
+  width: 100%;
+  padding: 0.875rem 1rem; /* Adjusted padding */
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 1rem; /* Adjusted font size */
+  font-weight: 600; /* Added font weight */
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 0.5rem; /* Added margin top */
+}
+
+.loginButton:hover {
+  background-color: #dc2626;
+}
+
+/* Add focus styles if needed */
+.loginButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.5); /* Example focus shadow */
+}
+

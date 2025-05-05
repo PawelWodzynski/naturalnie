@@ -1,0 +1,52 @@
+/* Styles specific to the ApiTestButton component */
+.testButton {
+  display: inline-flex; /* Use flexbox for alignment */
+  align-items: center; /* Center items vertically */
+  justify-content: center; /* Center items horizontally */
+  padding: 0.5rem 1rem; /* py-2 px-4 */
+  background-color: #4f46e5; /* bg-indigo-600 */
+  color: white; /* text-white */
+  font-weight: bold; /* font-bold */
+  border-radius: 0.375rem; /* rounded-md */
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.testButton:hover {
+  background-color: #4338ca; /* bg-indigo-700 */
+}
+
+.testButton:disabled {
+  opacity: 0.5; /* disabled:opacity-50 */
+  cursor: not-allowed;
+}
+
+.icon {
+  margin-right: 0.5rem; /* space-x-2 equivalent for icon */
+  display: inline-block; /* Ensure icon is treated as an inline block */
+  vertical-align: middle; /* Align icon vertically with text */
+}
+
+.spinner {
+  margin-right: 0.5rem;
+  animation: spin 1s linear infinite;
+  display: inline-block; /* Ensure icon is treated as an inline block */
+  vertical-align: middle; /* Align icon vertically with text */
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.buttonText {
+  /* No specific styles needed if inheriting from button */
+  display: inline-block; /* Ensure text is treated as an inline block */
+  vertical-align: middle; /* Align text vertically with icon */
+}
+

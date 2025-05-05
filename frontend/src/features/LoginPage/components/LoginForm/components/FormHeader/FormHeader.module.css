@@ -1,0 +1,8 @@
+.formHeader {
+  /* Add styles for the form header if needed, e.g., margin, color */
+  color: white; /* Example style */
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem; /* Example size */
+  text-align: center;
+}
+

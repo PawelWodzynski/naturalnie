@@ -1,0 +1,36 @@
+/* Styles for the main dashboard container - mostly handled by Tailwind */
+.dashboardContainer {
+  /* Add specific overrides or additions if Tailwind isn't enough */
+}
+
+/* Styles for the main content area within the dashboard */
+.dashboardContent {
+  /* max-width: 4xl; mx-auto; space-y-6; are handled by Tailwind */
+  /* Add specific padding or margins if needed */
+}
+
+/* General styles for sections (can be inherited or applied specifically) */
+.section {
+  /* bg-gray-800; rounded-xl; are handled by Tailwind */
+}
+
+.sectionHeader {
+  /* flex; justify-between; items-center; p-4; are handled by Tailwind */
+}
+
+.sectionTitleContainer {
+  /* flex; items-center; space-x-3; are handled by Tailwind */
+}
+
+.sectionTitle {
+  /* text-xl; font-bold; are handled by Tailwind */
+}
+
+.sectionToggle {
+  /* text-gray-400; hover:text-white; are handled by Tailwind */
+}
+
+.sectionContent {
+  /* p-4; space-y-4; are handled by Tailwind */
+}
+

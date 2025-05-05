@@ -1,0 +1,21 @@
+/* Styles specific to the LibraryStatusIndicator component */
+.indicatorContainer {
+  /* Tailwind handles flex, items-center, space-x-2 */
+}
+
+.successIcon {
+  /* Tailwind handles text-green-500 */
+}
+
+.successText {
+  /* Tailwind handles text-green-400 */
+}
+
+.errorIcon {
+  /* Tailwind handles text-red-500 */
+}
+
+.errorText {
+  /* Tailwind handles text-red-400 */
+}
+
