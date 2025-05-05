@@ -30,6 +30,7 @@
   margin-bottom: 5px;
   font-weight: 500;
   color: #555;
+  transition: opacity 0.3s ease; /* Add transition for label opacity */
 }
 
 .formGroup input[type="text"],
@@ -41,7 +42,7 @@
   font-size: 14px;
   width: 100%; /* Make input take full width of its grid cell */
   box-sizing: border-box; /* Include padding and border in element's total width and height */
-  transition: background-color 0.3s ease, border-color 0.3s ease; /* Smooth transition */
+  transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease; /* Smooth transition */
 }
 
 /* New centered row for Phone, NIP, Company Name */
@@ -56,66 +57,70 @@
   margin-top: 10px; /* Add some space above this row */
 }
 
-/* Styles for disabled fields */
-.disabledField label,
+/* Styles for disabled fields - Apply ONLY to input */
 .disabledField input {
   opacity: 0.6;
-  pointer-events: none; /* Prevent interaction */
+  pointer-events: none; /* Prevent interaction with input */
   background-color: #f0f0f0; /* Light grey background */
   cursor: not-allowed;
 }
 
-/* Styles for radio button container - Adjusted positioning */
+/* Style for disabled label (optional, just opacity) */
+.disabledField label {
+   opacity: 0.6;
+   cursor: not-allowed;
+}
+
+/* Styles for radio button container - Adjusted positioning and ensure clickability */
 .radioContainer {
   position: absolute;
-  /* Position relative to the bottom-right of the input field */
   bottom: 8px; /* Align vertically with input padding */
-  right: -60px; /* Position to the right of the input field, adjust as needed */
+  right: -60px; /* Position to the right of the input field */
   display: flex;
   align-items: center;
-  /* height: 100%; Remove height constraint */
+  z-index: 1; /* Ensure it's above other elements if needed */
+  pointer-events: auto !important; /* Ensure container is clickable */
 }
 
 .radioInput {
   margin-right: 5px;
   cursor: pointer;
+  pointer-events: auto !important; /* Ensure input is clickable */
 }
 
 .radioLabel {
-  font-size: 12px; /* Smaller label */
+  font-size: 12px;
   font-weight: normal;
   color: #666;
   cursor: pointer;
-  margin-bottom: 0 !important; /* Override default label margin */
-  white-space: nowrap; /* Prevent label text wrapping */
+  margin-bottom: 0 !important;
+  white-space: nowrap;
+  pointer-events: auto !important; /* Ensure label is clickable */
 }
 
 /* Responsive adjustments */
-@media (max-width: 900px) { /* Adjust breakpoint as needed */
+@media (max-width: 900px) {
   .fieldset {
-    grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
+    grid-template-columns: repeat(2, 1fr);
   }
   .centeredRow {
-    grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
-    /* NIP and Company Name will wrap */
+    grid-template-columns: repeat(2, 1fr);
   }
-  .centeredRow > .formGroup:nth-child(1) { /* Phone number */
-    grid-column: 1 / -1; /* Span full width on medium screens */
+  .centeredRow > .formGroup:nth-child(1) {
+    grid-column: 1 / -1;
   }
-  /* Adjust radio position on medium screens if needed */
   .radioContainer {
-     right: -55px; /* Slightly adjust position */
+     right: -55px;
   }
 }
 
 @media (max-width: 600px) {
   .fieldset {
-    grid-template-columns: 1fr; /* 1 column on small screens */
+    grid-template-columns: 1fr;
   }
   .centeredRow {
-    grid-template-columns: 1fr; /* 1 column on small screens */
+    grid-template-columns: 1fr;
   }
-  /* Position radio below the input on small screens */
   .radioContainer {
     position: static;
     margin-top: 5px;
