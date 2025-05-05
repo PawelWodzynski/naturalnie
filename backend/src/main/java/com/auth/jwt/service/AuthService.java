@@ -50,13 +50,19 @@ public class AuthService {
 
     @Transactional("authTransactionManager") // Specify the transaction manager
     public String register(RegisterEmployeeDto registerEmployeeDto) throws RegistrationException {
-        // 0. Check if passwords match
-        if (registerEmployeeDto.getPassword() == null || !registerEmployeeDto.getPassword().equals(registerEmployeeDto.getConfirmPassword())) {
+        // 0. Check if passwords match (trimming whitespace)
+        String password = registerEmployeeDto.getPassword();
+        String confirmPassword = registerEmployeeDto.getConfirmPassword();
+
+        if (password == null || confirmPassword == null || !password.trim().equals(confirmPassword.trim())) {
             throw new RegistrationException("Podane hasła nie są identyczne.");
         }
 
+        // Use the trimmed password for validation and encoding
+        String trimmedPassword = password.trim();
+
         // 1. Validate Password Complexity
-        if (!validationUtil.isPasswordValid(registerEmployeeDto.getPassword())) {
+        if (!validationUtil.isPasswordValid(trimmedPassword)) {
             throw new RegistrationException("Hasło musi zawierać minimum 6 znaków, przynajmniej jedną dużą literę i jeden znak specjalny.");
         }
 
@@ -78,7 +84,8 @@ public class AuthService {
         // 5. Create new Employee (without saving yet, to get ID first if needed or save later)
         Employee newEmployee = new Employee();
         newEmployee.setUserName(registerEmployeeDto.getUserName());
-        newEmployee.setPassword(passwordEncoder.encode(registerEmployeeDto.getPassword()));
+        // Encode the trimmed password
+        newEmployee.setPassword(passwordEncoder.encode(trimmedPassword));
         newEmployee.setFirstName(registerEmployeeDto.getFirstName());
         newEmployee.setLastName(registerEmployeeDto.getLastName());
         newEmployee.setEmail(registerEmployeeDto.getEmail());
