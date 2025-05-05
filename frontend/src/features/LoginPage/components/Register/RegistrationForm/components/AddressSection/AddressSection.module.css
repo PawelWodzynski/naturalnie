@@ -65,15 +65,15 @@
   cursor: not-allowed;
 }
 
-/* Styles for radio button container */
+/* Styles for radio button container - Adjusted positioning */
 .radioContainer {
   position: absolute;
-  top: 0;
-  right: 0;
+  /* Position relative to the bottom-right of the input field */
+  bottom: 8px; /* Align vertically with input padding */
+  right: -60px; /* Position to the right of the input field, adjust as needed */
   display: flex;
   align-items: center;
-  height: 100%; /* Match the height of the form group */
-  padding-right: 5px; /* Add some padding */
+  /* height: 100%; Remove height constraint */
 }
 
 .radioInput {
@@ -87,6 +87,7 @@
   color: #666;
   cursor: pointer;
   margin-bottom: 0 !important; /* Override default label margin */
+  white-space: nowrap; /* Prevent label text wrapping */
 }
 
 /* Responsive adjustments */
@@ -101,6 +102,10 @@
   .centeredRow > .formGroup:nth-child(1) { /* Phone number */
     grid-column: 1 / -1; /* Span full width on medium screens */
   }
+  /* Adjust radio position on medium screens if needed */
+  .radioContainer {
+     right: -55px; /* Slightly adjust position */
+  }
 }
 
 @media (max-width: 600px) {
@@ -110,10 +115,12 @@
   .centeredRow {
     grid-template-columns: 1fr; /* 1 column on small screens */
   }
+  /* Position radio below the input on small screens */
   .radioContainer {
-    position: static; /* Reset position on small screens */
+    position: static;
     margin-top: 5px;
     justify-content: flex-start;
+    height: auto;
   }
 }
 
