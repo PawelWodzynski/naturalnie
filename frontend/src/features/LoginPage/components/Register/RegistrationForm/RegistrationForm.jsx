@@ -88,14 +88,14 @@ const RegistrationForm = ({ onSuccess }) => {
     }
 
     try {
-      // Remove confirmPassword before sending
-      // Trim password before sending? Depends on backend requirements.
-      const { confirmPassword, ...dataToSend } = formData;
-      // dataToSend.password = dataToSend.password.trim(); // Optional: Trim password before sending
+      // IMPORTANT: Send the entire formData including confirmPassword to backend
+      // const { confirmPassword, ...dataToSend } = formData; // This line was removing confirmPassword
+      const dataToSend = formData; // Send complete form data including confirmPassword
 
       // Add console log to check the data being sent
       console.log('Data being sent to backend:', dataToSend);
       console.log('Password being sent:', dataToSend.password);
+      console.log('ConfirmPassword being sent:', dataToSend.confirmPassword);
 
       const response = await fetch('http://localhost:8080/register', {
         method: 'POST',
@@ -164,4 +164,3 @@ const RegistrationForm = ({ onSuccess }) => {
 };
 
 export default RegistrationForm;
-
