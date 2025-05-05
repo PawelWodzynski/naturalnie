@@ -2,18 +2,25 @@ package com.auth.jwt.service;
 
 import com.auth.jwt.data.dto.authorization.CredentialsDto;
 import com.auth.jwt.data.dto.employee.RegisterEmployeeDto;
+import com.auth.jwt.data.entity.Address; // Import Address
+import com.auth.jwt.data.entity.EmployeeConsent; // Import EmployeeConsent
 import com.auth.jwt.data.entity.auth.employee.Employee;
 import com.auth.jwt.data.entity.auth.employee.Role;
+import com.auth.jwt.data.repository.AddressRepository; // Import AddressRepository
+import com.auth.jwt.data.repository.EmployeeConsentRepository; // Import EmployeeConsentRepository
 import com.auth.jwt.data.repository.auth.employee.EmployeeJpaRepository;
 import com.auth.jwt.exception.RegistrationException;
 import com.auth.jwt.exception.AuthenticationException;
 import com.auth.jwt.security.UserAuthProvider;
 import com.auth.jwt.util.ValidationUtil;
+import jakarta.transaction.Transactional; // Import Transactional
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +33,8 @@ import java.util.stream.Collectors;
 public class AuthService {
 
     private final EmployeeJpaRepository employeeRepository;
+    private final AddressRepository addressRepository; // Inject AddressRepository
+    private final EmployeeConsentRepository consentRepository; // Inject EmployeeConsentRepository
     private final PasswordEncoder passwordEncoder;
     private final UserAuthProvider userAuthProvider;
     private final ValidationUtil validationUtil;
@@ -38,6 +47,7 @@ public class AuthService {
         return userAuthProvider.createToken(employee.getUserName());
     }
 
+    @Transactional // Ensure atomicity
     public String register(RegisterEmployeeDto registerEmployeeDto) throws RegistrationException {
         // 0. Check if passwords match
         if (registerEmployeeDto.getPassword() == null || !registerEmployeeDto.getPassword().equals(registerEmployeeDto.getConfirmPassword())) {
@@ -64,17 +74,46 @@ public class AuthService {
             throw new RegistrationException("Podany adres email jest już zarejestrowany.");
         }
 
-        // 5. Create and save new user
+        // 5. Create new Employee (without saving yet, to get ID first if needed or save later)
         Employee newEmployee = new Employee();
         newEmployee.setUserName(registerEmployeeDto.getUserName());
-        newEmployee.setPassword(passwordEncoder.encode(registerEmployeeDto.getPassword())); // Use the validated password
+        newEmployee.setPassword(passwordEncoder.encode(registerEmployeeDto.getPassword()));
         newEmployee.setFirstName(registerEmployeeDto.getFirstName());
         newEmployee.setLastName(registerEmployeeDto.getLastName());
         newEmployee.setEmail(registerEmployeeDto.getEmail());
-        employeeRepository.save(newEmployee);
+        // Save employee first to get the ID
+        Employee savedEmployee = employeeRepository.save(newEmployee);
 
-        // 6. Generate token
-        return userAuthProvider.createToken(newEmployee.getUserName());
+        // 6. Create and save Address
+        Address newAddress = new Address();
+        newAddress.setEmployeeId(savedEmployee.getId()); // Set the employee ID
+        newAddress.setStreet(registerEmployeeDto.getStreet());
+        newAddress.setBuildingNumber(registerEmployeeDto.getBuildingNumber());
+        newAddress.setApartmentNumber(registerEmployeeDto.getApartmentNumber());
+        newAddress.setPostalCode(registerEmployeeDto.getPostalCode());
+        newAddress.setCity(registerEmployeeDto.getCity());
+        newAddress.setVoivodeship(registerEmployeeDto.getVoivodeship());
+        newAddress.setDistrict(registerEmployeeDto.getDistrict());
+        newAddress.setCommune(registerEmployeeDto.getCommune());
+        newAddress.setPhoneNumber(registerEmployeeDto.getPhoneNumber());
+        Address savedAddress = addressRepository.save(newAddress);
+
+        // 7. Create and save EmployeeConsent
+        EmployeeConsent newConsent = new EmployeeConsent();
+        newConsent.setEmployeeId(savedEmployee.getId()); // Set the employee ID
+        newConsent.setRodoConsent(registerEmployeeDto.getRodoConsent() != null && registerEmployeeDto.getRodoConsent());
+        newConsent.setTermsConsent(registerEmployeeDto.getTermsConsent() != null && registerEmployeeDto.getTermsConsent());
+        newConsent.setMarketingConsent(registerEmployeeDto.getMarketingConsent() != null && registerEmployeeDto.getMarketingConsent());
+        newConsent.setConsentDate(Timestamp.from(Instant.now()));
+        EmployeeConsent savedConsent = consentRepository.save(newConsent);
+
+        // 8. Link Address and Consent back to Employee and save again
+        savedEmployee.setPrimaryAddress(savedAddress);
+        savedEmployee.setConsent(savedConsent);
+        employeeRepository.save(savedEmployee); // Update employee with references
+
+        // 9. Generate token
+        return userAuthProvider.createToken(savedEmployee.getUserName());
     }
 
     public Map<String, Object> validateTokenAndGetRoles(String token) {
