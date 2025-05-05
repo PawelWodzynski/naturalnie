@@ -12,7 +12,7 @@ public class RegisterEmployeeDto {
     private String lastName;
     private String email;
 
-    // Address details
+    // Primary Address details
     private String street;
     private String buildingNumber;
     private String apartmentNumber; // Optional
@@ -22,6 +22,17 @@ public class RegisterEmployeeDto {
     private String district; // Optional
     private String commune; // Optional
     private String phoneNumber; // Optional
+
+    // Alternative Address details (Optional)
+    private String altStreet;
+    private String altBuildingNumber;
+    private String altApartmentNumber;
+    private String altPostalCode;
+    private String altCity;
+    private String altVoivodeship;
+    private String altDistrict;
+    private String altCommune;
+    private String altPhoneNumber;
 
     // Consent details
     private Boolean rodoConsent;

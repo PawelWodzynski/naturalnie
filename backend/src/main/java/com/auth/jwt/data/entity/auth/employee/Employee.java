@@ -45,6 +45,11 @@ public class Employee {
     @JoinColumn(name = "primary_address_id", referencedColumnName = "address_id") // Maps to the foreign key column in employees table
     private Address primaryAddress;
 
+    // One-to-one relationship with AlternativeAddress (optional)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = true) // Added optional=true
+    @JoinColumn(name = "alternative_address_id", referencedColumnName = "address_id", nullable = true) // Maps to the foreign key column in employees table, nullable
+    private AlternativeAddress alternativeAddress;
+
     // Default constructor
     public Employee() {
     }
@@ -71,7 +76,7 @@ public class Employee {
 
     // Constructor with all fields including new relationships
     public Employee(String userName, String password, String firstName, String lastName, String email,
-                    List<Role> roles, EmployeeConsent consent, Address primaryAddress) {
+                    List<Role> roles, EmployeeConsent consent, Address primaryAddress, AlternativeAddress alternativeAddress) {
         this.userName = userName;
         this.password = password;
         this.firstName = firstName;
@@ -80,6 +85,7 @@ public class Employee {
         this.roles = roles;
         this.consent = consent;
         this.primaryAddress = primaryAddress;
+        this.alternativeAddress = alternativeAddress; // Added alternativeAddress
     }
 
     // Getter and setter methods for all fields
@@ -155,19 +161,28 @@ public class Employee {
         this.primaryAddress = primaryAddress;
     }
 
+    public AlternativeAddress getAlternativeAddress() {
+        return alternativeAddress;
+    }
+
+    public void setAlternativeAddress(AlternativeAddress alternativeAddress) {
+        this.alternativeAddress = alternativeAddress;
+    }
+
     // Adding toString method for debugging
     @Override
     public String toString() {
         return "Employee{" +
                 "id=" + id +
-                ", userName=\'" + userName + "\'" +
-                ", password=\'" + "*********" + "\'" +
-                ", firstName=\'" + firstName + "\'" +
-                ", lastName=\'" + lastName + "\'" +
-                ", email=\'" + email + "\'" +
+                ", userName=\'" + userName + "\\'" +
+                ", password=\'" + "*********" + "\\'" +
+                ", firstName=\'" + firstName + "\\'" +
+                ", lastName=\'" + lastName + "\\'" +
+                ", email=\'" + email + "\\'" +
                 ", roles=" + roles +
                 ", consentId=" + (consent != null ? consent.getConsentId() : null) +
                 ", primaryAddressId=" + (primaryAddress != null ? primaryAddress.getAddressId() : null) +
+                ", alternativeAddressId=" + (alternativeAddress != null ? alternativeAddress.getAddressId() : null) + // Added alternativeAddressId
                 '}';
     }
 }

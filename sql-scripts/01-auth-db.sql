@@ -16,6 +16,7 @@ CREATE TABLE `employee` (
   `email` varchar(50) NOT NULL,
   `consent_id` INT NULL UNIQUE COMMENT 'Reference to the specific consent record (one-to-one)',
   `primary_address_id` INT NULL UNIQUE COMMENT 'Reference to the primary address (one-to-one)',
+  `alternative_address_id` INT NULL UNIQUE COMMENT 'Reference to the alternative address (one-to-one, optional)', -- Added alternative_address_id
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; -- Set UTF8MB4 encoding
 
@@ -62,7 +63,7 @@ CREATE TABLE `employee_consents` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; -- Set UTF8MB4 encoding
 
 --
--- Table structure for table `addresses`
+-- Table structure for table `addresses` (Primary Address)
 --
 DROP TABLE IF EXISTS `addresses`;
 CREATE TABLE `addresses` (
@@ -81,10 +82,30 @@ CREATE TABLE `addresses` (
     FOREIGN KEY (`employee_id`) REFERENCES `employee`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; -- Set UTF8MB4 encoding
 
+--
+-- Table structure for table `alternative_addresses` (Alternative Address)
+--
+DROP TABLE IF EXISTS `alternative_addresses`;
+CREATE TABLE `alternative_addresses` (
+    `address_id` INT PRIMARY KEY AUTO_INCREMENT,
+    -- No employee_id here, linked via employee.alternative_address_id
+    `street` VARCHAR(100) NOT NULL,
+    `building_number` VARCHAR(20) NOT NULL,
+    `apartment_number` VARCHAR(20),
+    `postal_code` VARCHAR(6) NOT NULL,
+    `city` VARCHAR(100) NOT NULL,
+    `voivodeship` VARCHAR(50),
+    `district` VARCHAR(100),
+    `commune` VARCHAR(100),
+    `country` VARCHAR(255) NULL,
+    `phone_number` VARCHAR(15)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; -- Set UTF8MB4 encoding
+
 -- Add foreign key constraints to employee table after all tables are created
 ALTER TABLE `employee`
 ADD CONSTRAINT `fk_employee_consent` FOREIGN KEY (`consent_id`) REFERENCES `employee_consents`(`consent_id`) ON DELETE SET NULL,
-ADD CONSTRAINT `fk_employee_primary_address` FOREIGN KEY (`primary_address_id`) REFERENCES `addresses`(`address_id`) ON DELETE SET NULL;
+ADD CONSTRAINT `fk_employee_primary_address` FOREIGN KEY (`primary_address_id`) REFERENCES `addresses`(`address_id`) ON DELETE SET NULL,
+ADD CONSTRAINT `fk_employee_alternative_address` FOREIGN KEY (`alternative_address_id`) REFERENCES `alternative_addresses`(`address_id`) ON DELETE SET NULL; -- Added FK for alternative address
 
 --
 -- Dumping data for table `employee`
@@ -95,16 +116,16 @@ ADD CONSTRAINT `fk_employee_primary_address` FOREIGN KEY (`primary_address_id`) 
 --
 INSERT INTO `employee` (username, password, first_name, last_name, email)
 VALUES 
-('admin', '$2a$12$m3ZBICrETR7kXtjOcbEZreRM1MnIcUlZ98QVeb7di4B4fm.sxwHXS', 'Admin', 'Admin', 'admin@admin.com'),
-('manager', '$2a$12$m3ZBICrETR7kXtjOcbEZreRM1MnIcUlZ98QVeb7di4B4fm.sxwHXS', 'Test', 'Manager', 'test@manager.com'),
-('employee', '$2a$12$m3ZBICrETR7kXtjOcbEZreRM1MnIcUlZ98QVeb7di4B4fm.sxwHXS', 'Test', 'Employee', 'test@employee.com');
+("admin", "$2a$12$m3ZBICrETR7kXtjOcbEZreRM1MnIcUlZ98QVeb7di4B4fm.sxwHXS", "Admin", "Admin", "admin@admin.com"),
+("manager", "$2a$12$m3ZBICrETR7kXtjOcbEZreRM1MnIcUlZ98QVeb7di4B4fm.sxwHXS", "Test", "Manager", "test@manager.com"),
+("employee", "$2a$12$m3ZBICrETR7kXtjOcbEZreRM1MnIcUlZ98QVeb7di4B4fm.sxwHXS", "Test", "Employee", "test@employee.com");
 
 --
 -- Dumping data for table `role`
 --
 INSERT INTO `role` (name)
 VALUES 
-('ROLE_EMPLOYEE'),('ROLE_MANAGER'),('ROLE_ADMIN');
+("ROLE_EMPLOYEE"),("ROLE_MANAGER"),("ROLE_ADMIN");
 
 --
 -- Dumping data for table `employee_roles`

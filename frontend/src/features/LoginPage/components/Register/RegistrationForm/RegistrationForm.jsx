@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import UserDataSection from './components/UserDataSection';
 import AddressSection from './components/AddressSection';
 import ConsentSection from './components/ConsentSection';
+import AlternativeAddressSection from './components/AlternativeAddressSection'; // Import the new component
 
 const RegistrationForm = ({ onSuccess }) => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [showAlternativeAddress, setShowAlternativeAddress] = useState(false); // State for checkbox
   const [formData, setFormData] = useState({
     // Employee details
     userName: '',
@@ -15,7 +17,7 @@ const RegistrationForm = ({ onSuccess }) => {
     firstName: '',
     lastName: '',
     email: '',
-    // Address details
+    // Primary Address details
     street: '',
     buildingNumber: '',
     apartmentNumber: '',
@@ -25,6 +27,16 @@ const RegistrationForm = ({ onSuccess }) => {
     district: '',
     commune: '',
     phoneNumber: '',
+    // Alternative Address details (Initialize with empty strings)
+    altStreet: '',
+    altBuildingNumber: '',
+    altApartmentNumber: '',
+    altPostalCode: '',
+    altCity: '',
+    altVoivodeship: '',
+    altDistrict: '',
+    altCommune: '',
+    altPhoneNumber: '',
     // Consent details
     rodoConsent: false,
     termsConsent: false,
@@ -35,10 +47,15 @@ const RegistrationForm = ({ onSuccess }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    // Handle the checkbox separately
+    if (name === 'showAlternativeAddressCheckbox') {
+      setShowAlternativeAddress(checked);
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: type === 'checkbox' ? checked : value,
+      }));
+    }
   };
 
   const nextStep = () => {
@@ -55,10 +72,17 @@ const RegistrationForm = ({ onSuccess }) => {
       }
     }
     if (currentStep === 2) {
-       // Basic check, more specific validation might be needed
+       // Basic check for primary address
       if (!formData.street || !formData.buildingNumber || !formData.postalCode || !formData.city || !formData.phoneNumber) {
-        setError('Proszę wypełnić wymagane pola adresowe (ulica, nr budynku, kod pocztowy, miasto, telefon).');
+        setError('Proszę wypełnić wymagane pola adresu podstawowego (ulica, nr budynku, kod pocztowy, miasto, telefon).');
         return;
+      }
+      // Basic check for alternative address if shown
+      if (showAlternativeAddress) {
+          if (!formData.altStreet || !formData.altBuildingNumber || !formData.altPostalCode || !formData.altCity || !formData.altPhoneNumber) {
+            setError('Proszę wypełnić wymagane pola adresu alternatywnego (ulica, nr budynku, kod pocztowy, miasto, telefon).');
+            return;
+          }
       }
     }
     setError(''); // Clear error if validation passes
@@ -80,21 +104,11 @@ const RegistrationForm = ({ onSuccess }) => {
       return;
     }
 
-    // Also check password match on final submit, just in case?
-    // It's better to rely on the step validation, but adding it here won't hurt.
-    if (formData.password.trim() !== formData.confirmPassword.trim()) {
-        setError('Hasła nie są identyczne. Proszę wrócić do kroku 1 i poprawić.');
-        return;
-    }
+    // Password match validation is already done in step 1 validation
 
     try {
-      // IMPORTANT: Send the entire formData including confirmPassword to backend
-      const dataToSend = formData; // Send complete form data including confirmPassword
-
-      // Remove console logs showing sensitive data
-      // console.log('Data being sent to backend:', dataToSend);
-      // console.log('Password being sent:', dataToSend.password);
-      // console.log('ConfirmPassword being sent:', dataToSend.confirmPassword);
+      // Send the complete formData including alternative address fields
+      const dataToSend = formData;
 
       const response = await fetch('http://localhost:8080/register', {
         method: 'POST',
@@ -136,7 +150,29 @@ const RegistrationForm = ({ onSuccess }) => {
       {/* Render the current step's section */}
       <div className={styles.formSectionContainer}>
         {currentStep === 1 && <UserDataSection formData={formData} handleChange={handleChange} />}
-        {currentStep === 2 && <AddressSection formData={formData} handleChange={handleChange} />}
+        {currentStep === 2 && (
+          <>
+            <AddressSection formData={formData} handleChange={handleChange} />
+            {/* Checkbox to show alternative address */}
+            <div className={styles.checkboxContainer}>
+              <input
+                type="checkbox"
+                id="showAlternativeAddressCheckbox"
+                name="showAlternativeAddressCheckbox"
+                checked={showAlternativeAddress}
+                onChange={handleChange}
+                className={styles.checkboxInput}
+              />
+              <label htmlFor="showAlternativeAddressCheckbox" className={styles.checkboxLabel}>
+                Dodaj alternatywny adres dostawy
+              </label>
+            </div>
+            {/* Conditionally render AlternativeAddressSection */}
+            {showAlternativeAddress && (
+              <AlternativeAddressSection formData={formData} handleChange={handleChange} />
+            )}
+          </>
+        )}
         {currentStep === 3 && <ConsentSection formData={formData} handleChange={handleChange} />}
       </div>
 
@@ -163,3 +199,4 @@ const RegistrationForm = ({ onSuccess }) => {
 };
 
 export default RegistrationForm;
+
