@@ -2,9 +2,9 @@ package com.auth.jwt.service;
 
 import com.auth.jwt.data.dto.authorization.CredentialsDto;
 import com.auth.jwt.data.dto.employee.RegisterEmployeeDto;
-import com.auth.jwt.data.entity.Address; // Import Address
-import com.auth.jwt.data.entity.EmployeeConsent; // Import EmployeeConsent
+import com.auth.jwt.data.entity.auth.employee.Address;
 import com.auth.jwt.data.entity.auth.employee.Employee;
+import com.auth.jwt.data.entity.auth.employee.EmployeeConsent;
 import com.auth.jwt.data.entity.auth.employee.Role;
 import com.auth.jwt.data.repository.AddressRepository; // Import AddressRepository
 import com.auth.jwt.data.repository.EmployeeConsentRepository; // Import EmployeeConsentRepository
