@@ -69,3 +69,49 @@ VALUES
 (2, 2),
 (3, 1);
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+
+-- Additions for employee consents and addresses (May 05 2025)
+
+CREATE TABLE employee_consents (
+    consent_id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT NOT NULL,
+    rodo_consent BOOLEAN DEFAULT FALSE,
+    terms_consent BOOLEAN DEFAULT FALSE,
+    marketing_consent BOOLEAN DEFAULT FALSE,
+    consent_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE
+);
+
+CREATE TABLE addresses (
+    address_id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT NOT NULL,
+    street VARCHAR(100) NOT NULL,
+    building_number VARCHAR(20) NOT NULL,
+    apartment_number VARCHAR(20),
+    postal_code VARCHAR(6) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    voivodeship VARCHAR(50),
+    district VARCHAR(100),
+    commune VARCHAR(100),
+    phone_number VARCHAR(15),
+    FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE
+);
+
+
+-- Modify employees table to add references to consents and a primary address
+-- Note: The primary relationships are defined by foreign keys in employee_consents and addresses tables.
+-- Adding columns here might be for specific linking purposes (e.g., primary address).
+ALTER TABLE employees
+ADD COLUMN consent_id INT NULL COMMENT 'Reference to the specific consent record for this employee',
+ADD COLUMN primary_address_id INT NULL COMMENT 'Reference to the primary address for this employee';
+
+-- Optional: Add foreign key constraints if a strict link from employee is required.
+-- Ensure these constraints align with the intended data model (e.g., one-to-one vs. one-to-many).
+-- ALTER TABLE employees
+-- ADD CONSTRAINT fk_employee_consent FOREIGN KEY (consent_id) REFERENCES employee_consents(consent_id) ON DELETE SET NULL;
+-- ALTER TABLE employees
+-- ADD CONSTRAINT fk_employee_primary_address FOREIGN KEY (primary_address_id) REFERENCES addresses(address_id) ON DELETE SET NULL;
+
+
