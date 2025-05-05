@@ -1,5 +1,7 @@
 package com.auth.jwt.data.entity.auth.employee;
 
+import com.auth.jwt.data.entity.Address; // Import Address entity
+import com.auth.jwt.data.entity.EmployeeConsent; // Import EmployeeConsent entity
 import jakarta.persistence.*;
 
 import java.util.Collection;
@@ -35,11 +37,21 @@ public class Employee {
             inverseJoinColumns = @JoinColumn(name = "role_id")) // Inverse side of the relationship
     private List<Role> roles; // Collection to store roles
 
+    // One-to-one relationship with EmployeeConsent
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "consent_id", referencedColumnName = "consent_id") // Maps to the foreign key column in employees table
+    private EmployeeConsent consent;
+
+    // One-to-one relationship with Address (for primary address)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "primary_address_id", referencedColumnName = "address_id") // Maps to the foreign key column in employees table
+    private Address primaryAddress;
+
     // Default constructor
     public Employee() {
     }
 
-    // Constructor with all fields
+    // Constructor with basic fields
     public Employee(String userName, String password, String firstName, String lastName, String email) {
         this.userName = userName;
         this.password = password;
@@ -48,7 +60,7 @@ public class Employee {
         this.email = email;
     }
 
-    // Constructor with all fields and an additional field for roles
+    // Constructor with roles
     public Employee(String userName, String password, String firstName, String lastName, String email,
                     List<Role> roles) {
         this.userName = userName;
@@ -57,6 +69,19 @@ public class Employee {
         this.lastName = lastName;
         this.email = email;
         this.roles = roles;
+    }
+
+    // Constructor with all fields including new relationships
+    public Employee(String userName, String password, String firstName, String lastName, String email,
+                    List<Role> roles, EmployeeConsent consent, Address primaryAddress) {
+        this.userName = userName;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.roles = roles;
+        this.consent = consent;
+        this.primaryAddress = primaryAddress;
     }
 
     // Getter and setter methods for all fields
@@ -116,17 +141,36 @@ public class Employee {
         this.roles = roles;
     }
 
+    public EmployeeConsent getConsent() {
+        return consent;
+    }
+
+    public void setConsent(EmployeeConsent consent) {
+        this.consent = consent;
+    }
+
+    public Address getPrimaryAddress() {
+        return primaryAddress;
+    }
+
+    public void setPrimaryAddress(Address primaryAddress) {
+        this.primaryAddress = primaryAddress;
+    }
+
     // Adding toString method for debugging
     @Override
     public String toString() {
         return "Employee{" +
                 "id=" + id +
-                ", userName='" + userName + '\'' +
-                ", password='" + "*********" + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
+                ", userName=\'" + userName + "\'" +
+                ", password=\'" + "*********" + "\'" +
+                ", firstName=\'" + firstName + "\'" +
+                ", lastName=\'" + lastName + "\'" +
+                ", email=\'" + email + "\'" +
                 ", roles=" + roles +
+                ", consentId=" + (consent != null ? consent.getConsentId() : null) +
+                ", primaryAddressId=" + (primaryAddress != null ? primaryAddress.getAddressId() : null) +
                 '}';
     }
 }
+
