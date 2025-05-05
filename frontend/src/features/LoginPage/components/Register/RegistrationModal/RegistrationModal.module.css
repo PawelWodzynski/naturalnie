@@ -6,11 +6,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay */
+  background-color: rgba(0, 0, 0, 0.6); /* Slightly darker overlay */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000; /* Ensure modal is on top */
+  padding: 1rem; /* Add padding for smaller screens */
 }
 
 .modalContent {
@@ -19,19 +20,22 @@
   border-radius: 0.5rem; /* rounded-lg */
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
   position: relative;
-  min-width: 300px; /* Adjust as needed */
-  max-width: 90%;
+  width: 100%; /* Full width on small screens */
+  max-width: 600px; /* Increased max-width for larger screens */
+  max-height: 90vh; /* Limit height and allow scrolling */
+  overflow-y: auto; /* Enable vertical scrolling if content overflows */
 }
 
 .closeButton {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  top: 0.75rem;
+  right: 0.75rem;
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   cursor: pointer;
   color: #6b7280; /* gray-500 */
+  line-height: 1;
 }
 
 .closeButton:hover {
@@ -42,7 +46,15 @@
   margin-top: 0;
   margin-bottom: 1.5rem;
   text-align: center;
-  font-size: 1.25rem; /* text-xl */
+  font-size: 1.5rem; /* text-2xl */
   font-weight: bold;
+  color: #333; /* Darker heading */
+}
+
+/* Responsive adjustments */
+@media (min-width: 640px) { /* sm breakpoint */
+  .modalContent {
+    padding: 2.5rem;
+  }
 }
 

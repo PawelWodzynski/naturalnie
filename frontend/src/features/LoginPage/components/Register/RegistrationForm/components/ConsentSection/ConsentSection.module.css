@@ -1,0 +1,28 @@
+/* Styles for ConsentSection */
+
+.fieldset {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+}
+
+.fieldset legend {
+  font-weight: bold;
+  padding: 0 0.5rem;
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.checkboxGroup input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.checkboxGroup label {
+  font-weight: 500;
+}
+
