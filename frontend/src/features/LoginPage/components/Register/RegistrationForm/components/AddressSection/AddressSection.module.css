@@ -68,7 +68,7 @@
 /* Style for disabled label (optional, just opacity) */
 .disabledField label {
    opacity: 0.6;
-   cursor: not-allowed;
+   /* Remove cursor: not-allowed from label */
 }
 
 /* Styles for radio button container - Adjusted positioning and ensure clickability */
@@ -84,7 +84,7 @@
 
 .radioInput {
   margin-right: 5px;
-  cursor: pointer;
+  cursor: pointer !important; /* Ensure pointer cursor */
   pointer-events: auto !important; /* Ensure input is clickable */
 }
 
@@ -92,7 +92,7 @@
   font-size: 12px;
   font-weight: normal;
   color: #666;
-  cursor: pointer;
+  cursor: pointer !important; /* Ensure pointer cursor */
   margin-bottom: 0 !important;
   white-space: nowrap;
   pointer-events: auto !important; /* Ensure label is clickable */
