@@ -9,6 +9,7 @@ import java.util.Optional;
 @Repository
 public interface JednostkaRepository extends JpaRepository<Jednostka, Integer> {
     Optional<Jednostka> findByNazwa(String nazwa);
-    Optional<Jednostka> findBySkrot(String skrot); // Added missing method
+    Optional<Jednostka> findBySkrot(String skrot);
+    Optional<Jednostka> findByNazwaAndSkrot(String nazwa, String skrot); // Added missing method
 }
 
