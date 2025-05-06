@@ -81,40 +81,81 @@ public class ProduktService {
             throw new IllegalArgumentException("Produkt o nazwie '" + produkt.getNazwa() + "' już istnieje.");
         }
 
+        // Handle related entities that must exist
         if (produkt.getRodzajProduktu() != null && produkt.getRodzajProduktu().getId() != null) {
             produkt.setRodzajProduktu(rodzajProduktuRepository.findById(produkt.getRodzajProduktu().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("RodzajProduktu not found")));
+                .orElseThrow(() -> new ResourceNotFoundException("RodzajProduktu not found with ID: " + produkt.getRodzajProduktu().getId())));
+        } else {
+            produkt.setRodzajProduktu(null); // Or throw error if required
         }
         if (produkt.getJednostka() != null && produkt.getJednostka().getId() != null) {
             produkt.setJednostka(jednostkaRepository.findById(produkt.getJednostka().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Jednostka not found")));
+                .orElseThrow(() -> new ResourceNotFoundException("Jednostka not found with ID: " + produkt.getJednostka().getId())));
+        } else {
+            produkt.setJednostka(null); // Or throw error if required
         }
         if (produkt.getNadKategoria() != null && produkt.getNadKategoria().getId() != null) {
             produkt.setNadKategoria(nadKategoriaRepository.findById(produkt.getNadKategoria().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("NadKategoria not found")));
+                .orElseThrow(() -> new ResourceNotFoundException("NadKategoria not found with ID: " + produkt.getNadKategoria().getId())));
+        } else {
+            produkt.setNadKategoria(null); // Or throw error if required
         }
         if (produkt.getOpakowanie() != null && produkt.getOpakowanie().getId() != null) {
             produkt.setOpakowanie(opakowanieRepository.findById(produkt.getOpakowanie().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Opakowanie not found")));
+                .orElseThrow(() -> new ResourceNotFoundException("Opakowanie not found with ID: " + produkt.getOpakowanie().getId())));
+        } else {
+            produkt.setOpakowanie(null); // Or throw error if required
         }
         if (produkt.getStawkaVat() != null && produkt.getStawkaVat().getId() != null) {
             produkt.setStawkaVat(stawkaVatRepository.findById(produkt.getStawkaVat().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("StawkaVat not found")));
+                .orElseThrow(() -> new ResourceNotFoundException("StawkaVat not found with ID: " + produkt.getStawkaVat().getId())));
+        } else {
+            produkt.setStawkaVat(null); // Or throw error if required
         }
 
+        // Handle KodTowaru: find by kod or create new
         if (produkt.getKodTowaru() != null && produkt.getKodTowaru().getKod() != null) {
             Optional<KodTowaru> existingKt = kodTowaruRepository.findByKod(produkt.getKodTowaru().getKod());
-            if (existingKt.isPresent()) produkt.setKodTowaru(existingKt.get());
-        }
-        if (produkt.getKodEan() != null && produkt.getKodEan().getKod() != null) {
-            Optional<KodEan> existingKe = kodEanRepository.findByKod(produkt.getKodEan().getKod());
-            if (existingKe.isPresent()) produkt.setKodEan(existingKe.get());
-        }
-        if (produkt.getIdentyfikator() != null && produkt.getIdentyfikator().getWartosc() != null) {
-            Optional<Identyfikator> existingId = identyfikatorRepository.findByWartosc(produkt.getIdentyfikator().getWartosc());
-            if (existingId.isPresent()) produkt.setIdentyfikator(existingId.get());
+            if (existingKt.isPresent()) {
+                produkt.setKodTowaru(existingKt.get());
+            } else {
+                KodTowaru newKodTowaru = produkt.getKodTowaru();
+                newKodTowaru.setId(null); // Ensure it's treated as new
+                produkt.setKodTowaru(kodTowaruRepository.save(newKodTowaru));
+            }
+        } else {
+            produkt.setKodTowaru(null); // Set to null if not provided or no kod
         }
 
+        // Handle KodEan: find by kod or create new
+        if (produkt.getKodEan() != null && produkt.getKodEan().getKod() != null) {
+            Optional<KodEan> existingKe = kodEanRepository.findByKod(produkt.getKodEan().getKod());
+            if (existingKe.isPresent()) {
+                produkt.setKodEan(existingKe.get());
+            } else {
+                KodEan newKodEan = produkt.getKodEan();
+                newKodEan.setId(null); // Ensure it's treated as new
+                produkt.setKodEan(kodEanRepository.save(newKodEan));
+            }
+        } else {
+            produkt.setKodEan(null); // Set to null if not provided or no kod
+        }
+
+        // Handle Identyfikator: find by wartosc or create new
+        if (produkt.getIdentyfikator() != null && produkt.getIdentyfikator().getWartosc() != null) {
+            Optional<Identyfikator> existingId = identyfikatorRepository.findByWartosc(produkt.getIdentyfikator().getWartosc());
+            if (existingId.isPresent()) {
+                produkt.setIdentyfikator(existingId.get());
+            } else {
+                Identyfikator newIdentyfikator = produkt.getIdentyfikator();
+                newIdentyfikator.setId(null); // Ensure it's treated as new
+                produkt.setIdentyfikator(identyfikatorRepository.save(newIdentyfikator));
+            }
+        } else {
+            produkt.setIdentyfikator(null); // Set to null if not provided or no wartosc
+        }
+
+        // Handle Skladniki
         if (produkt.getSkladniki() != null && !produkt.getSkladniki().isEmpty()) {
             Set<Skladnik> managedSkladniki = new HashSet<>();
             for (Skladnik skladnik : produkt.getSkladniki()) {
@@ -126,7 +167,8 @@ public class ProduktService {
                     if (existingSkladnik.isPresent()) {
                         managedSkladniki.add(existingSkladnik.get());
                     } else {
-                        managedSkladniki.add(skladnikService.createSkladnik(new Skladnik(skladnik.getNazwa())));
+                        // Pass the Skladnik instance directly to createSkladnik if it's new
+                        managedSkladniki.add(skladnikService.createSkladnik(skladnik));
                     }
                 }
             }
@@ -135,12 +177,14 @@ public class ProduktService {
         
         Produkt savedProdukt = produktRepository.save(produkt);
 
+        // Handle Zdjecia after Produkt is saved
         if (produkt.getZdjecia() != null && !produkt.getZdjecia().isEmpty()) {
             List<Zdjecie> managedZdjecia = produkt.getZdjecia().stream().map(zdjecie -> {
-                zdjecie.setProdukt(savedProdukt);
+                zdjecie.setProdukt(savedProdukt); // Link to the saved Produkt
+                zdjecie.setId(null); // Ensure Zdjecie is treated as new if not already persisted with Produkt
                 return zdjecieRepository.save(zdjecie);
             }).collect(Collectors.toList());
-            savedProdukt.setZdjecia(managedZdjecia);
+            savedProdukt.setZdjecia(new HashSet<>(managedZdjecia)); // Produkt entity expects a Set for Zdjecia
         }
 
         return savedProdukt;
@@ -162,27 +206,98 @@ public class ProduktService {
 
         if (produktDetails.getWaga() != null) produkt.setWaga(produktDetails.getWaga());
         if (produktDetails.getCena() != null) produkt.setCena(produktDetails.getCena());
-        if (produktDetails.getSuperProdukt() != null) produkt.setSuperProdukt(produktDetails.getSuperProdukt());
-        if (produktDetails.getTowarPolecany() != null) produkt.setTowarPolecany(produktDetails.getTowarPolecany());
+        // ... (other simple field updates)
+        produkt.setSuperProdukt(produktDetails.getSuperProdukt());
+        produkt.setTowarPolecany(produktDetails.getTowarPolecany());
+        produkt.setRekomedacjaSprzedawcy(produktDetails.getRekomedacjaSprzedawcy());
+        produkt.setSuperCena(produktDetails.getSuperCena());
+        produkt.setNowosc(produktDetails.getNowosc());
+        produkt.setSuperjakosc(produktDetails.getSuperjakosc());
+        produkt.setRabat(produktDetails.getRabat());
+        produkt.setDostepny(produktDetails.getDostepny());
+        produkt.setDostepneOdReki(produktDetails.getDostepneOdReki());
+        produkt.setDostepneDo7Dni(produktDetails.getDostepneDo7Dni());
+        produkt.setDostepneNaZamowienie(produktDetails.getDostepneNaZamowienie());
+        produkt.setWartoKupic(produktDetails.getWartoKupic());
+        produkt.setBezglutenowy(produktDetails.getBezglutenowy());
         if (produktDetails.getOpis() != null) produkt.setOpis(produktDetails.getOpis());
 
+        // Update logic for related entities - similar careful handling needed as in create
         if (produktDetails.getRodzajProduktu() != null && produktDetails.getRodzajProduktu().getId() != null) {
             produkt.setRodzajProduktu(rodzajProduktuRepository.findById(produktDetails.getRodzajProduktu().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("RodzajProduktu not found")));
+        } else if (produktDetails.getRodzajProduktu() != null) {
+             produkt.setRodzajProduktu(null); // Or handle new RodzajProduktu if applicable
         }
+
+        // KodTowaru, KodEan, Identyfikator updates
+        if (produktDetails.getKodTowaru() != null) {
+            if (produktDetails.getKodTowaru().getId() != null) {
+                produkt.setKodTowaru(kodTowaruRepository.findById(produktDetails.getKodTowaru().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("KodTowaru not found")));
+            } else if (produktDetails.getKodTowaru().getKod() != null) {
+                Optional<KodTowaru> existingKt = kodTowaruRepository.findByKod(produktDetails.getKodTowaru().getKod());
+                if (existingKt.isPresent()) {
+                    produkt.setKodTowaru(existingKt.get());
+                } else {
+                    KodTowaru newKt = produktDetails.getKodTowaru();
+                    newKt.setId(null);
+                    produkt.setKodTowaru(kodTowaruRepository.save(newKt));
+                }
+            }
+        } else {
+            produkt.setKodTowaru(null);
+        }
+        // Similar for KodEan and Identyfikator
+         if (produktDetails.getKodEan() != null) {
+            if (produktDetails.getKodEan().getId() != null) {
+                produkt.setKodEan(kodEanRepository.findById(produktDetails.getKodEan().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("KodEan not found")));
+            } else if (produktDetails.getKodEan().getKod() != null) {
+                Optional<KodEan> existingKe = kodEanRepository.findByKod(produktDetails.getKodEan().getKod());
+                if (existingKe.isPresent()) {
+                    produkt.setKodEan(existingKe.get());
+                } else {
+                    KodEan newKe = produktDetails.getKodEan();
+                    newKe.setId(null);
+                    produkt.setKodEan(kodEanRepository.save(newKe));
+                }
+            }
+        } else {
+            produkt.setKodEan(null);
+        }
+
+        if (produktDetails.getIdentyfikator() != null) {
+            if (produktDetails.getIdentyfikator().getId() != null) {
+                produkt.setIdentyfikator(identyfikatorRepository.findById(produktDetails.getIdentyfikator().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Identyfikator not found")));
+            } else if (produktDetails.getIdentyfikator().getWartosc() != null) {
+                Optional<Identyfikator> existingId = identyfikatorRepository.findByWartosc(produktDetails.getIdentyfikator().getWartosc());
+                if (existingId.isPresent()) {
+                    produkt.setIdentyfikator(existingId.get());
+                } else {
+                    Identyfikator newId = produktDetails.getIdentyfikator();
+                    newId.setId(null);
+                    produkt.setIdentyfikator(identyfikatorRepository.save(newId));
+                }
+            }
+        } else {
+            produkt.setIdentyfikator(null);
+        }
+
 
         if (produktDetails.getSkladniki() != null) {
             Set<Skladnik> managedSkladniki = new HashSet<>();
             for (Skladnik skladnikDetail : produktDetails.getSkladniki()) {
                 if (skladnikDetail.getId() != null) {
                     managedSkladniki.add(skladnikRepository.findById(skladnikDetail.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Skladnik not found")));
+                        .orElseThrow(() -> new ResourceNotFoundException("Skladnik not found with ID: " + skladnikDetail.getId())));
                 } else if (skladnikDetail.getNazwa() != null) {
                      Optional<Skladnik> existingSkladnik = skladnikRepository.findByNazwa(skladnikDetail.getNazwa());
                     if (existingSkladnik.isPresent()) {
                         managedSkladniki.add(existingSkladnik.get());
                     } else {
-                        managedSkladniki.add(skladnikService.createSkladnik(new Skladnik(skladnikDetail.getNazwa())));
+                        managedSkladniki.add(skladnikService.createSkladnik(skladnikDetail));
                     }
                 }
             }
@@ -190,15 +305,19 @@ public class ProduktService {
             produkt.getSkladniki().addAll(managedSkladniki);
         }
 
+        // Zdjecia update logic - more complex, might involve deleting old ones not in new list, updating existing, adding new
         if (produktDetails.getZdjecia() != null) {
-            zdjecieRepository.deleteByProduktIdAndIdNotIn(produkt.getId(), 
-                produktDetails.getZdjecia().stream().map(Zdjecie::getId).filter(imgId -> imgId != null).collect(Collectors.toList()));
+            // Simple approach: remove all old, add all new. Or more sophisticated merge.
+            produkt.getZdjecia().clear(); // Assuming Produkt.zdjecia is managed and will trigger orphan removal or cascade delete if configured
+            zdjecieRepository.deleteByProduktId(produkt.getId()); // Explicit delete if cascade not set up for removal
 
-            List<Zdjecie> updatedZdjecia = produktDetails.getZdjecia().stream().map(zdjecieDetail -> {
+            Set<Zdjecie> newZdjecia = new HashSet<>();
+            for (Zdjecie zdjecieDetail : produktDetails.getZdjecia()) {
                 zdjecieDetail.setProdukt(produkt);
-                return zdjecieRepository.save(zdjecieDetail);
-            }).collect(Collectors.toList());
-            produkt.setZdjecia(updatedZdjecia);
+                zdjecieDetail.setId(null); // Treat as new for update
+                newZdjecia.add(zdjecieRepository.save(zdjecieDetail));
+            }
+            produkt.setZdjecia(newZdjecia);
         }
 
         return produktRepository.save(produkt);
@@ -206,10 +325,12 @@ public class ProduktService {
 
     @Transactional("appDataTransactionManager")
     public void deleteProdukt(Integer id) {
-        if (!produktRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony.");
-        }
-        produktRepository.deleteById(id);
+        Produkt produkt = produktRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony."));
+        // Add logic to handle related entities if necessary, e.g., if cascade delete is not configured
+        // For example, explicitly delete Zdjecia associated with this Produkt
+        // zdjecieRepository.deleteByProduktId(id);
+        produktRepository.delete(produkt);
     }
 }
 
