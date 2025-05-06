@@ -103,6 +103,7 @@ public class Produkt {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "opakowanie_id")
+    @JsonBackReference("opakowanie-produkt") // Added this line
     private Opakowanie opakowanie;
 
     @ManyToOne(fetch = FetchType.LAZY)

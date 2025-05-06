@@ -1,5 +1,6 @@
 package com.auth.jwt.data.entity.app_data;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
@@ -17,7 +18,7 @@ public class Opakowanie {
     @Column(name = "nazwa", nullable = false, length = 100)
     private String nazwa;
 
-    @Column(name = "skrot", length = 50) // Added skrot field
+    @Column(name = "skrot", length = 50)
     private String skrot;
 
     @Column(name = "opis", columnDefinition = "TEXT")
@@ -25,6 +26,7 @@ public class Opakowanie {
 
     // Relacja OneToMany z Produkt
     @OneToMany(mappedBy = "opakowanie", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("opakowanie-produkt")
     private List<Produkt> produkty;
 }
 
