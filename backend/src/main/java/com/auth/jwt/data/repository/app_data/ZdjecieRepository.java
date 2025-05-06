@@ -21,7 +21,9 @@ public interface ZdjecieRepository extends JpaRepository<Zdjecie, Integer> {
     @Query("DELETE FROM Zdjecie z WHERE z.produkt.id = :produktId AND z.id NOT IN :ids")
     void deleteByProduktIdAndIdNotIn(@Param("produktId") Integer produktId, @Param("ids") List<Integer> ids);
 
-    // Added for SkladnikService to find by name, if needed for Zdjecie (e.g. by alt text or similar)
-    // Optional<Zdjecie> findByNazwa(String nazwa); // Example, if Zdjecie had a 'nazwa' or 'altText' field for lookup
+    @Transactional
+    @Modifying
+    void deleteByProduktId(Integer produktId); // Added this method
+
 }
 
