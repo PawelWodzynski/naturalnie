@@ -7,6 +7,7 @@ import java.util.List;
 @Data
 public class ProduktRequestDTO {
 
+    // Produkt fields
     private String nazwa;
     private BigDecimal waga;
     private BigDecimal cena;
@@ -25,12 +26,26 @@ public class ProduktRequestDTO {
     private Boolean bezglutenowy;
     private String opis;
 
-    // IDs for simple relations
-    private Integer rodzajProduktuId;
-    private Integer jednostkaId;
-    private Integer nadKategoriaId;
-    private Integer opakowanieId;
-    private Integer stawkaVatId;
+    // Fields from RodzajProduktu
+    private String rodzajProduktuNazwa; // Required, from RodzajProduktu.nazwa
+    private String rodzajProduktuOpis;
+
+    // Fields from Jednostka
+    private String jednostkaNazwa; // Required, from Jednostka.nazwa
+    private String jednostkaSkrot; // Required, from Jednostka.skrot
+
+    // Fields from NadKategoria
+    private String nadKategoriaNazwa; // Required, from NadKategoria.nazwa
+    private String nadKategoriaOpis;
+    private Integer nadKategoriaKolejnosc;
+
+    // Fields from Opakowanie
+    private String opakowanieNazwa; // Required, from Opakowanie.nazwa
+    private String opakowanieSkrot;
+    private String opakowanieOpis;
+
+    // Fields from StawkaVat
+    private BigDecimal stawkaVatWartosc; // Required, from StawkaVat.wartosc
 
     // Values for KodTowaru, KodEan, Identyfikator (to be found or created)
     private String kodTowaruKod; // Value of KodTowaru.kod
