@@ -1,7 +1,8 @@
 package com.auth.jwt.controller.app_data;
 
 import com.auth.jwt.data.entity.app_data.Produkt;
-import com.auth.jwt.dto.app_data.ProduktDTO; // Added import
+import com.auth.jwt.dto.app_data.ProduktDTO; // Response DTO
+import com.auth.jwt.dto.app_data.ProduktRequestDTO; // Request DTO
 import com.auth.jwt.exception.ResourceNotFoundException;
 import com.auth.jwt.exception.UserNotAuthenticatedException;
 import com.auth.jwt.service.app_data.ProduktService;
@@ -9,7 +10,7 @@ import com.auth.jwt.util.AuthUtil;
 import com.auth.jwt.util.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl; // Added import
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,7 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors; // Added import
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/app-data/produkt")
@@ -113,10 +114,10 @@ public class ProduktController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createProdukt(@RequestBody Produkt produkt, @RequestParam(required = true) String token) {
+    public ResponseEntity<?> createProdukt(@RequestBody ProduktRequestDTO produktRequestDTO, @RequestParam(required = true) String token) {
         try {
             authUtil.getAuthenticatedUserOrThrow();
-            Produkt createdProdukt = produktService.createProdukt(produkt);
+            Produkt createdProdukt = produktService.createProdukt(produktRequestDTO); // Changed to use DTO
             ProduktDTO createdProduktDTO = new ProduktDTO(createdProdukt);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(responseUtil.createSuccessResponse("Utworzono nowy produkt wraz z powiązaniami.", createdProduktDTO));
@@ -135,10 +136,10 @@ public class ProduktController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateProdukt(@PathVariable Integer id, @RequestBody Produkt produktDetails, @RequestParam(required = true) String token) {
+    public ResponseEntity<?> updateProdukt(@PathVariable Integer id, @RequestBody ProduktRequestDTO produktRequestDetails, @RequestParam(required = true) String token) {
         try {
             authUtil.getAuthenticatedUserOrThrow();
-            Produkt updatedProdukt = produktService.updateProdukt(id, produktDetails);
+            Produkt updatedProdukt = produktService.updateProdukt(id, produktRequestDetails); // Changed to use DTO
             ProduktDTO updatedProduktDTO = new ProduktDTO(updatedProdukt);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Zaktualizowano produkt.", updatedProduktDTO));
         } catch (UserNotAuthenticatedException e) {

@@ -134,7 +134,7 @@ CREATE TABLE produkt (
 CREATE TABLE zdjecie (
     zdjecie_id INT PRIMARY KEY AUTO_INCREMENT,
     produkt_id INT NOT NULL,
-    url VARCHAR(500) NOT NULL,
+    dane_zdjecia LONGBLOB NOT NULL,
     opis VARCHAR(255),
     kolejnosc INT DEFAULT 0,
     FOREIGN KEY (produkt_id) REFERENCES produkt(produkt_id) ON DELETE CASCADE

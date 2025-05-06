@@ -14,8 +14,9 @@ public class Zdjecie {
     @Column(name = "zdjecie_id")
     private Integer id;
 
-    @Column(name = "url", nullable = false, length = 500)
-    private String url;
+    @Lob
+    @Column(name = "dane_zdjecia", nullable = false, columnDefinition="LONGBLOB")
+    private byte[] daneZdjecia;
 
     @Column(name = "opis", length = 255)
     private String opis;
