@@ -103,11 +103,12 @@ public class Produkt {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "opakowanie_id")
-    @JsonBackReference("opakowanie-produkt") // Added this line
+    @JsonBackReference("opakowanie-produkt")
     private Opakowanie opakowanie;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stawka_vat_id")
+    @JsonBackReference("stawkavat-produkt") // Added this line
     private StawkaVat stawkaVat;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -131,12 +132,14 @@ public class Produkt {
     )
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    // No Jackson annotation here, will be handled by DTO
     private Set<Skladnik> skladniki = new HashSet<>();
 
     @OneToMany(mappedBy = "produkt", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference("produkt-zdjecie")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    // No Jackson annotation for direct serialization, will be handled by DTO for IDs
     private List<Zdjecie> zdjecia;
 }
 

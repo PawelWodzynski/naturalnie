@@ -1,5 +1,6 @@
 package com.auth.jwt.data.entity.app_data;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -20,6 +21,7 @@ public class StawkaVat {
 
     // Relacja OneToMany z Produkt
     @OneToMany(mappedBy = "stawkaVat", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("stawkavat-produkt")
     private List<Produkt> produkty;
 }
 

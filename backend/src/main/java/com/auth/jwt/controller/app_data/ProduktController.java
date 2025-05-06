@@ -1,6 +1,7 @@
 package com.auth.jwt.controller.app_data;
 
 import com.auth.jwt.data.entity.app_data.Produkt;
+import com.auth.jwt.dto.app_data.ProduktDTO; // Added import
 import com.auth.jwt.exception.ResourceNotFoundException;
 import com.auth.jwt.exception.UserNotAuthenticatedException;
 import com.auth.jwt.service.app_data.ProduktService;
@@ -8,6 +9,7 @@ import com.auth.jwt.util.AuthUtil;
 import com.auth.jwt.util.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl; // Added import
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors; // Added import
 
 @RestController
 @RequestMapping("/api/app-data/produkt")
@@ -35,15 +38,17 @@ public class ProduktController {
     @GetMapping
     public ResponseEntity<?> getAllProdukty(@RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(); // Fixed
-            List<Produkt> produkty = produktService.getAllProdukty();
-            return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano listę produktów.", produkty));
+            authUtil.getAuthenticatedUserOrThrow();
+            List<ProduktDTO> produktyDTO = produktService.getAllProdukty().stream()
+                    .map(ProduktDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano listę produktów.", produktyDTO));
         } catch (UserNotAuthenticatedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(responseUtil.createErrorResponse(e.getMessage()));
         } catch (Exception e) {
             System.err.println("Błąd w endpoincie /api/app-data/produkt (GET): " + e.getMessage());
-            e.printStackTrace(); // Detailed stack trace for debugging
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(responseUtil.createErrorResponse("Wystąpił wewnętrzny błąd serwera przy pobieraniu produktów."));
         }
@@ -55,21 +60,25 @@ public class ProduktController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
             @RequestParam(required = false) Integer nadKategoriaId,
-            @RequestParam(required = false, defaultValue = "id,asc") String[] sort) { // Added sorting
+            @RequestParam(required = false, defaultValue = "id,asc") String[] sort) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(); // Fixed
+            authUtil.getAuthenticatedUserOrThrow();
             
-            // Handle sorting
             Sort.Direction direction = Sort.Direction.fromString(sort.length > 1 ? sort[1] : "asc");
             Sort.Order order = new Sort.Order(direction, sort[0]);
             Pageable pageable = PageRequest.of(page, size, Sort.by(order));
 
             Page<Produkt> produktyPage = produktService.getAllProduktyPaginated(pageable, nadKategoriaId);
-            return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano paginowaną listę produktów.", produktyPage));
+            Page<ProduktDTO> produktyDTOPage = new PageImpl<>(
+                produktyPage.getContent().stream().map(ProduktDTO::new).collect(Collectors.toList()),
+                pageable,
+                produktyPage.getTotalElements()
+            );
+            return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano paginowaną listę produktów.", produktyDTOPage));
         } catch (UserNotAuthenticatedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(responseUtil.createErrorResponse(e.getMessage()));
-        } catch (IllegalArgumentException e) { // Catch issues like invalid sort direction
+        } catch (IllegalArgumentException e) { 
              return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(responseUtil.createErrorResponse("Nieprawidłowe parametry żądania: " + e.getMessage()));
         } catch (Exception e) {
@@ -84,10 +93,11 @@ public class ProduktController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getProduktById(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(); // Fixed
+            authUtil.getAuthenticatedUserOrThrow();
             Produkt produkt = produktService.getProduktById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony."));
-            return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano produkt.", produkt));
+            ProduktDTO produktDTO = new ProduktDTO(produkt);
+            return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano produkt.", produktDTO));
         } catch (UserNotAuthenticatedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(responseUtil.createErrorResponse(e.getMessage()));
@@ -105,10 +115,11 @@ public class ProduktController {
     @PostMapping
     public ResponseEntity<?> createProdukt(@RequestBody Produkt produkt, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(); // Fixed
+            authUtil.getAuthenticatedUserOrThrow();
             Produkt createdProdukt = produktService.createProdukt(produkt);
+            ProduktDTO createdProduktDTO = new ProduktDTO(createdProdukt);
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(responseUtil.createSuccessResponse("Utworzono nowy produkt wraz z powiązaniami.", createdProdukt));
+                    .body(responseUtil.createSuccessResponse("Utworzono nowy produkt wraz z powiązaniami.", createdProduktDTO));
         } catch (UserNotAuthenticatedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(responseUtil.createErrorResponse(e.getMessage()));
@@ -126,9 +137,10 @@ public class ProduktController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateProdukt(@PathVariable Integer id, @RequestBody Produkt produktDetails, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(); // Fixed
+            authUtil.getAuthenticatedUserOrThrow();
             Produkt updatedProdukt = produktService.updateProdukt(id, produktDetails);
-            return ResponseEntity.ok(responseUtil.createSuccessResponse("Zaktualizowano produkt.", updatedProdukt));
+            ProduktDTO updatedProduktDTO = new ProduktDTO(updatedProdukt);
+            return ResponseEntity.ok(responseUtil.createSuccessResponse("Zaktualizowano produkt.", updatedProduktDTO));
         } catch (UserNotAuthenticatedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(responseUtil.createErrorResponse(e.getMessage()));
@@ -149,7 +161,7 @@ public class ProduktController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteProdukt(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(); // Fixed
+            authUtil.getAuthenticatedUserOrThrow();
             produktService.deleteProdukt(id);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Usunięto produkt o ID " + id + ".", null));
         } catch (UserNotAuthenticatedException e) {
