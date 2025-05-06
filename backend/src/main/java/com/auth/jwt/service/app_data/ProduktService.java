@@ -3,7 +3,7 @@ package com.auth.jwt.service.app_data;
 import com.auth.jwt.data.entity.app_data.*;
 import com.auth.jwt.data.repository.app_data.*;
 import com.auth.jwt.exception.ResourceNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -75,7 +75,7 @@ public class ProduktService {
         return produktRepository.findById(id);
     }
 
-    @Transactional
+    @Transactional("appDataTransactionManager")
     public Produkt createProdukt(Produkt produkt) {
         if (produktRepository.findByNazwa(produkt.getNazwa()).isPresent()) {
             throw new IllegalArgumentException("Produkt o nazwie '" + produkt.getNazwa() + "' już istnieje.");
@@ -146,7 +146,7 @@ public class ProduktService {
         return savedProdukt;
     }
 
-    @Transactional
+    @Transactional("appDataTransactionManager")
     public Produkt updateProdukt(Integer id, Produkt produktDetails) {
         Produkt produkt = produktRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony."));
@@ -204,7 +204,7 @@ public class ProduktService {
         return produktRepository.save(produkt);
     }
 
-    @Transactional
+    @Transactional("appDataTransactionManager")
     public void deleteProdukt(Integer id) {
         if (!produktRepository.existsById(id)) {
             throw new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony.");
