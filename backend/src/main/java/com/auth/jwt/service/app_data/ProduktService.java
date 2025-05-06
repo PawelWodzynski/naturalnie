@@ -163,8 +163,9 @@ public class ProduktService {
                     if (existingSkladnik.isPresent()) {
                         managedSkladniki.add(existingSkladnik.get());
                     } else {
-                        // Assuming SkladnikService.createSkladnik saves and returns the managed Skladnik
-                        managedSkladniki.add(skladnikService.createSkladnik(new Skladnik(skladnikDetails.getNazwa())));
+                        Skladnik newSkladnik = new Skladnik();
+                        newSkladnik.setNazwa(skladnikDetails.getNazwa());
+                        managedSkladniki.add(skladnikService.createSkladnik(newSkladnik));
                     }
                 }
             }
@@ -271,7 +272,11 @@ public class ProduktService {
                 produkt.setKodTowaru(kodTowaruRepository.findById(inputKt.getId()).orElse(null)); // Or throw
             } else if (inputKt.getKod() != null) {
                 produkt.setKodTowaru(kodTowaruRepository.findByKod(inputKt.getKod())
-                    .orElseGet(() -> kodTowaruRepository.save(new KodTowaru(inputKt.getKod()))));
+                    .orElseGet(() -> {
+                        KodTowaru newKt = new KodTowaru();
+                        newKt.setKod(inputKt.getKod());
+                        return kodTowaruRepository.save(newKt);
+                    }));
             }
         } else {
             produkt.setKodTowaru(null);
@@ -283,7 +288,11 @@ public class ProduktService {
                 produkt.setKodEan(kodEanRepository.findById(inputKe.getId()).orElse(null));
             } else if (inputKe.getKod() != null) {
                 produkt.setKodEan(kodEanRepository.findByKod(inputKe.getKod())
-                    .orElseGet(() -> kodEanRepository.save(new KodEan(inputKe.getKod()))));
+                    .orElseGet(() -> {
+                        KodEan newKe = new KodEan();
+                        newKe.setKod(inputKe.getKod());
+                        return kodEanRepository.save(newKe);
+                    }));
             }
         } else {
             produkt.setKodEan(null);
@@ -295,7 +304,11 @@ public class ProduktService {
                 produkt.setIdentyfikator(identyfikatorRepository.findById(inputIdf.getId()).orElse(null));
             } else if (inputIdf.getWartosc() != null) {
                 produkt.setIdentyfikator(identyfikatorRepository.findByWartosc(inputIdf.getWartosc())
-                    .orElseGet(() -> identyfikatorRepository.save(new Identyfikator(inputIdf.getWartosc()))));
+                    .orElseGet(() -> {
+                        Identyfikator newIdf = new Identyfikator();
+                        newIdf.setWartosc(inputIdf.getWartosc());
+                        return identyfikatorRepository.save(newIdf);
+                    }));
             }
         } else {
             produkt.setIdentyfikator(null);
@@ -309,8 +322,10 @@ public class ProduktService {
                     updatedSkladniki.add(skladnikRepository.findById(skladnikDetail.getId())
                         .orElseThrow(() -> new ResourceNotFoundException("Skladnik not found with ID: " + skladnikDetail.getId())));
                 } else if (skladnikDetail.getNazwa() != null) {
+                     Skladnik newSkladnik = new Skladnik();
+                     newSkladnik.setNazwa(skladnikDetail.getNazwa());
                     updatedSkladniki.add(skladnikRepository.findByNazwa(skladnikDetail.getNazwa())
-                        .orElseGet(() -> skladnikService.createSkladnik(new Skladnik(skladnikDetail.getNazwa()))));
+                        .orElseGet(() -> skladnikService.createSkladnik(newSkladnik)));
                 }
             }
         }
@@ -318,7 +333,6 @@ public class ProduktService {
         produkt.getSkladnikiEntities().addAll(updatedSkladniki);
 
         // Update Zdjecia
-        // First, remove zdjecia that are no longer in the list (if orphanRemoval=true is not enough or for more control)
         List<Integer> newImageIds = new ArrayList<>();
         if (produktDetails.getZdjeciaEntities() != null) {
             newImageIds = produktDetails.getZdjeciaEntities().stream()
@@ -326,9 +340,7 @@ public class ProduktService {
                                        .filter(java.util.Objects::nonNull)
                                        .collect(Collectors.toList());
         }
-        // Remove old images not present in the new list
-        // zdjecieRepository.deleteByProduktIdAndIdNotIn(produkt.getId(), newImageIds); // If newImageIds can be empty, this might delete all.
-        // A safer approach: fetch current, compare, delete.
+        
         List<Zdjecie> existingZdjecia = zdjecieRepository.findByProduktId(produkt.getId());
         List<Zdjecie> zdjeciaToRemove = existingZdjecia.stream()
             .filter(ez -> !newImageIds.contains(ez.getId()))
@@ -336,30 +348,26 @@ public class ProduktService {
         zdjecieRepository.deleteAll(zdjeciaToRemove);
         produkt.getZdjeciaEntities().removeIf(z -> zdjeciaToRemove.stream().anyMatch(r -> r.getId().equals(z.getId())));
 
-        // Add or update images
         if (produktDetails.getZdjeciaEntities() != null) {
             for (Zdjecie zdjecieDetail : produktDetails.getZdjeciaEntities()) {
-                if (zdjecieDetail.getId() != null) { // Existing image, potentially update URL/Opis
+                if (zdjecieDetail.getId() != null) { 
                     Zdjecie existingZdjecie = zdjecieRepository.findById(zdjecieDetail.getId()).orElse(null);
                     if (existingZdjecie != null && existingZdjecie.getProdukt().getId().equals(produkt.getId())) {
                         if (zdjecieDetail.getUrl() != null) existingZdjecie.setUrl(zdjecieDetail.getUrl());
                         if (zdjecieDetail.getOpis() != null) existingZdjecie.setOpis(zdjecieDetail.getOpis());
-                        // No need to add to produkt.getZdjeciaEntities() if it's already there and managed by JPA
-                    } // else: trying to assign image from another product or non-existent, handle error or ignore
-                } else { // New image
+                    }
+                } else { 
                     Zdjecie newZdjecie = new Zdjecie();
                     newZdjecie.setUrl(zdjecieDetail.getUrl());
                     newZdjecie.setOpis(zdjecieDetail.getOpis());
                     newZdjecie.setProdukt(produkt);
-                    produkt.getZdjeciaEntities().add(newZdjecie); // Add to collection for cascade save
+                    produkt.getZdjeciaEntities().add(newZdjecie); 
                 }
             }
         }
 
-        // First save for relations
         Produkt savedProdukt = produktRepository.save(produkt);
 
-        // Update JSON fields
         try {
             List<Integer> finalSkladnikiIds = savedProdukt.getSkladnikiEntities().stream().map(Skladnik::getId).collect(Collectors.toList());
             savedProdukt.setSkladnikiJson(objectMapper.writeValueAsString(finalSkladnikiIds));
@@ -370,7 +378,6 @@ public class ProduktService {
             throw new RuntimeException("Error serializing IDs to JSON during update", e);
         }
 
-        // Second save for JSON fields
         return produktRepository.save(savedProdukt);
     }
 
@@ -379,11 +386,7 @@ public class ProduktService {
     public void deleteProdukt(Integer id) {
         Produkt produkt = produktRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony."));
-        // Explicitly delete related Zdjecia if cascade isn't fully trusted or for specific logic
-        // List<Zdjecie> zdjeciaToDelete = zdjecieRepository.findByProduktId(id);
-        // zdjecieRepository.deleteAll(zdjeciaToDelete);
-        produktRepository.delete(produkt); // Cascade should handle Zdjecia due to orphanRemoval=true
-                                        // and Produkt_Skladnik join table entries
+        produktRepository.delete(produkt); 
     }
 }
 
