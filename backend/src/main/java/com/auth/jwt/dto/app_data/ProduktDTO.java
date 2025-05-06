@@ -113,13 +113,13 @@ public class ProduktDTO {
             this.identyfikatorWartosc = produkt.getIdentyfikator().getWartosc();
         }
 
-        if (produkt.getSkladniki() != null) {
-            this.skladnikiIds = produkt.getSkladniki().stream()
+        if (produkt.getSkladnikiEntities() != null) {
+            this.skladnikiIds = produkt.getSkladnikiEntities().stream()
                                      .map(Skladnik::getId)
                                      .collect(Collectors.toList());
         }
-        if (produkt.getZdjecia() != null) {
-            this.zdjeciaIds = produkt.getZdjecia().stream()
+        if (produkt.getZdjeciaEntities() != null) {
+            this.zdjeciaIds = produkt.getZdjeciaEntities().stream()
                                    .map(Zdjecie::getId)
                                    .collect(Collectors.toList());
         }
