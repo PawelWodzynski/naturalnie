@@ -32,7 +32,7 @@ public class ProduktService {
     private final IdentyfikatorRepository identyfikatorRepository;
     private final SkladnikRepository skladnikRepository;
     private final ZdjecieRepository zdjecieRepository;
-    private final SkladnikService skladnikService;
+    private final SkladnikService skladnikService; // Assuming SkladnikService has a createSkladnik method
     private final ObjectMapper objectMapper; // For JSON serialization
 
     @Autowired
@@ -83,12 +83,10 @@ public class ProduktService {
     @Transactional("appDataTransactionManager")
     public Produkt createProdukt(Produkt produkt) {
         if (produktRepository.findByNazwa(produkt.getNazwa()).isPresent()) {
-            throw new IllegalArgumentException("Produkt o nazwie '" + produkt.getNazwa() + "' już istnieje.");
+            throw new IllegalArgumentException("Produkt o nazwie '" + produkt.getNazwa() + "' ju	 istnieje.");
         }
 
-        // Handle related entities (KodTowaru, KodEan, Identyfikator, Skladniki, Zdjecia)
-        // This logic remains largely the same for managing the actual entities and their relationships
-
+        // Handle simple one-to-one relations (KodTowaru, KodEan, Identyfikator)
         // KodTowaru
         if (produkt.getKodTowaru() != null) {
             KodTowaru inputKt = produkt.getKodTowaru();
@@ -100,11 +98,11 @@ public class ProduktService {
                 if (existingKt.isPresent()) {
                     produkt.setKodTowaru(existingKt.get());
                 } else {
-                    inputKt.setId(null);
+                    inputKt.setId(null); // Ensure it's treated as new
                     produkt.setKodTowaru(kodTowaruRepository.save(inputKt));
                 }
             } else {
-                 produkt.setKodTowaru(null);
+                 produkt.setKodTowaru(null); // Or throw error if kod is mandatory for new KodTowaru
             }
         } else {
             produkt.setKodTowaru(null);
@@ -121,11 +119,11 @@ public class ProduktService {
                 if (existingKe.isPresent()) {
                     produkt.setKodEan(existingKe.get());
                 } else {
-                    inputKe.setId(null);
+                    inputKe.setId(null); // Ensure it's treated as new
                     produkt.setKodEan(kodEanRepository.save(inputKe));
                 }
             } else {
-                produkt.setKodEan(null);
+                produkt.setKodEan(null); // Or throw error if kod is mandatory
             }
         } else {
             produkt.setKodEan(null);
@@ -142,17 +140,17 @@ public class ProduktService {
                 if (existingIdf.isPresent()) {
                     produkt.setIdentyfikator(existingIdf.get());
                 } else {
-                    inputIdf.setId(null);
+                    inputIdf.setId(null); // Ensure it's treated as new
                     produkt.setIdentyfikator(identyfikatorRepository.save(inputIdf));
                 }
             } else {
-                produkt.setIdentyfikator(null);
+                produkt.setIdentyfikator(null); // Or throw error if wartosc is mandatory
             }
         } else {
             produkt.setIdentyfikator(null);
         }
-
-        // Skladniki - manage entities and prepare IDs for JSON
+        
+        // Handle SkladnikiEntities
         Set<Skladnik> managedSkladniki = new HashSet<>();
         if (produkt.getSkladnikiEntities() != null && !produkt.getSkladnikiEntities().isEmpty()) {
             for (Skladnik skladnikDetails : produkt.getSkladnikiEntities()) {
@@ -165,87 +163,50 @@ public class ProduktService {
                     if (existingSkladnik.isPresent()) {
                         managedSkladniki.add(existingSkladnik.get());
                     } else {
-                        managedSkladniki.add(skladnikService.createSkladnik(skladnikDetails));
+                        // Assuming SkladnikService.createSkladnik saves and returns the managed Skladnik
+                        managedSkladniki.add(skladnikService.createSkladnik(new Skladnik(skladnikDetails.getNazwa())));
                     }
                 }
             }
         }
-        produkt.setSkladnikiEntities(managedSkladniki); // Set the managed entities for @ManyToMany relationship
-        // Serialize Skladnik IDs to JSON
-        try {
-            List<Integer> skladnikiIds = managedSkladniki.stream().map(Skladnik::getId).collect(Collectors.toList());
-            produkt.setSkladnikiJson(objectMapper.writeValueAsString(skladnikiIds));
-        } catch (JsonProcessingException e) {
-            // Handle exception, e.g., log it or throw a custom exception
-            throw new RuntimeException("Error serializing Skladnik IDs to JSON", e);
-        }
+        produkt.setSkladnikiEntities(managedSkladniki);
 
-        // Zdjecia - manage entities and prepare IDs for JSON
+        // Handle ZdjeciaEntities
         List<Zdjecie> processedZdjecia = new ArrayList<>();
         if (produkt.getZdjeciaEntities() != null && !produkt.getZdjeciaEntities().isEmpty()) {
-            for (Zdjecie zdjecie : produkt.getZdjeciaEntities()) {
-                zdjecie.setId(null); 
-                zdjecie.setProdukt(produkt); 
-                processedZdjecia.add(zdjecie); 
+            for (Zdjecie zdjecieInput : produkt.getZdjeciaEntities()) {
+                Zdjecie newZdjecie = new Zdjecie();
+                newZdjecie.setUrl(zdjecieInput.getUrl());
+                newZdjecie.setOpis(zdjecieInput.getOpis());
+                newZdjecie.setProdukt(produkt); // Link to the current Produkt instance
+                newZdjecie.setId(null); // Ensure it's treated as new
+                processedZdjecia.add(newZdjecie);
             }
         }
-        produkt.setZdjeciaEntities(processedZdjecia); // Set the processed entities for @OneToMany relationship
-        // Save Produkt first to get its ID for Zdjecia, if Zdjecia are saved separately or if cascade is not enough
-        // However, with CascadeType.ALL, saving Produkt should save ZdjeciaEntities.
-        // We need their IDs after they are potentially saved by cascade.
+        produkt.setZdjeciaEntities(processedZdjecia);
 
-        // Save the produkt entity (this will also cascade save ZdjeciaEntities and update Skladniki join table)
+        // First save: Persist Produkt and cascade save ZdjeciaEntities, manage SkladnikiEntities join table
         Produkt savedProdukt = produktRepository.save(produkt);
 
-        // Now that ZdjeciaEntities are saved (either by cascade or if we saved them explicitly after Produkt),
-        // we can get their IDs and update zdjeciaJson.
+        // Populate JSON fields based on the saved (and now ID-populated) entities
         try {
-            List<Integer> zdjeciaIds = savedProdukt.getZdjeciaEntities().stream()
-                                                 .map(Zdjecie::getId)
-                                                 .collect(Collectors.toList());
-            savedProdukt.setZdjeciaJson(objectMapper.writeValueAsString(zdjeciaIds));
-            // We need to save the Produkt again to persist the zdjeciaJson field
-            // This might cause issues if not handled carefully within the transaction.
-            // A better approach might be to save Zdjecia first if they don't depend on Produkt ID from this save operation,
-            // or to do this in two steps if necessary.
-            // For now, let's assume the cascade saves Zdjecia and gives them IDs, then we update and save again.
-            // This is not ideal. Let's refine.
+            List<Integer> finalSkladnikiIds = savedProdukt.getSkladnikiEntities().stream()
+                                                        .map(Skladnik::getId)
+                                                        .collect(Collectors.toList());
+            savedProdukt.setSkladnikiJson(objectMapper.writeValueAsString(finalSkladnikiIds));
+
+            List<Integer> finalZdjeciaIds = savedProdukt.getZdjeciaEntities().stream()
+                                                      .map(Zdjecie::getId)
+                                                      .collect(Collectors.toList());
+            savedProdukt.setZdjeciaJson(objectMapper.writeValueAsString(finalZdjeciaIds));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error serializing Zdjecie IDs to JSON", e);
+            // Log the error and consider how to handle it - rethrowing as RuntimeException for now
+            // logger.error("Error serializing Skladnik/Zdjecie IDs to JSON for Produkt ID: {}", savedProdukt.getId(), e);
+            throw new RuntimeException("Error serializing Skladnik/Zdjecie IDs to JSON after save", e);
         }
         
-        // Refined approach for Zdjecia and Skladniki JSON fields:
-        // 1. Prepare Skladnik entities and get their IDs.
-        // 2. Prepare Zdjecie entities (set produkt, ID to null).
-        // 3. Set SkladnikiJson based on prepared Skladnik IDs.
-        // 4. Save Produkt (this will save Produkt, cascade save Zdjecia, update Skladniki join table).
-        // 5. After Produkt is saved, Zdjecia will have IDs. Get these IDs and set ZdjeciaJson.
-        // 6. Save Produkt again to update ZdjeciaJson.
-
-        // Let's re-do the JSON part more cleanly:
-
-        // Skladniki JSON (already done before initial save)
-
-        // Zdjecia JSON (needs to be done AFTER zdjecia are saved and have IDs)
-        // The Produkt entity is saved once. The Zdjecia are cascaded. After the save, they have IDs.
-        // We then update the JSON field and save the Produkt again.
-        
-        // Initial save of Produkt and cascaded entities
-        Produkt tempSavedProdukt = produktRepository.save(produkt);
-
-        // Now, populate JSON fields based on the saved entities
-        try {
-            List<Integer> finalSkladnikiIds = tempSavedProdukt.getSkladnikiEntities().stream().map(Skladnik::getId).collect(Collectors.toList());
-            tempSavedProdukt.setSkladnikiJson(objectMapper.writeValueAsString(finalSkladnikiIds));
-
-            List<Integer> finalZdjeciaIds = tempSavedProdukt.getZdjeciaEntities().stream().map(Zdjecie::getId).collect(Collectors.toList());
-            tempSavedProdukt.setZdjeciaJson(objectMapper.writeValueAsString(finalZdjeciaIds));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error serializing IDs to JSON after save", e);
-        }
-        
-        // Final save to persist the JSON string fields
-        return produktRepository.save(tempSavedProdukt);
+        // Second save: Persist the zdjeciaJson and skladnikiJson string fields
+        return produktRepository.save(savedProdukt);
     }
 
     @Transactional("appDataTransactionManager")
@@ -253,93 +214,176 @@ public class ProduktService {
         Produkt produkt = produktRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony."));
 
-        // Update basic fields (nazwa, waga, cena, flags, opis etc.)
+        // Update basic fields
         if (produktDetails.getNazwa() != null && !produktDetails.getNazwa().equals(produkt.getNazwa())) {
             produktRepository.findByNazwa(produktDetails.getNazwa()).ifPresent(existing -> {
                 if (!existing.getId().equals(id)) {
-                    throw new IllegalArgumentException("Produkt o nazwie '" + produktDetails.getNazwa() + "' już istnieje.");
+                    throw new IllegalArgumentException("Produkt o nazwie '" + produktDetails.getNazwa() + "' ju	 istnieje.");
                 }
             });
             produkt.setNazwa(produktDetails.getNazwa());
         }
         if (produktDetails.getWaga() != null) produkt.setWaga(produktDetails.getWaga());
         if (produktDetails.getCena() != null) produkt.setCena(produktDetails.getCena());
-        // ... update other simple fields ...
+        if (produktDetails.getSuperProdukt() != null) produkt.setSuperProdukt(produktDetails.getSuperProdukt());
+        if (produktDetails.getTowarPolecany() != null) produkt.setTowarPolecany(produktDetails.getTowarPolecany());
+        if (produktDetails.getRekomendacjaSprzedawcy() != null) produkt.setRekomendacjaSprzedawcy(produktDetails.getRekomendacjaSprzedawcy());
+        if (produktDetails.getSuperCena() != null) produkt.setSuperCena(produktDetails.getSuperCena());
+        if (produktDetails.getNowosc() != null) produkt.setNowosc(produktDetails.getNowosc());
+        if (produktDetails.getSuperjakosc() != null) produkt.setSuperjakosc(produktDetails.getSuperjakosc());
+        if (produktDetails.getRabat() != null) produkt.setRabat(produktDetails.getRabat());
+        if (produktDetails.getDostepny() != null) produkt.setDostepny(produktDetails.getDostepny());
+        if (produktDetails.getDostepneOdReki() != null) produkt.setDostepneOdReki(produktDetails.getDostepneOdReki());
+        if (produktDetails.getDostepneDo7Dni() != null) produkt.setDostepneDo7Dni(produktDetails.getDostepneDo7Dni());
+        if (produktDetails.getDostepneNaZamowienie() != null) produkt.setDostepneNaZamowienie(produktDetails.getDostepneNaZamowienie());
+        if (produktDetails.getWartoKupic() != null) produkt.setWartoKupic(produktDetails.getWartoKupic());
+        if (produktDetails.getBezglutenowy() != null) produkt.setBezglutenowy(produktDetails.getBezglutenowy());
+        if (produktDetails.getOpis() != null) produkt.setOpis(produktDetails.getOpis());
+        // wyswietlenia and data fields are usually managed by system/DB
 
-        // Update related entities (RodzajProduktu, Jednostka, etc. - by ID)
-        // ... (logic for updating these by ID remains similar to create) ...
+        // Update simple relations by ID
+        if (produktDetails.getRodzajProduktu() != null && produktDetails.getRodzajProduktu().getId() != null) {
+            produkt.setRodzajProduktu(rodzajProduktuRepository.findById(produktDetails.getRodzajProduktu().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("RodzajProduktu not found")));
+        }
+        if (produktDetails.getJednostka() != null && produktDetails.getJednostka().getId() != null) {
+            produkt.setJednostka(jednostkaRepository.findById(produktDetails.getJednostka().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Jednostka not found")));
+        }
+        if (produktDetails.getNadKategoria() != null && produktDetails.getNadKategoria().getId() != null) {
+            produkt.setNadKategoria(nadKategoriaRepository.findById(produktDetails.getNadKategoria().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("NadKategoria not found")));
+        }
+        if (produktDetails.getOpakowanie() != null && produktDetails.getOpakowanie().getId() != null) {
+            produkt.setOpakowanie(opakowanieRepository.findById(produktDetails.getOpakowanie().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Opakowanie not found")));
+        }
+        if (produktDetails.getStawkaVat() != null && produktDetails.getStawkaVat().getId() != null) {
+            produkt.setStawkaVat(stawkaVatRepository.findById(produktDetails.getStawkaVat().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("StawkaVat not found")));
+        }
 
-        // Update KodTowaru, KodEan, Identyfikator (by ID or by key, or create/update)
-        // ... (logic for these remains similar to create, adapted for update) ...
+        // Update KodTowaru, KodEan, Identyfikator (similar to create, but fetch or create/update)
+        // KodTowaru
+        if (produktDetails.getKodTowaru() != null) {
+            KodTowaru inputKt = produktDetails.getKodTowaru();
+            if (inputKt.getId() != null) {
+                produkt.setKodTowaru(kodTowaruRepository.findById(inputKt.getId()).orElse(null)); // Or throw
+            } else if (inputKt.getKod() != null) {
+                produkt.setKodTowaru(kodTowaruRepository.findByKod(inputKt.getKod())
+                    .orElseGet(() -> kodTowaruRepository.save(new KodTowaru(inputKt.getKod()))));
+            }
+        } else {
+            produkt.setKodTowaru(null);
+        }
+        // Similar logic for KodEan and Identyfikator
+        if (produktDetails.getKodEan() != null) {
+            KodEan inputKe = produktDetails.getKodEan();
+            if (inputKe.getId() != null) {
+                produkt.setKodEan(kodEanRepository.findById(inputKe.getId()).orElse(null));
+            } else if (inputKe.getKod() != null) {
+                produkt.setKodEan(kodEanRepository.findByKod(inputKe.getKod())
+                    .orElseGet(() -> kodEanRepository.save(new KodEan(inputKe.getKod()))));
+            }
+        } else {
+            produkt.setKodEan(null);
+        }
+
+        if (produktDetails.getIdentyfikator() != null) {
+            Identyfikator inputIdf = produktDetails.getIdentyfikator();
+            if (inputIdf.getId() != null) {
+                produkt.setIdentyfikator(identyfikatorRepository.findById(inputIdf.getId()).orElse(null));
+            } else if (inputIdf.getWartosc() != null) {
+                produkt.setIdentyfikator(identyfikatorRepository.findByWartosc(inputIdf.getWartosc())
+                    .orElseGet(() -> identyfikatorRepository.save(new Identyfikator(inputIdf.getWartosc()))));
+            }
+        } else {
+            produkt.setIdentyfikator(null);
+        }
 
         // Update Skladniki
-        Set<Skladnik> updatedManagedSkladniki = new HashSet<>();
-        if (produktDetails.getSkladnikiEntities() != null) { // Assuming input DTO/details provide Skladnik entities or IDs
+        Set<Skladnik> updatedSkladniki = new HashSet<>();
+        if (produktDetails.getSkladnikiEntities() != null) {
             for (Skladnik skladnikDetail : produktDetails.getSkladnikiEntities()) {
                 if (skladnikDetail.getId() != null) {
-                    updatedManagedSkladniki.add(skladnikRepository.findById(skladnikDetail.getId())
+                    updatedSkladniki.add(skladnikRepository.findById(skladnikDetail.getId())
                         .orElseThrow(() -> new ResourceNotFoundException("Skladnik not found with ID: " + skladnikDetail.getId())));
                 } else if (skladnikDetail.getNazwa() != null) {
-                     Optional<Skladnik> existingSkladnik = skladnikRepository.findByNazwa(skladnikDetail.getNazwa());
-                    if (existingSkladnik.isPresent()) {
-                        updatedManagedSkladniki.add(existingSkladnik.get());
-                    } else {
-                        updatedManagedSkladniki.add(skladnikService.createSkladnik(skladnikDetail));
-                    }
+                    updatedSkladniki.add(skladnikRepository.findByNazwa(skladnikDetail.getNazwa())
+                        .orElseGet(() -> skladnikService.createSkladnik(new Skladnik(skladnikDetail.getNazwa()))));
                 }
             }
         }
         produkt.getSkladnikiEntities().clear();
-        produkt.getSkladnikiEntities().addAll(updatedManagedSkladniki);
-        try {
-            List<Integer> skladnikiIds = produkt.getSkladnikiEntities().stream().map(Skladnik::getId).collect(Collectors.toList());
-            produkt.setSkladnikiJson(objectMapper.writeValueAsString(skladnikiIds));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error serializing Skladnik IDs to JSON during update", e);
-        }
+        produkt.getSkladnikiEntities().addAll(updatedSkladniki);
 
         // Update Zdjecia
-        // Clear existing zdjeciaEntities and repopulate based on produktDetails
-        // This is a simple clear and add; a more complex diff and update might be needed for performance
-        produkt.getZdjeciaEntities().clear();
-        // Must remove from repository too if orphanRemoval=true is not enough or if they are not deleted by cascade
-        zdjecieRepository.deleteByProduktId(produkt.getId()); // Custom method needed in ZdjecieRepository
+        // First, remove zdjecia that are no longer in the list (if orphanRemoval=true is not enough or for more control)
+        List<Integer> newImageIds = new ArrayList<>();
+        if (produktDetails.getZdjeciaEntities() != null) {
+            newImageIds = produktDetails.getZdjeciaEntities().stream()
+                                       .map(Zdjecie::getId)
+                                       .filter(java.util.Objects::nonNull)
+                                       .collect(Collectors.toList());
+        }
+        // Remove old images not present in the new list
+        // zdjecieRepository.deleteByProduktIdAndIdNotIn(produkt.getId(), newImageIds); // If newImageIds can be empty, this might delete all.
+        // A safer approach: fetch current, compare, delete.
+        List<Zdjecie> existingZdjecia = zdjecieRepository.findByProduktId(produkt.getId());
+        List<Zdjecie> zdjeciaToRemove = existingZdjecia.stream()
+            .filter(ez -> !newImageIds.contains(ez.getId()))
+            .collect(Collectors.toList());
+        zdjecieRepository.deleteAll(zdjeciaToRemove);
+        produkt.getZdjeciaEntities().removeIf(z -> zdjeciaToRemove.stream().anyMatch(r -> r.getId().equals(z.getId())));
 
-        List<Zdjecie> newZdjeciaEntities = new ArrayList<>();
+        // Add or update images
         if (produktDetails.getZdjeciaEntities() != null) {
             for (Zdjecie zdjecieDetail : produktDetails.getZdjeciaEntities()) {
-                zdjecieDetail.setId(null); // Treat as new for simplicity in update
-                zdjecieDetail.setProdukt(produkt);
-                newZdjeciaEntities.add(zdjecieDetail); // Add to list, will be cascaded
+                if (zdjecieDetail.getId() != null) { // Existing image, potentially update URL/Opis
+                    Zdjecie existingZdjecie = zdjecieRepository.findById(zdjecieDetail.getId()).orElse(null);
+                    if (existingZdjecie != null && existingZdjecie.getProdukt().getId().equals(produkt.getId())) {
+                        if (zdjecieDetail.getUrl() != null) existingZdjecie.setUrl(zdjecieDetail.getUrl());
+                        if (zdjecieDetail.getOpis() != null) existingZdjecie.setOpis(zdjecieDetail.getOpis());
+                        // No need to add to produkt.getZdjeciaEntities() if it's already there and managed by JPA
+                    } // else: trying to assign image from another product or non-existent, handle error or ignore
+                } else { // New image
+                    Zdjecie newZdjecie = new Zdjecie();
+                    newZdjecie.setUrl(zdjecieDetail.getUrl());
+                    newZdjecie.setOpis(zdjecieDetail.getOpis());
+                    newZdjecie.setProdukt(produkt);
+                    produkt.getZdjeciaEntities().add(newZdjecie); // Add to collection for cascade save
+                }
             }
         }
-        produkt.setZdjeciaEntities(newZdjeciaEntities);
-        // The ZdjeciaEntities will be saved by cascade when 'produkt' is saved.
-        // After saving, we can update the zdjeciaJson field.
 
-        Produkt tempUpdatedProdukt = produktRepository.save(produkt);
+        // First save for relations
+        Produkt savedProdukt = produktRepository.save(produkt);
 
-        // Update JSON fields after save ensures IDs are available
+        // Update JSON fields
         try {
-            List<Integer> finalSkladnikiIds = tempUpdatedProdukt.getSkladnikiEntities().stream().map(Skladnik::getId).collect(Collectors.toList());
-            tempUpdatedProdukt.setSkladnikiJson(objectMapper.writeValueAsString(finalSkladnikiIds));
+            List<Integer> finalSkladnikiIds = savedProdukt.getSkladnikiEntities().stream().map(Skladnik::getId).collect(Collectors.toList());
+            savedProdukt.setSkladnikiJson(objectMapper.writeValueAsString(finalSkladnikiIds));
 
-            List<Integer> finalZdjeciaIds = tempUpdatedProdukt.getZdjeciaEntities().stream().map(Zdjecie::getId).collect(Collectors.toList());
-            tempUpdatedProdukt.setZdjeciaJson(objectMapper.writeValueAsString(finalZdjeciaIds));
+            List<Integer> finalZdjeciaIds = savedProdukt.getZdjeciaEntities().stream().map(Zdjecie::getId).collect(Collectors.toList());
+            savedProdukt.setZdjeciaJson(objectMapper.writeValueAsString(finalZdjeciaIds));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error serializing IDs to JSON after update save", e);
+            throw new RuntimeException("Error serializing IDs to JSON during update", e);
         }
 
-        return produktRepository.save(tempUpdatedProdukt);
+        // Second save for JSON fields
+        return produktRepository.save(savedProdukt);
     }
+
 
     @Transactional("appDataTransactionManager")
     public void deleteProdukt(Integer id) {
         Produkt produkt = produktRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony."));
-        // Zdjecia are deleted by cascade due to orphanRemoval=true and CascadeType.ALL
-        // Skladniki join table entries are handled by JPA for @ManyToMany
-        produktRepository.delete(produkt);
+                .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony."));
+        // Explicitly delete related Zdjecia if cascade isn't fully trusted or for specific logic
+        // List<Zdjecie> zdjeciaToDelete = zdjecieRepository.findByProduktId(id);
+        // zdjecieRepository.deleteAll(zdjeciaToDelete);
+        produktRepository.delete(produkt); // Cascade should handle Zdjecia due to orphanRemoval=true
+                                        // and Produkt_Skladnik join table entries
     }
 }
 
