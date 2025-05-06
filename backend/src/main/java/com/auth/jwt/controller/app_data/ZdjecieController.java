@@ -31,7 +31,7 @@ public class ZdjecieController {
     @GetMapping
     public ResponseEntity<?> getAllZdjecia(@RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             List<Zdjecie> zdjecia = zdjecieService.getAllZdjecia();
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano listę zdjęć.", zdjecia));
         } catch (UserNotAuthenticatedException e) {
@@ -47,7 +47,7 @@ public class ZdjecieController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getZdjecieById(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Zdjecie zdjecie = zdjecieService.getZdjecieById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Zdjecie o ID " + id + " nie znalezione."));
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano zdjęcie.", zdjecie));
@@ -67,7 +67,7 @@ public class ZdjecieController {
     @GetMapping("/produkt/{produktId}")
     public ResponseEntity<?> getZdjeciaByProduktId(@PathVariable Integer produktId, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             List<Zdjecie> zdjecia = zdjecieService.getZdjeciaByProduktId(produktId);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano zdjęcia dla produktu o ID " + produktId + ".", zdjecia));
         } catch (UserNotAuthenticatedException e) {
@@ -83,7 +83,7 @@ public class ZdjecieController {
     @PostMapping
     public ResponseEntity<?> createZdjecie(@RequestBody Zdjecie zdjecie, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             // Ensure Produkt is set for the Zdjecie before creation, or handle it appropriately
             if (zdjecie.getProdukt() == null || zdjecie.getProdukt().getId() == null) {
                 throw new IllegalArgumentException("Produkt ID musi być ustawione dla zdjęcia.");
@@ -107,7 +107,7 @@ public class ZdjecieController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateZdjecie(@PathVariable Integer id, @RequestBody Zdjecie zdjecieDetails, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Zdjecie updatedZdjecie = zdjecieService.updateZdjecie(id, zdjecieDetails);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Zaktualizowano zdjęcie.", updatedZdjecie));
         } catch (UserNotAuthenticatedException e) {
@@ -129,7 +129,7 @@ public class ZdjecieController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteZdjecie(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             zdjecieService.deleteZdjecie(id);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Usunięto zdjęcie o ID " + id + ".", null));
         } catch (UserNotAuthenticatedException e) {

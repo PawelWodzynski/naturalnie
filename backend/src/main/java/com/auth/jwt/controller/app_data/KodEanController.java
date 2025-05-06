@@ -31,7 +31,7 @@ public class KodEanController {
     @GetMapping
     public ResponseEntity<?> getAllKodyEan(@RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             List<KodEan> kodyEan = kodEanService.getAllKodyEan();
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano listę kodów EAN.", kodyEan));
         } catch (UserNotAuthenticatedException e) {
@@ -47,7 +47,7 @@ public class KodEanController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getKodEanById(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             KodEan kodEan = kodEanService.getKodEanById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("KodEan o ID " + id + " nie znaleziony."));
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano kod EAN.", kodEan));
@@ -67,7 +67,7 @@ public class KodEanController {
     @PostMapping
     public ResponseEntity<?> createKodEan(@RequestBody KodEan kodEan, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             KodEan createdKodEan = kodEanService.createKodEan(kodEan);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(responseUtil.createSuccessResponse("Utworzono nowy kod EAN.", createdKodEan));
@@ -87,7 +87,7 @@ public class KodEanController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateKodEan(@PathVariable Integer id, @RequestBody KodEan kodEanDetails, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             KodEan updatedKodEan = kodEanService.updateKodEan(id, kodEanDetails);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Zaktualizowano kod EAN.", updatedKodEan));
         } catch (UserNotAuthenticatedException e) {
@@ -109,7 +109,7 @@ public class KodEanController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteKodEan(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             kodEanService.deleteKodEan(id);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Usunięto kod EAN o ID " + id + ".", null));
         } catch (UserNotAuthenticatedException e) {

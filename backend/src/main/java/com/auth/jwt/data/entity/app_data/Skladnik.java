@@ -2,11 +2,14 @@ package com.auth.jwt.data.entity.app_data;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor; // Added for JPA
+
 import java.util.Set;
 
 @Entity
 @Table(name = "skladnik", schema = "app_data")
 @Data
+@NoArgsConstructor // Added for JPA
 public class Skladnik {
 
     @Id
@@ -20,5 +23,10 @@ public class Skladnik {
     // Relacja ManyToMany z Produkt (właściciel relacji jest w Produkt)
     @ManyToMany(mappedBy = "skladniki")
     private Set<Produkt> produkty;
+
+    // Constructor for creating Skladnik with nazwa
+    public Skladnik(String nazwa) {
+        this.nazwa = nazwa;
+    }
 }
 

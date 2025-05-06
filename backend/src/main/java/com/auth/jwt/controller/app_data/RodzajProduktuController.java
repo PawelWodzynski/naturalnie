@@ -31,7 +31,7 @@ public class RodzajProduktuController {
     @GetMapping
     public ResponseEntity<?> getAllRodzajeProduktow(@RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             List<RodzajProduktu> rodzajeProduktow = rodzajProduktuService.getAllRodzajeProduktow();
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano listę rodzajów produktów.", rodzajeProduktow));
         } catch (UserNotAuthenticatedException e) {
@@ -47,7 +47,7 @@ public class RodzajProduktuController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getRodzajProduktuById(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             RodzajProduktu rodzajProduktu = rodzajProduktuService.getRodzajProduktuById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("RodzajProduktu o ID " + id + " nie znaleziony."));
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano rodzaj produktu.", rodzajProduktu));
@@ -67,7 +67,7 @@ public class RodzajProduktuController {
     @PostMapping
     public ResponseEntity<?> createRodzajProduktu(@RequestBody RodzajProduktu rodzajProduktu, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             RodzajProduktu createdRodzajProduktu = rodzajProduktuService.createRodzajProduktu(rodzajProduktu);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(responseUtil.createSuccessResponse("Utworzono nowy rodzaj produktu.", createdRodzajProduktu));
@@ -87,7 +87,7 @@ public class RodzajProduktuController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateRodzajProduktu(@PathVariable Integer id, @RequestBody RodzajProduktu rodzajProduktuDetails, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             RodzajProduktu updatedRodzajProduktu = rodzajProduktuService.updateRodzajProduktu(id, rodzajProduktuDetails);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Zaktualizowano rodzaj produktu.", updatedRodzajProduktu));
         } catch (UserNotAuthenticatedException e) {
@@ -109,7 +109,7 @@ public class RodzajProduktuController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteRodzajProduktu(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             rodzajProduktuService.deleteRodzajProduktu(id);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Usunięto rodzaj produktu o ID " + id + ".", null));
         } catch (UserNotAuthenticatedException e) {

@@ -32,7 +32,7 @@ public class JednostkaController {
     @GetMapping
     public ResponseEntity<?> getAllJednostki(@RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             List<Jednostka> jednostki = jednostkaService.getAllJednostki();
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano listę jednostek.", jednostki));
         } catch (UserNotAuthenticatedException e) {
@@ -48,7 +48,7 @@ public class JednostkaController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getJednostkaById(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Jednostka jednostka = jednostkaService.getJednostkaById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Jednostka o ID " + id + " nie znaleziona."));
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano jednostkę.", jednostka));
@@ -68,7 +68,7 @@ public class JednostkaController {
     @PostMapping
     public ResponseEntity<?> createJednostka(@RequestBody Jednostka jednostka, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Jednostka createdJednostka = jednostkaService.createJednostka(jednostka);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(responseUtil.createSuccessResponse("Utworzono nową jednostkę.", createdJednostka));
@@ -88,7 +88,7 @@ public class JednostkaController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateJednostka(@PathVariable Integer id, @RequestBody Jednostka jednostkaDetails, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Jednostka updatedJednostka = jednostkaService.updateJednostka(id, jednostkaDetails);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Zaktualizowano jednostkę.", updatedJednostka));
         } catch (UserNotAuthenticatedException e) {
@@ -110,7 +110,7 @@ public class JednostkaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteJednostka(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             jednostkaService.deleteJednostka(id);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Usunięto jednostkę o ID " + id + ".", null));
         } catch (UserNotAuthenticatedException e) {

@@ -31,7 +31,7 @@ public class SkladnikController {
     @GetMapping
     public ResponseEntity<?> getAllSkladniki(@RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             List<Skladnik> skladniki = skladnikService.getAllSkladniki();
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano listę składników.", skladniki));
         } catch (UserNotAuthenticatedException e) {
@@ -47,7 +47,7 @@ public class SkladnikController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getSkladnikById(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Skladnik skladnik = skladnikService.getSkladnikById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Skladnik o ID " + id + " nie znaleziony."));
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano składnik.", skladnik));
@@ -67,7 +67,7 @@ public class SkladnikController {
     @PostMapping
     public ResponseEntity<?> createSkladnik(@RequestBody Skladnik skladnik, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Skladnik createdSkladnik = skladnikService.createSkladnik(skladnik);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(responseUtil.createSuccessResponse("Utworzono nowy składnik.", createdSkladnik));
@@ -87,7 +87,7 @@ public class SkladnikController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateSkladnik(@PathVariable Integer id, @RequestBody Skladnik skladnikDetails, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Skladnik updatedSkladnik = skladnikService.updateSkladnik(id, skladnikDetails);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Zaktualizowano składnik.", updatedSkladnik));
         } catch (UserNotAuthenticatedException e) {
@@ -109,7 +109,7 @@ public class SkladnikController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteSkladnik(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             skladnikService.deleteSkladnik(id);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Usunięto składnik o ID " + id + ".", null));
         } catch (UserNotAuthenticatedException e) {

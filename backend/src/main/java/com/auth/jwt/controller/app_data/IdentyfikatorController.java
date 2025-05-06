@@ -31,7 +31,7 @@ public class IdentyfikatorController {
     @GetMapping
     public ResponseEntity<?> getAllIdentyfikatory(@RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             List<Identyfikator> identyfikatory = identyfikatorService.getAllIdentyfikatory();
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano listę identyfikatorów.", identyfikatory));
         } catch (UserNotAuthenticatedException e) {
@@ -47,7 +47,7 @@ public class IdentyfikatorController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getIdentyfikatorById(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Identyfikator identyfikator = identyfikatorService.getIdentyfikatorById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Identyfikator o ID " + id + " nie znaleziony."));
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano identyfikator.", identyfikator));
@@ -67,7 +67,7 @@ public class IdentyfikatorController {
     @PostMapping
     public ResponseEntity<?> createIdentyfikator(@RequestBody Identyfikator identyfikator, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Identyfikator createdIdentyfikator = identyfikatorService.createIdentyfikator(identyfikator);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(responseUtil.createSuccessResponse("Utworzono nowy identyfikator.", createdIdentyfikator));
@@ -87,7 +87,7 @@ public class IdentyfikatorController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateIdentyfikator(@PathVariable Integer id, @RequestBody Identyfikator identyfikatorDetails, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Identyfikator updatedIdentyfikator = identyfikatorService.updateIdentyfikator(id, identyfikatorDetails);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Zaktualizowano identyfikator.", updatedIdentyfikator));
         } catch (UserNotAuthenticatedException e) {
@@ -109,7 +109,7 @@ public class IdentyfikatorController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteIdentyfikator(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             identyfikatorService.deleteIdentyfikator(id);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Usunięto identyfikator o ID " + id + ".", null));
         } catch (UserNotAuthenticatedException e) {

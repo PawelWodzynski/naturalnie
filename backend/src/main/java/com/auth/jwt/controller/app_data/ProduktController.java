@@ -35,7 +35,7 @@ public class ProduktController {
     @GetMapping
     public ResponseEntity<?> getAllProdukty(@RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             List<Produkt> produkty = produktService.getAllProdukty();
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano listę produktów.", produkty));
         } catch (UserNotAuthenticatedException e) {
@@ -57,7 +57,7 @@ public class ProduktController {
             @RequestParam(required = false) Integer nadKategoriaId,
             @RequestParam(required = false, defaultValue = "id,asc") String[] sort) { // Added sorting
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             
             // Handle sorting
             Sort.Direction direction = Sort.Direction.fromString(sort.length > 1 ? sort[1] : "asc");
@@ -84,7 +84,7 @@ public class ProduktController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getProduktById(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Produkt produkt = produktService.getProduktById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony."));
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano produkt.", produkt));
@@ -105,7 +105,7 @@ public class ProduktController {
     @PostMapping
     public ResponseEntity<?> createProdukt(@RequestBody Produkt produkt, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Produkt createdProdukt = produktService.createProdukt(produkt);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(responseUtil.createSuccessResponse("Utworzono nowy produkt wraz z powiązaniami.", createdProdukt));
@@ -126,7 +126,7 @@ public class ProduktController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateProdukt(@PathVariable Integer id, @RequestBody Produkt produktDetails, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Produkt updatedProdukt = produktService.updateProdukt(id, produktDetails);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Zaktualizowano produkt.", updatedProdukt));
         } catch (UserNotAuthenticatedException e) {
@@ -149,7 +149,7 @@ public class ProduktController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteProdukt(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             produktService.deleteProdukt(id);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Usunięto produkt o ID " + id + ".", null));
         } catch (UserNotAuthenticatedException e) {

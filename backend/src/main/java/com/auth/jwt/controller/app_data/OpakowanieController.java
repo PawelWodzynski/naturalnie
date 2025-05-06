@@ -31,7 +31,7 @@ public class OpakowanieController {
     @GetMapping
     public ResponseEntity<?> getAllOpakowania(@RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             List<Opakowanie> opakowania = opakowanieService.getAllOpakowania();
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano listę opakowań.", opakowania));
         } catch (UserNotAuthenticatedException e) {
@@ -47,7 +47,7 @@ public class OpakowanieController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getOpakowanieById(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Opakowanie opakowanie = opakowanieService.getOpakowanieById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Opakowanie o ID " + id + " nie znalezione."));
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano opakowanie.", opakowanie));
@@ -67,7 +67,7 @@ public class OpakowanieController {
     @PostMapping
     public ResponseEntity<?> createOpakowanie(@RequestBody Opakowanie opakowanie, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Opakowanie createdOpakowanie = opakowanieService.createOpakowanie(opakowanie);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(responseUtil.createSuccessResponse("Utworzono nowe opakowanie.", createdOpakowanie));
@@ -87,7 +87,7 @@ public class OpakowanieController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateOpakowanie(@PathVariable Integer id, @RequestBody Opakowanie opakowanieDetails, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             Opakowanie updatedOpakowanie = opakowanieService.updateOpakowanie(id, opakowanieDetails);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Zaktualizowano opakowanie.", updatedOpakowanie));
         } catch (UserNotAuthenticatedException e) {
@@ -109,7 +109,7 @@ public class OpakowanieController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteOpakowanie(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             opakowanieService.deleteOpakowanie(id);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Usunięto opakowanie o ID " + id + ".", null));
         } catch (UserNotAuthenticatedException e) {

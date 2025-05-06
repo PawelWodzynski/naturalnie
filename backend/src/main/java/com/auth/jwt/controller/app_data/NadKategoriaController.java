@@ -31,7 +31,7 @@ public class NadKategoriaController {
     @GetMapping
     public ResponseEntity<?> getAllNadKategorie(@RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             List<NadKategoria> nadKategorie = nadKategoriaService.getAllNadKategorie();
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano listę nadkategorii.", nadKategorie));
         } catch (UserNotAuthenticatedException e) {
@@ -47,7 +47,7 @@ public class NadKategoriaController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getNadKategoriaById(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             NadKategoria nadKategoria = nadKategoriaService.getNadKategoriaById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("NadKategoria o ID " + id + " nie znaleziona."));
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano nadkategorię.", nadKategoria));
@@ -67,7 +67,7 @@ public class NadKategoriaController {
     @PostMapping
     public ResponseEntity<?> createNadKategoria(@RequestBody NadKategoria nadKategoria, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             NadKategoria createdNadKategoria = nadKategoriaService.createNadKategoria(nadKategoria);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(responseUtil.createSuccessResponse("Utworzono nową nadkategorię.", createdNadKategoria));
@@ -87,7 +87,7 @@ public class NadKategoriaController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateNadKategoria(@PathVariable Integer id, @RequestBody NadKategoria nadKategoriaDetails, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             NadKategoria updatedNadKategoria = nadKategoriaService.updateNadKategoria(id, nadKategoriaDetails);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Zaktualizowano nadkategorię.", updatedNadKategoria));
         } catch (UserNotAuthenticatedException e) {
@@ -109,7 +109,7 @@ public class NadKategoriaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteNadKategoria(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             nadKategoriaService.deleteNadKategoria(id);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Usunięto nadkategorię o ID " + id + ".", null));
         } catch (UserNotAuthenticatedException e) {

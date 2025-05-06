@@ -31,7 +31,7 @@ public class StawkaVatController {
     @GetMapping
     public ResponseEntity<?> getAllStawkiVat(@RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             List<StawkaVat> stawkiVat = stawkaVatService.getAllStawkiVat();
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano listę stawek VAT.", stawkiVat));
         } catch (UserNotAuthenticatedException e) {
@@ -47,7 +47,7 @@ public class StawkaVatController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getStawkaVatById(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             StawkaVat stawkaVat = stawkaVatService.getStawkaVatById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("StawkaVat o ID " + id + " nie znaleziona."));
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano stawkę VAT.", stawkaVat));
@@ -67,7 +67,7 @@ public class StawkaVatController {
     @PostMapping
     public ResponseEntity<?> createStawkaVat(@RequestBody StawkaVat stawkaVat, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             StawkaVat createdStawkaVat = stawkaVatService.createStawkaVat(stawkaVat);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(responseUtil.createSuccessResponse("Utworzono nową stawkę VAT.", createdStawkaVat));
@@ -87,7 +87,7 @@ public class StawkaVatController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateStawkaVat(@PathVariable Integer id, @RequestBody StawkaVat stawkaVatDetails, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             StawkaVat updatedStawkaVat = stawkaVatService.updateStawkaVat(id, stawkaVatDetails);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Zaktualizowano stawkę VAT.", updatedStawkaVat));
         } catch (UserNotAuthenticatedException e) {
@@ -109,7 +109,7 @@ public class StawkaVatController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteStawkaVat(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             stawkaVatService.deleteStawkaVat(id);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Usunięto stawkę VAT o ID " + id + ".", null));
         } catch (UserNotAuthenticatedException e) {

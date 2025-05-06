@@ -31,7 +31,7 @@ public class KodTowaruController {
     @GetMapping
     public ResponseEntity<?> getAllKodyTowarow(@RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             List<KodTowaru> kodyTowarow = kodTowaruService.getAllKodyTowarow();
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano listę kodów towarów.", kodyTowarow));
         } catch (UserNotAuthenticatedException e) {
@@ -47,7 +47,7 @@ public class KodTowaruController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getKodTowaruById(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             KodTowaru kodTowaru = kodTowaruService.getKodTowaruById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("KodTowaru o ID " + id + " nie znaleziony."));
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano kod towaru.", kodTowaru));
@@ -67,7 +67,7 @@ public class KodTowaruController {
     @PostMapping
     public ResponseEntity<?> createKodTowaru(@RequestBody KodTowaru kodTowaru, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             KodTowaru createdKodTowaru = kodTowaruService.createKodTowaru(kodTowaru);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(responseUtil.createSuccessResponse("Utworzono nowy kod towaru.", createdKodTowaru));
@@ -87,7 +87,7 @@ public class KodTowaruController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateKodTowaru(@PathVariable Integer id, @RequestBody KodTowaru kodTowaruDetails, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             KodTowaru updatedKodTowaru = kodTowaruService.updateKodTowaru(id, kodTowaruDetails);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Zaktualizowano kod towaru.", updatedKodTowaru));
         } catch (UserNotAuthenticatedException e) {
@@ -109,7 +109,7 @@ public class KodTowaruController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteKodTowaru(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(token);
+            authUtil.getAuthenticatedUserOrThrow(); // Fixed
             kodTowaruService.deleteKodTowaru(id);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Usunięto kod towaru o ID " + id + ".", null));
         } catch (UserNotAuthenticatedException e) {
