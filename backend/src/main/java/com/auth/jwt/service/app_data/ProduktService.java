@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList; // Added import
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -184,7 +185,7 @@ public class ProduktService {
                 zdjecie.setId(null); // Ensure Zdjecie is treated as new if not already persisted with Produkt
                 return zdjecieRepository.save(zdjecie);
             }).collect(Collectors.toList());
-            savedProdukt.setZdjecia(new HashSet<>(managedZdjecia)); // Produkt entity expects a Set for Zdjecia
+            savedProdukt.setZdjecia(managedZdjecia); // Corrected: Produkt.zdjecia is List<Zdjecie>
         }
 
         return savedProdukt;
@@ -209,7 +210,7 @@ public class ProduktService {
         // ... (other simple field updates)
         produkt.setSuperProdukt(produktDetails.getSuperProdukt());
         produkt.setTowarPolecany(produktDetails.getTowarPolecany());
-        produkt.setRekomedacjaSprzedawcy(produktDetails.getRekomedacjaSprzedawcy());
+        produkt.setRekomendacjaSprzedawcy(produktDetails.getRekomendacjaSprzedawcy()); // Corrected typo
         produkt.setSuperCena(produktDetails.getSuperCena());
         produkt.setNowosc(produktDetails.getNowosc());
         produkt.setSuperjakosc(produktDetails.getSuperjakosc());
@@ -305,19 +306,37 @@ public class ProduktService {
             produkt.getSkladniki().addAll(managedSkladniki);
         }
 
-        // Zdjecia update logic - more complex, might involve deleting old ones not in new list, updating existing, adding new
+        // Zdjecia update logic
         if (produktDetails.getZdjecia() != null) {
-            // Simple approach: remove all old, add all new. Or more sophisticated merge.
-            produkt.getZdjecia().clear(); // Assuming Produkt.zdjecia is managed and will trigger orphan removal or cascade delete if configured
-            zdjecieRepository.deleteByProduktId(produkt.getId()); // Explicit delete if cascade not set up for removal
+            // Remove old images not present in the new list
+            List<Integer> newImageIds = produktDetails.getZdjecia().stream()
+                                схожі.map(Zdjecie::getId)
+                                .filter(imgId -> imgId != null)
+                                .collect(Collectors.toList());
+            if (!newImageIds.isEmpty()) {
+                zdjecieRepository.deleteByProduktIdAndIdNotIn(produkt.getId(), newImageIds);
+            } else {
+                 // If newImageIds is empty, delete all existing images for this product
+                List<Zdjecie> zdjeciaToDelete = zdjecieRepository.findByProduktId(produkt.getId());
+                if (zdjeciaToDelete != null && !zdjeciaToDelete.isEmpty()) {
+                    zdjecieRepository.deleteAll(zdjeciaToDelete);
+                }
+            }
 
-            Set<Zdjecie> newZdjecia = new HashSet<>();
+            List<Zdjecie> newZdjeciaList = new ArrayList<>();
             for (Zdjecie zdjecieDetail : produktDetails.getZdjecia()) {
                 zdjecieDetail.setProdukt(produkt);
-                zdjecieDetail.setId(null); // Treat as new for update
-                newZdjecia.add(zdjecieRepository.save(zdjecieDetail));
+                // If zdjecieDetail has an ID, it might be an existing image to update.
+                // If ID is null, it's a new image.
+                // save() will handle both update and create.
+                newZdjeciaList.add(zdjecieRepository.save(zdjecieDetail));
             }
-            produkt.setZdjecia(newZdjecia);
+            produkt.setZdjecia(newZdjeciaList); // Corrected: Produkt.zdjecia is List<Zdjecie>
+        } else {
+            // If produktDetails.getZdjecia() is null, it might mean no changes or remove all.
+            // For now, let's assume it means no changes to existing images unless explicitly cleared.
+            // If the intent is to remove all images, the list should be empty, not null.
+            // If produktDetails.getZdjecia() is an empty list, the logic above will delete all images.
         }
 
         return produktRepository.save(produkt);
@@ -327,9 +346,12 @@ public class ProduktService {
     public void deleteProdukt(Integer id) {
         Produkt produkt = produktRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony."));
-        // Add logic to handle related entities if necessary, e.g., if cascade delete is not configured
-        // For example, explicitly delete Zdjecia associated with this Produkt
-        // zdjecieRepository.deleteByProduktId(id);
+        // Explicitly delete Zdjecia associated with this Produkt before deleting the Produkt
+        // This is good practice if orphanRemoval=true is not fully relied upon or if specific logic is needed.
+        List<Zdjecie> zdjeciaToDelete = zdjecieRepository.findByProduktId(id);
+        if (zdjeciaToDelete != null && !zdjeciaToDelete.isEmpty()) {
+            zdjecieRepository.deleteAll(zdjeciaToDelete);
+        }
         produktRepository.delete(produkt);
     }
 }
