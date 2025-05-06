@@ -17,6 +17,9 @@ public class Opakowanie {
     @Column(name = "nazwa", nullable = false, length = 100)
     private String nazwa;
 
+    @Column(name = "skrot", length = 50) // Added skrot field
+    private String skrot;
+
     @Column(name = "opis", columnDefinition = "TEXT")
     private String opis;
 

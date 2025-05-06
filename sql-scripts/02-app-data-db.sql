@@ -35,6 +35,7 @@ CREATE TABLE rodzaj_produktu (
 CREATE TABLE opakowanie (
     opakowanie_id INT PRIMARY KEY AUTO_INCREMENT,
     nazwa VARCHAR(100) NOT NULL,
+    skrot VARCHAR(50), -- Added skrot column
     opis TEXT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -160,4 +161,5 @@ VALUES
 (4, 4,'example'),
 (5, 5,'example'),
 (6, 6,'example');
+
 
