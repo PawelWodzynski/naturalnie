@@ -35,18 +35,18 @@ public class Employee {
             inverseJoinColumns = @JoinColumn(name = "role_id")) // Inverse side of the relationship
     private List<Role> roles; // Collection to store roles
 
-    // One-to-one relationship with EmployeeConsent
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    // One-to-one relationship with EmployeeConsent - Changed to EAGER
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "consent_id", referencedColumnName = "consent_id") // Maps to the foreign key column in employees table
     private EmployeeConsent consent;
 
-    // One-to-one relationship with Address (for primary address)
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    // One-to-one relationship with Address (for primary address) - Changed to EAGER
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "primary_address_id", referencedColumnName = "address_id") // Maps to the foreign key column in employees table
     private Address primaryAddress;
 
-    // One-to-one relationship with AlternativeAddress (optional)
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = true) // Added optional=true
+    // One-to-one relationship with AlternativeAddress (optional) - Changed to EAGER
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, optional = true)
     @JoinColumn(name = "alternative_address_id", referencedColumnName = "address_id", nullable = true) // Maps to the foreign key column in employees table, nullable
     private AlternativeAddress alternativeAddress;
 
@@ -174,15 +174,15 @@ public class Employee {
     public String toString() {
         return "Employee{" +
                 "id=" + id +
-                ", userName=\'" + userName + "\\'" +
-                ", password=\'" + "*********" + "\\'" +
-                ", firstName=\'" + firstName + "\\'" +
-                ", lastName=\'" + lastName + "\\'" +
-                ", email=\'" + email + "\\'" +
-                ", roles=" + roles +
-                ", consentId=" + (consent != null ? consent.getConsentId() : null) +
-                ", primaryAddressId=" + (primaryAddress != null ? primaryAddress.getAddressId() : null) +
-                ", alternativeAddressId=" + (alternativeAddress != null ? alternativeAddress.getAddressId() : null) + // Added alternativeAddressId
+                ", userName=\'" + userName + "\\\'" +
+                ", password=\'" + "*********" + "\\\'" +
+                ", firstName=\'" + firstName + "\\\'" +
+                ", lastName=\'" + lastName + "\\\'" +
+                ", email=\'" + email + "\\\'" +
+                ", roles=" + (roles != null ? roles.size() + " roles" : "null") +
+                ", consentId=" + (consent != null ? consent.getConsentId() : "null") +
+                ", primaryAddressId=" + (primaryAddress != null ? primaryAddress.getAddressId() : "null") +
+                ", alternativeAddressId=" + (alternativeAddress != null ? alternativeAddress.getAddressId() : "null") +
                 '}';
     }
 }
