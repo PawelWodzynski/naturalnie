@@ -87,31 +87,31 @@ public class ProduktService {
             produkt.setRodzajProduktu(rodzajProduktuRepository.findById(produkt.getRodzajProduktu().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("RodzajProduktu not found with ID: " + produkt.getRodzajProduktu().getId())));
         } else {
-            produkt.setRodzajProduktu(null); // Or throw error if required
+            produkt.setRodzajProduktu(null); 
         }
         if (produkt.getJednostka() != null && produkt.getJednostka().getId() != null) {
             produkt.setJednostka(jednostkaRepository.findById(produkt.getJednostka().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Jednostka not found with ID: " + produkt.getJednostka().getId())));
         } else {
-            produkt.setJednostka(null); // Or throw error if required
+            produkt.setJednostka(null); 
         }
         if (produkt.getNadKategoria() != null && produkt.getNadKategoria().getId() != null) {
             produkt.setNadKategoria(nadKategoriaRepository.findById(produkt.getNadKategoria().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("NadKategoria not found with ID: " + produkt.getNadKategoria().getId())));
         } else {
-            produkt.setNadKategoria(null); // Or throw error if required
+            produkt.setNadKategoria(null); 
         }
         if (produkt.getOpakowanie() != null && produkt.getOpakowanie().getId() != null) {
             produkt.setOpakowanie(opakowanieRepository.findById(produkt.getOpakowanie().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Opakowanie not found with ID: " + produkt.getOpakowanie().getId())));
         } else {
-            produkt.setOpakowanie(null); // Or throw error if required
+            produkt.setOpakowanie(null); 
         }
         if (produkt.getStawkaVat() != null && produkt.getStawkaVat().getId() != null) {
             produkt.setStawkaVat(stawkaVatRepository.findById(produkt.getStawkaVat().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("StawkaVat not found with ID: " + produkt.getStawkaVat().getId())));
         } else {
-            produkt.setStawkaVat(null); // Or throw error if required
+            produkt.setStawkaVat(null); 
         }
 
         // Handle KodTowaru: find by kod or create new
@@ -121,11 +121,11 @@ public class ProduktService {
                 produkt.setKodTowaru(existingKt.get());
             } else {
                 KodTowaru newKodTowaru = produkt.getKodTowaru();
-                newKodTowaru.setId(null); // Ensure it's treated as new
+                newKodTowaru.setId(null); 
                 produkt.setKodTowaru(kodTowaruRepository.save(newKodTowaru));
             }
         } else {
-            produkt.setKodTowaru(null); // Set to null if not provided or no kod
+            produkt.setKodTowaru(null); 
         }
 
         // Handle KodEan: find by kod or create new
@@ -135,11 +135,11 @@ public class ProduktService {
                 produkt.setKodEan(existingKe.get());
             } else {
                 KodEan newKodEan = produkt.getKodEan();
-                newKodEan.setId(null); // Ensure it's treated as new
+                newKodEan.setId(null); 
                 produkt.setKodEan(kodEanRepository.save(newKodEan));
             }
         } else {
-            produkt.setKodEan(null); // Set to null if not provided or no kod
+            produkt.setKodEan(null); 
         }
 
         // Handle Identyfikator: find by wartosc or create new
@@ -149,11 +149,11 @@ public class ProduktService {
                 produkt.setIdentyfikator(existingId.get());
             } else {
                 Identyfikator newIdentyfikator = produkt.getIdentyfikator();
-                newIdentyfikator.setId(null); // Ensure it's treated as new
+                newIdentyfikator.setId(null); 
                 produkt.setIdentyfikator(identyfikatorRepository.save(newIdentyfikator));
             }
         } else {
-            produkt.setIdentyfikator(null); // Set to null if not provided or no wartosc
+            produkt.setIdentyfikator(null); 
         }
 
         // Handle Skladniki
@@ -168,7 +168,6 @@ public class ProduktService {
                     if (existingSkladnik.isPresent()) {
                         managedSkladniki.add(existingSkladnik.get());
                     } else {
-                        // Pass the Skladnik instance directly to createSkladnik if it's new
                         managedSkladniki.add(skladnikService.createSkladnik(skladnik));
                     }
                 }
@@ -176,18 +175,25 @@ public class ProduktService {
             produkt.setSkladniki(managedSkladniki);
         }
         
-        Produkt savedProdukt = produktRepository.save(produkt);
-
-        // Handle Zdjecia after Produkt is saved
+        // Prepare Zdjecia for cascade save
+        // Ensure Zdjecia are correctly associated with the Produkt instance before saving.
+        // This relies on CascadeType.ALL on Produkt.zdjecia.
         if (produkt.getZdjecia() != null && !produkt.getZdjecia().isEmpty()) {
-            List<Zdjecie> managedZdjecia = produkt.getZdjecia().stream().map(zdjecie -> {
-                zdjecie.setProdukt(savedProdukt); // Link to the saved Produkt
-                zdjecie.setId(null); // Ensure Zdjecie is treated as new if not already persisted with Produkt
-                return zdjecieRepository.save(zdjecie);
-            }).collect(Collectors.toList());
-            savedProdukt.setZdjecia(managedZdjecia); // Corrected: Produkt.zdjecia is List<Zdjecie>
+            List<Zdjecie> processedZdjecia = new ArrayList<>();
+            for (Zdjecie zdjecie : produkt.getZdjecia()) {
+                zdjecie.setId(null); // Ensure it's treated as new
+                zdjecie.setProdukt(produkt); // Set the bi-directional relationship to the 'produkt' instance being saved
+                processedZdjecia.add(zdjecie);
+            }
+            produkt.setZdjecia(processedZdjecia);
+        } else {
+            // If no zdjecia are provided, ensure the list is empty rather than null,
+            // to prevent potential issues with cascading or later operations.
+            produkt.setZdjecia(new ArrayList<>());
         }
-
+        
+        Produkt savedProdukt = produktRepository.save(produkt);
+        
         return savedProdukt;
     }
 
@@ -207,7 +213,6 @@ public class ProduktService {
 
         if (produktDetails.getWaga() != null) produkt.setWaga(produktDetails.getWaga());
         if (produktDetails.getCena() != null) produkt.setCena(produktDetails.getCena());
-        // ... (other simple field updates)
         produkt.setSuperProdukt(produktDetails.getSuperProdukt());
         produkt.setTowarPolecany(produktDetails.getTowarPolecany());
         produkt.setRekomendacjaSprzedawcy(produktDetails.getRekomendacjaSprzedawcy()); // Corrected typo
@@ -223,15 +228,13 @@ public class ProduktService {
         produkt.setBezglutenowy(produktDetails.getBezglutenowy());
         if (produktDetails.getOpis() != null) produkt.setOpis(produktDetails.getOpis());
 
-        // Update logic for related entities - similar careful handling needed as in create
         if (produktDetails.getRodzajProduktu() != null && produktDetails.getRodzajProduktu().getId() != null) {
             produkt.setRodzajProduktu(rodzajProduktuRepository.findById(produktDetails.getRodzajProduktu().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("RodzajProduktu not found")));
         } else if (produktDetails.getRodzajProduktu() != null) {
-             produkt.setRodzajProduktu(null); // Or handle new RodzajProduktu if applicable
+             produkt.setRodzajProduktu(null); 
         }
 
-        // KodTowaru, KodEan, Identyfikator updates
         if (produktDetails.getKodTowaru() != null) {
             if (produktDetails.getKodTowaru().getId() != null) {
                 produkt.setKodTowaru(kodTowaruRepository.findById(produktDetails.getKodTowaru().getId())
@@ -249,7 +252,6 @@ public class ProduktService {
         } else {
             produkt.setKodTowaru(null);
         }
-        // Similar for KodEan and Identyfikator
          if (produktDetails.getKodEan() != null) {
             if (produktDetails.getKodEan().getId() != null) {
                 produkt.setKodEan(kodEanRepository.findById(produktDetails.getKodEan().getId())
@@ -308,15 +310,13 @@ public class ProduktService {
 
         // Zdjecia update logic
         if (produktDetails.getZdjecia() != null) {
-            // Remove old images not present in the new list
             List<Integer> newImageIds = produktDetails.getZdjecia().stream()
                                 .map(Zdjecie::getId)
-                                .filter(java.util.Objects::nonNull) // Ensure Objects is imported or use (imgId -> imgId != null)
+                                .filter(java.util.Objects::nonNull) 
                                 .collect(Collectors.toList());
             if (!newImageIds.isEmpty()) {
                 zdjecieRepository.deleteByProduktIdAndIdNotIn(produkt.getId(), newImageIds);
             } else {
-                 // If newImageIds is empty, delete all existing images for this product
                 List<Zdjecie> zdjeciaToDelete = zdjecieRepository.findByProduktId(produkt.getId());
                 if (zdjeciaToDelete != null && !zdjeciaToDelete.isEmpty()) {
                     zdjecieRepository.deleteAll(zdjeciaToDelete);
@@ -326,17 +326,12 @@ public class ProduktService {
             List<Zdjecie> newZdjeciaList = new ArrayList<>();
             for (Zdjecie zdjecieDetail : produktDetails.getZdjecia()) {
                 zdjecieDetail.setProdukt(produkt);
-                // If zdjecieDetail has an ID, it might be an existing image to update.
-                // If ID is null, it's a new image.
-                // save() will handle both update and create.
                 newZdjeciaList.add(zdjecieRepository.save(zdjecieDetail));
             }
-            produkt.setZdjecia(newZdjeciaList); // Corrected: Produkt.zdjecia is List<Zdjecie>
+            produkt.setZdjecia(newZdjeciaList); 
         } else {
             // If produktDetails.getZdjecia() is null, it might mean no changes or remove all.
             // For now, let's assume it means no changes to existing images unless explicitly cleared.
-            // If the intent is to remove all images, the list should be empty, not null.
-            // If produktDetails.getZdjecia() is an empty list, the logic above will delete all images.
         }
 
         return produktRepository.save(produkt);
@@ -346,8 +341,6 @@ public class ProduktService {
     public void deleteProdukt(Integer id) {
         Produkt produkt = produktRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony."));
-        // Explicitly delete Zdjecia associated with this Produkt before deleting the Produkt
-        // This is good practice if orphanRemoval=true is not fully relied upon or if specific logic is needed.
         List<Zdjecie> zdjeciaToDelete = zdjecieRepository.findByProduktId(id);
         if (zdjeciaToDelete != null && !zdjeciaToDelete.isEmpty()) {
             zdjecieRepository.deleteAll(zdjeciaToDelete);
