@@ -310,8 +310,8 @@ public class ProduktService {
         if (produktDetails.getZdjecia() != null) {
             // Remove old images not present in the new list
             List<Integer> newImageIds = produktDetails.getZdjecia().stream()
-                                схожі.map(Zdjecie::getId)
-                                .filter(imgId -> imgId != null)
+                                .map(Zdjecie::getId)
+                                .filter(java.util.Objects::nonNull) // Ensure Objects is imported or use (imgId -> imgId != null)
                                 .collect(Collectors.toList());
             if (!newImageIds.isEmpty()) {
                 zdjecieRepository.deleteByProduktIdAndIdNotIn(produkt.getId(), newImageIds);
