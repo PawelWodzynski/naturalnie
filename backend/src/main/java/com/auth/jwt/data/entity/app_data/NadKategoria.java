@@ -24,7 +24,7 @@ public class NadKategoria {
     private Integer kolejnosc;
 
     // Relacja OneToMany z RodzajProduktu
-    @OneToMany(mappedBy = "nadKategoria", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "nadKategoria", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<RodzajProduktu> rodzajeProduktow;
 
     // Relacja OneToMany z Produkt (jeśli produkt może należeć bezpośrednio do nadkategorii)
