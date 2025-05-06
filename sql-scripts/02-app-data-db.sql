@@ -10,9 +10,9 @@ CREATE TABLE jednostka (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dodanie podstawowych jednostek
-INSERT INTO jednostka (nazwa, skrot) VALUES 
-    ("sztuka", "szt."),
-    ("opakowanie", "opak.");
+INSERT INTO jednostka (nazwa, skrot) VALUES
+    ('sztuka', 'szt.'),
+    ('opakowanie', 'opak.');
 
 -- Tabela: nad_kategoria
 CREATE TABLE nad_kategoria (
