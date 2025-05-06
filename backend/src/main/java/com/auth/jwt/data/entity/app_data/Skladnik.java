@@ -21,7 +21,7 @@ public class Skladnik {
     private String nazwa;
 
     // Relacja ManyToMany z Produkt (właściciel relacji jest w Produkt)
-    @ManyToMany(mappedBy = "skladniki")
+    @ManyToMany(mappedBy = "skladnikiEntities") // Corrected mappedBy to match field in Produkt entity
     private Set<Produkt> produkty;
 
     // Constructor for creating Skladnik with nazwa
