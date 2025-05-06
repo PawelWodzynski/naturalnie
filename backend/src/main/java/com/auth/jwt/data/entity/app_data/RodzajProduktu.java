@@ -1,5 +1,6 @@
 package com.auth.jwt.data.entity.app_data;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
@@ -23,10 +24,13 @@ public class RodzajProduktu {
     // Relacja ManyToOne z NadKategoria
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nad_kategoria_id")
+    @JsonBackReference("nadkategoria-rodzajeproduktu")
     private NadKategoria nadKategoria;
 
     // Relacja OneToMany z Produkt
     @OneToMany(mappedBy = "rodzajProduktu", cascade = CascadeType.ALL, orphanRemoval = true)
+    // If Produkt also has a @JsonManagedReference to this, consider adding @JsonManagedReference here too.
+    // For now, assuming Produkt might have @JsonBackReference to RodzajProduktu or this side is not serialized from here in a cycle.
     private List<Produkt> produkty;
 }
 

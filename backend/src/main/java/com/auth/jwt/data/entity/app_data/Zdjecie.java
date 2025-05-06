@@ -1,5 +1,6 @@
 package com.auth.jwt.data.entity.app_data;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -25,6 +26,7 @@ public class Zdjecie {
     // Relacja ManyToOne z Produkt
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "produkt_id", nullable = false)
+    @JsonBackReference("produkt-zdjecie")
     private Produkt produkt;
 }
 

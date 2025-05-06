@@ -1,5 +1,7 @@
 package com.auth.jwt.data.entity.app_data;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -32,7 +34,6 @@ public class Produkt {
     @Column(name = "cena", nullable = false, precision = 10, scale = 2)
     private BigDecimal cena;
 
-    // Promotional flags
     @Column(name = "super_produkt", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean superProdukt = false;
 
@@ -54,7 +55,6 @@ public class Produkt {
     @Column(name = "rabat", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean rabat = false;
 
-    // Availability flags
     @Column(name = "dostepny", columnDefinition = "BOOLEAN DEFAULT TRUE")
     private Boolean dostepny = true;
 
@@ -70,19 +70,15 @@ public class Produkt {
     @Column(name = "warto_kupic", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean wartoKupic = false;
 
-    // Gluten-free flag
     @Column(name = "bezglutenowy", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean bezglutenowy = false;
 
-    // Description
     @Column(name = "opis", columnDefinition = "TEXT")
     private String opis;
 
-    // View counter
     @Column(name = "wyswietlenia", columnDefinition = "INT DEFAULT 0")
     private Integer wyswietlenia = 0;
 
-    // Timestamps
     @CreationTimestamp
     @Column(name = "data_dodania", updatable = false)
     private LocalDateTime dataDodania;
@@ -91,9 +87,9 @@ public class Produkt {
     @Column(name = "data_aktualizacji")
     private LocalDateTime dataAktualizacji;
 
-    // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rodzaj_produktu_id")
+    @JsonBackReference("rodzajproduktu-produkt")
     private RodzajProduktu rodzajProduktu;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -102,6 +98,7 @@ public class Produkt {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nad_kategoria_id")
+    @JsonBackReference("nadkategoria-produkt")
     private NadKategoria nadKategoria;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -124,10 +121,9 @@ public class Produkt {
     @JoinColumn(name = "identyfikator_id", referencedColumnName = "identyfikator_id")
     private Identyfikator identyfikator;
 
-    // ManyToMany relationship with Skladnik
     @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
-        name = "produkt_skladnik", // Name of the join table
+        name = "produkt_skladnik",
         schema = "app_data",
         joinColumns = @JoinColumn(name = "produkt_id"),
         inverseJoinColumns = @JoinColumn(name = "skladnik_id")
@@ -136,13 +132,10 @@ public class Produkt {
     @EqualsAndHashCode.Exclude
     private Set<Skladnik> skladniki = new HashSet<>();
 
-    // OneToMany relationship with Zdjecie
     @OneToMany(mappedBy = "produkt", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference("produkt-zdjecie")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<Zdjecie> zdjecia;
-
-    // Note: The 'zdjecia' TEXT column from SQL is omitted as the Zdjecie entity handles images.
-    // Note: The 'skladniki' TEXT column from SQL is replaced by the ManyToMany relationship.
 }
 
