@@ -34,9 +34,8 @@ public class Produkt {
     @Column(name = "cena", nullable = false, precision = 10, scale = 2)
     private BigDecimal cena;
 
-    // This column will store JSON string of Zdjecie IDs
     @Column(name = "zdjecia", columnDefinition = "TEXT")
-    private String zdjeciaJson; 
+    private String zdjeciaJson;
 
     @Column(name = "super_produkt", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean superProdukt = false;
@@ -127,23 +126,24 @@ public class Produkt {
     @JoinColumn(name = "identyfikator_id", referencedColumnName = "identyfikator_id")
     private Identyfikator identyfikator;
 
-    // This column will store JSON string of Skladnik IDs
     @Column(name = "skladniki", columnDefinition = "TEXT")
     private String skladnikiJson;
 
-    // Actual list of Zdjecie entities, linked via zdjecie.produkt_id
-    // This relationship is managed by JPA through the Zdjecie entity's ManyToOne mapping.
     @OneToMany(mappedBy = "produkt", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonManagedReference("produkt-zdjecie") // This is for API response if DTO is not used for this part
+    @JsonManagedReference("produkt-zdjecie")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<Zdjecie> zdjeciaEntities; // Renamed to avoid confusion with zdjeciaJson
+    private List<Zdjecie> zdjeciaEntities;
 
-    // Transient field to hold Skladnik entities for processing, not persisted directly via this field
-    @Transient
-    private Set<Skladnik> skladnikiEntities = new HashSet<>();
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "produkt_skladnik", schema = "app_data",
+            joinColumns = @JoinColumn(name = "produkt_id"),
+            inverseJoinColumns = @JoinColumn(name = "skladnik_id")
+    )
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Skladnik> skladnikiEntities = new HashSet<>(); // Made this a JPA managed ManyToMany field
 
-    // Getter and Setter for zdjeciaEntities (if needed, Lombok @Data handles it)
-    // Getter and Setter for skladnikiEntities (if needed, Lombok @Data handles it)
 }
 
