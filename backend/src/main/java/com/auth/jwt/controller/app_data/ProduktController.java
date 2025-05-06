@@ -7,6 +7,10 @@ import com.auth.jwt.service.app_data.ProduktService;
 import com.auth.jwt.util.AuthUtil;
 import com.auth.jwt.util.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +49,38 @@ public class ProduktController {
         }
     }
 
+    @GetMapping("/paginated")
+    public ResponseEntity<?> getAllProduktyPaginated(
+            @RequestParam(required = true) String token,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(required = false) Integer nadKategoriaId,
+            @RequestParam(required = false, defaultValue = "id,asc") String[] sort) { // Added sorting
+        try {
+            authUtil.getAuthenticatedUserOrThrow(token);
+            
+            // Handle sorting
+            Sort.Direction direction = Sort.Direction.fromString(sort.length > 1 ? sort[1] : "asc");
+            Sort.Order order = new Sort.Order(direction, sort[0]);
+            Pageable pageable = PageRequest.of(page, size, Sort.by(order));
+
+            Page<Produkt> produktyPage = produktService.getAllProduktyPaginated(pageable, nadKategoriaId);
+            return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano paginowaną listę produktów.", produktyPage));
+        } catch (UserNotAuthenticatedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(responseUtil.createErrorResponse(e.getMessage()));
+        } catch (IllegalArgumentException e) { // Catch issues like invalid sort direction
+             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(responseUtil.createErrorResponse("Nieprawidłowe parametry żądania: " + e.getMessage()));
+        } catch (Exception e) {
+            System.err.println("Błąd w endpoincie /api/app-data/produkt/paginated (GET): " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(responseUtil.createErrorResponse("Wystąpił wewnętrzny błąd serwera przy pobieraniu paginowanych produktów."));
+        }
+    }
+
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getProduktById(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
@@ -66,7 +102,6 @@ public class ProduktController {
         }
     }
 
-    // This POST endpoint serves as the composite controller for full product creation
     @PostMapping
     public ResponseEntity<?> createProdukt(@RequestBody Produkt produkt, @RequestParam(required = true) String token) {
         try {
@@ -77,7 +112,7 @@ public class ProduktController {
         } catch (UserNotAuthenticatedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(responseUtil.createErrorResponse(e.getMessage()));
-        } catch (IllegalArgumentException | ResourceNotFoundException e) { // Catch specific exceptions from service
+        } catch (IllegalArgumentException | ResourceNotFoundException e) { 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(responseUtil.createErrorResponse(e.getMessage()));
         } catch (Exception e) {
