@@ -333,17 +333,19 @@ public class ProduktService {
         produkt.getSkladnikiEntities().addAll(updatedSkladniki);
 
         // Update Zdjecia
-        List<Integer> newImageIds = new ArrayList<>();
+        final List<Integer> finalNewImageIds;
         if (produktDetails.getZdjeciaEntities() != null) {
-            newImageIds = produktDetails.getZdjeciaEntities().stream()
+            finalNewImageIds = produktDetails.getZdjeciaEntities().stream()
                                        .map(Zdjecie::getId)
                                        .filter(java.util.Objects::nonNull)
                                        .collect(Collectors.toList());
+        } else {
+            finalNewImageIds = new ArrayList<>(); // Initialize to empty list if null
         }
         
         List<Zdjecie> existingZdjecia = zdjecieRepository.findByProduktId(produkt.getId());
         List<Zdjecie> zdjeciaToRemove = existingZdjecia.stream()
-            .filter(ez -> !newImageIds.contains(ez.getId()))
+            .filter(ez -> !finalNewImageIds.contains(ez.getId())) // Use finalNewImageIds here
             .collect(Collectors.toList());
         zdjecieRepository.deleteAll(zdjeciaToRemove);
         produkt.getZdjeciaEntities().removeIf(z -> zdjeciaToRemove.stream().anyMatch(r -> r.getId().equals(z.getId())));
@@ -351,17 +353,21 @@ public class ProduktService {
         if (produktDetails.getZdjeciaEntities() != null) {
             for (Zdjecie zdjecieDetail : produktDetails.getZdjeciaEntities()) {
                 if (zdjecieDetail.getId() != null) { 
+                    // If ID is present, it's an existing image. We assume it's already linked or handled.
+                    // If you need to update existing images' details (URL, opis), add logic here.
+                    // For now, we only care about linking new images or unlinking old ones.
                     Zdjecie existingZdjecie = zdjecieRepository.findById(zdjecieDetail.getId()).orElse(null);
                     if (existingZdjecie != null && existingZdjecie.getProdukt().getId().equals(produkt.getId())) {
                         if (zdjecieDetail.getUrl() != null) existingZdjecie.setUrl(zdjecieDetail.getUrl());
                         if (zdjecieDetail.getOpis() != null) existingZdjecie.setOpis(zdjecieDetail.getOpis());
+                        // No need to add to produkt.getZdjeciaEntities() if already there and managed by JPA
                     }
-                } else { 
+                } else { // New image, ID is null
                     Zdjecie newZdjecie = new Zdjecie();
                     newZdjecie.setUrl(zdjecieDetail.getUrl());
                     newZdjecie.setOpis(zdjecieDetail.getOpis());
                     newZdjecie.setProdukt(produkt);
-                    produkt.getZdjeciaEntities().add(newZdjecie); 
+                    produkt.getZdjeciaEntities().add(newZdjecie); // Add new, unpersisted Zdjecie to the collection
                 }
             }
         }
@@ -386,7 +392,12 @@ public class ProduktService {
     public void deleteProdukt(Integer id) {
         Produkt produkt = produktRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony."));
-        produktRepository.delete(produkt); 
+        // Before deleting the product, explicitly delete related Zdjecia if cascade is not set or to be sure
+        // List<Zdjecie> zdjeciaToDelete = zdjecieRepository.findByProduktId(id);
+        // if (zdjeciaToDelete != null && !zdjeciaToDelete.isEmpty()) {
+        //     zdjecieRepository.deleteAll(zdjeciaToDelete);
+        // }
+        produktRepository.delete(produkt); // Changed from deleteById for consistency and if cascade is configured
     }
 }
 
