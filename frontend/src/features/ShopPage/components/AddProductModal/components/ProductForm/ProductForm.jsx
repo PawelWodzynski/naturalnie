@@ -1,14 +1,14 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import styles from './ProductForm.module.css';
 import ImageUploadManager from './components/ImageUploadManager';
-import DropdownField from '../../../../shared/components/DropdownField/DropdownField';
+import DropdownField from '../../../../../../shared/components/DropdownField/DropdownField';
 import {
   fetchRodzajeProduktu,
   fetchJednostki,
   fetchNadKategorie,
   fetchOpakowania,
   fetchStawkiVat
-} from '../../../../shared/services/apiService';
+} from '../../../../../../shared/services/apiService';
 
 const ProductForm = ({ onClose }) => {
   const initialFormData = {
