@@ -1,10 +1,16 @@
 import React from 'react';
 import styles from './AddProductButton.module.css';
 
-const AddProductButton = () => {
+// Accept onClick as a prop
+const AddProductButton = ({ onClick }) => {
+  // Use the passed onClick handler
   const handleAddProduct = () => {
-    // Funkcjonalność zostanie dodana później
-    console.log('Przycisk "Dodaj produkt" kliknięty');
+    if (onClick) {
+      onClick();
+    } else {
+      // Fallback or default behavior if no onClick is provided
+      console.log('Przycisk "Dodaj produkt" kliknięty, ale brak akcji do wykonania.');
+    }
   };
 
   return (
