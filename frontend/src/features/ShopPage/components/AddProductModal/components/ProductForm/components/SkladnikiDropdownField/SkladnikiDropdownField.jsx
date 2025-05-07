@@ -32,7 +32,7 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
       const data = await response.json();
       if (data.success && Array.isArray(data.data)) {
         setAllSkladniki(data.data);
-        setSuggestions(data.data); // Initially show all when focused and empty
+        // Set suggestions to allSkladniki only if input is empty and dropdown is visible, handled in onFocus
       } else {
         throw new Error(data.message || 'Nieprawidłowy format danych odpowiedzi API dla składników.');
       }
@@ -46,13 +46,15 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
   }, [apiToken]);
 
   useEffect(() => {
-    // Fetch all ingredients once on mount if token is available
-    // Or, fetch on first focus if preferred (current design: on focus)
-  }, [fetchAllSkladniki]);
+    // Initial fetch on component mount if token is present and allSkladniki is empty
+    if (apiToken && allSkladniki.length === 0) {
+        // fetchAllSkladniki(); // Or fetch on first focus as per current design
+    }
+  }, [apiToken, allSkladniki.length, fetchAllSkladniki]);
 
   const filterSuggestions = (value) => {
     if (!value) {
-      setSuggestions(allSkladniki); // Show all if input is cleared
+      setSuggestions(allSkladniki); 
       return;
     }
     const filtered = allSkladniki.filter(s => 
@@ -71,18 +73,27 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
     }
     debounceTimeoutRef.current = setTimeout(() => {
       if (value.trim() === '') {
-        setSuggestions(allSkladniki); // Show all if input is empty after debounce
+        if (allSkladniki.length > 0) {
+            setSuggestions(allSkladniki);
+        } else if (!isLoading) {
+            fetchAllSkladniki(); // Fetch if allSkladniki is empty and not already loading
+        }
       } else {
         filterSuggestions(value);
       }
-    }, 300); // 300ms debounce
+    }, 300); 
   };
 
   const handleInputFocus = () => {
     if (allSkladniki.length === 0 && !isLoading) {
-        fetchAllSkladniki(); // Fetch if not already fetched
+        fetchAllSkladniki().then(() => {
+            // After fetching, if input is still empty, show all suggestions
+            if (inputValue.trim() === '') {
+                // Need to access the updated allSkladniki, so might need a slight refactor or rely on useEffect
+                // For now, let's assume fetchAllSkladniki sets suggestions if it's the initial load
+            }
+        });
     } else {
-        // If already fetched, filter based on current input or show all
         if (inputValue.trim() === '') {
             setSuggestions(allSkladniki);
         } else {
@@ -92,7 +103,6 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
     setIsDropdownVisible(true);
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (componentRef.current && !componentRef.current.contains(event.target)) {
@@ -102,22 +112,25 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
     };
   }, []);
 
   const handleSuggestionClick = (suggestion) => {
-    setInputValue(suggestion.nazwa); // Uzupełnij pole formularza
-    onSkladnikSelected(suggestion); // Przekaż wybrany obiekt składnika
+    onSkladnikSelected(suggestion); 
+    setInputValue(''); // Clear input field after selection
     setIsDropdownVisible(false);
-    // Optionally clear suggestions or keep them filtered based on the new input value
-    // For now, we hide the dropdown, input is filled.
+    // Optionally, reset suggestions to the full list if the user re-focuses the empty input
+    setSuggestions(allSkladniki); 
   };
 
   const handleAddButtonClick = () => {
     if (inputValue.trim() !== '') {
       onNewSkladnikAdd(inputValue.trim());
-      setInputValue(''); // Clear input after adding
-      setSuggestions(allSkladniki); // Reset suggestions to all or empty based on desired behavior
+      setInputValue(''); 
+      setSuggestions(allSkladniki); 
       setIsDropdownVisible(false);
     }
   };
@@ -154,6 +167,9 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
       )}
       {isDropdownVisible && !isLoading && suggestions.length === 0 && inputValue.trim() !== '' && (
          <div className={styles.noSuggestions}>Brak pasujących składników. Możesz dodać nowy.</div>
+      )}
+       {isDropdownVisible && !isLoading && suggestions.length === 0 && inputValue.trim() === '' && allSkladniki.length > 0 && (
+         <div className={styles.noSuggestions}>Rozpocznij wpisywanie, aby wyszukać lub wybrać z listy.</div>
       )}
     </div>
   );
