@@ -1,0 +1,37 @@
+# Lista Zadań - Wyszukiwanie w Dropdownach
+
+- [x] **Krok 1: Refaktoryzacja `DropdownField.jsx` na komponent niestandardowy**
+    - [x] Zmiana struktury HTML z `<select>` na `div` (kontener), `div` (nagłówek/trigger), `input` (wyszukiwarka) i `ul` (lista opcji).
+    - [x] Implementacja stanu `isOpen` do zarządzania widocznością listy opcji.
+    - [x] Implementacja stanu `searchTerm` do przechowywania frazy wyszukiwania.
+    - [x] Dodanie pola `<input type="text">` do wprowadzania frazy wyszukiwania, widocznego gdy dropdown jest otwarty.
+    - [x] Wyświetlanie aktualnie wybranej wartości (lub placeholdera) w nagłówku dropdowna.
+- [x] **Krok 2: Implementacja logiki pobierania, filtrowania i wyświetlania opcji**
+    - [x] Funkcja `loadOptions` jest wywoływana przy pierwszym otwarciu dropdowna (lub gdy jest pusty).
+    - [x] Implementacja funkcji `handleSearchChange` do aktualizacji `searchTerm`.
+    - [x] Implementacja logiki filtrowania `options` na podstawie `searchTerm` (case-insensitive, po `optionLabelKey`). Filtrowanie odbywa się po stronie klienta na już pobranych danych.
+    - [x] Wyświetlanie przefiltrowanej listy opcji jako elementy `<li>`.
+    - [x] Wyświetlanie komunikatów "Ładowanie...", "Błąd pobierania danych", "Brak pasujących opcji", "Brak dostępnych opcji".
+- [x] **Krok 3: Obsługa interakcji użytkownika**
+    - [x] Implementacja funkcji `toggleDropdown` do otwierania/zamykania listy opcji po kliknięciu nagłówka.
+    - [x] Implementacja funkcji `handleOptionClick(selectedOption)` do obsługi wyboru opcji z listy:
+        - Wywołanie `onChange(syntheticEvent, selectedOption)` (przekazanie obiektu podobnego do eventu oraz pełnego obiektu wybranej opcji).
+        - Ustawienie wyświetlanej wartości w nagłówku dropdowna na podstawie `selectedOption[optionLabelKey]`.
+        - Zamknięcie listy opcji (`setIsOpen(false)`).
+        - Wyczyszczenie `searchTerm`.
+    - [x] Implementacja zamykania dropdowna po kliknięciu na zewnątrz komponentu.
+- [x] **Krok 4: Aktualizacja stylów CSS**
+    - [x] Stworzenie/aktualizacja `DropdownField.module.css` aby ostylować nowy, niestandardowy komponent dropdown.
+    - [x] Stylowanie nagłówka, pola wyszukiwania, listy opcji, poszczególnych opcji (w tym stanu hover/aktywny).
+- [x] **Krok 5: Integracja z `ProductForm.jsx`**
+    - [x] Weryfikacja, czy `handleDropdownChange` w `ProductForm.jsx` poprawnie odbiera i przetwarza `selectedOption` przekazywany z nowego `DropdownField.jsx`.
+- [x] **Krok 6: Testowanie i Walidacja**
+    - [x] Przetestowanie funkcjonalności wyszukiwania (filtrowania) we wszystkich dropdownach w `ProductForm.jsx`.
+    - [x] Weryfikacja, czy wybór opcji (po wyszukaniu lub bez) nadal poprawnie aktualizuje formularz i jego ukryte pola.
+    - [x] Weryfikacja responsywności i wyglądu.
+    - [x] Sprawdzenie obsługi przypadków brzegowych (brak opcji, błędy ładowania, puste wyszukiwanie).
+- [ ] **Krok 7: Wypchnięcie zmian na Git**
+    - [ ] Commit i push zaktualizowanych plików (`DropdownField.jsx`, `DropdownField.module.css`, ewentualnie `ProductForm.jsx`).
+- [ ] **Krok 8: Raportowanie użytkownikowi**
+    - [ ] Poinformowanie użytkownika o zaimplementowanej funkcjonalności wyszukiwania w dropdownach.
+    - [ ] Przesłanie zaktualizowanych plików.

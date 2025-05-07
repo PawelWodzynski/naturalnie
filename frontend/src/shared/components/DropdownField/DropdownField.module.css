@@ -1,32 +1,112 @@
 .formGroup {
-  margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
+  margin-bottom: 1rem;
 }
 
 .formGroup label {
   margin-bottom: 0.5rem;
   font-weight: bold;
+  color: #333;
 }
 
-.formInput {
+.dropdownContainer {
+  position: relative;
+  width: 100%;
+}
+
+.dropdownHeader {
   padding: 0.75rem;
   border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 1rem;
-  width: 100%;
-  box-sizing: border-box;
+  background-color: #fff;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  min-height: 40px; /* Ensure consistent height */
 }
 
-.formInput:focus {
-  border-color: #007bff;
+.dropdownHeader:hover {
+  border-color: #999;
+}
+
+.placeholder {
+  color: #757575;
+}
+
+.dropdownArrow {
+  transition: transform 0.2s ease-in-out;
+}
+
+.dropdownArrow.open {
+  transform: rotate(180deg);
+}
+
+.dropdownListContainer {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  background-color: #fff;
+  z-index: 1000;
+  max-height: 250px;
+  overflow-y: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.searchInput {
+  width: calc(100% - 1.5rem); /* Full width minus padding */
+  padding: 0.75rem;
+  border: none;
+  border-bottom: 1px solid #eee;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+.searchInput:focus {
   outline: none;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  border-bottom-color: #007bff;
+}
+
+.dropdownList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdownItem {
+  padding: 0.75rem;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdownItem:last-child {
+  border-bottom: none;
+}
+
+.dropdownItem:hover {
+  background-color: #f0f0f0;
+}
+
+.dropdownMessage {
+  padding: 0.75rem;
+  color: #757575;
+  text-align: center;
 }
 
 .errorMessage {
-  color: red;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
+  color: #d9534f; /* Bootstrap danger color */
+  font-size: 0.9rem;
+}
+
+/* Accessibility: Focus styles for the header if it's made focusable */
+.dropdownHeader:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
 }
 
