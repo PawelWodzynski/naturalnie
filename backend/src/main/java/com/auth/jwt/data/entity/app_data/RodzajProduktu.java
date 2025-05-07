@@ -1,6 +1,7 @@
 package com.auth.jwt.data.entity.app_data;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore; // Added import
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -36,6 +37,7 @@ public class RodzajProduktu {
     @OneToMany(mappedBy = "rodzajProduktu", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonIgnore // Added annotation to prevent serialization of lazy-loaded collection
     private List<Produkt> produkty;
 }
 
