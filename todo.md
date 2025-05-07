@@ -30,8 +30,8 @@
     - [x] Weryfikacja, czy wybór opcji (po wyszukaniu lub bez) nadal poprawnie aktualizuje formularz i jego ukryte pola.
     - [x] Weryfikacja responsywności i wyglądu.
     - [x] Sprawdzenie obsługi przypadków brzegowych (brak opcji, błędy ładowania, puste wyszukiwanie).
-- [ ] **Krok 7: Wypchnięcie zmian na Git**
-    - [ ] Commit i push zaktualizowanych plików (`DropdownField.jsx`, `DropdownField.module.css`, ewentualnie `ProductForm.jsx`).
-- [ ] **Krok 8: Raportowanie użytkownikowi**
-    - [ ] Poinformowanie użytkownika o zaimplementowanej funkcjonalności wyszukiwania w dropdownach.
-    - [ ] Przesłanie zaktualizowanych plików.
+- [x] **Krok 7: Wypchnięcie zmian na Git**
+    - [x] Commit i push zaktualizowanych plików (`DropdownField.jsx`, `DropdownField.module.css`, ewentualnie `ProductForm.jsx`).
+- [x] **Krok 8: Raportowanie użytkownikowi**
+    - [x] Poinformowanie użytkownika o zaimplementowanej funkcjonalności wyszukiwania w dropdownach.
+    - [x] Przesłanie zaktualizowanych plików.

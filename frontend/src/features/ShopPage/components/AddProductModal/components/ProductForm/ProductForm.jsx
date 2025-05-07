@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import styles from './ProductForm.module.css';
 import ImageUploadManager from './components/ImageUploadManager';
 import DropdownField from '../../../../../../shared/components/DropdownField/DropdownField';
@@ -7,8 +7,20 @@ import {
   fetchJednostki,
   fetchNadKategorie,
   fetchOpakowania,
-  fetchStawkiVat
+  fetchStawkiVat,
+  addRodzajProduktu,
+  addJednostka,
+  addNadKategoria,
+  addOpakowanie,
+  addStawkaVat
 } from '../../../../../../shared/services/apiService';
+
+// Import Add Option Modals
+import AddRodzajProduktuModal from './components/addOptionModals/AddRodzajProduktuModal';
+import AddJednostkaModal from './components/addOptionModals/AddJednostkaModal';
+import AddNadKategoriaModal from './components/addOptionModals/AddNadKategoriaModal';
+import AddOpakowanieModal from './components/addOptionModals/AddOpakowanieModal';
+import AddStawkaVatModal from './components/addOptionModals/AddStawkaVatModal';
 
 const ProductForm = ({ onClose }) => {
   const initialFormData = {
@@ -29,13 +41,11 @@ const ProductForm = ({ onClose }) => {
     wartoKupic: false,
     bezglutenowy: false,
     opis: '',
-
     rodzajProduktuId: '', 
     jednostkaId: '',
     nadKategoriaId: '',
     opakowanieId: '',
     stawkaVatId: '',
-
     rodzajProduktuNazwa: '',
     rodzajProduktuOpis: '',
     jednostkaNazwa: '',
@@ -47,7 +57,6 @@ const ProductForm = ({ onClose }) => {
     opakowanieSkrot: '',
     opakowanieOpis: '',
     stawkaVatWartosc: 0,
-
     kodTowaruKod: '',
     kodEanKod: '',
     identyfikatorWartosc: '',
@@ -55,10 +64,26 @@ const ProductForm = ({ onClose }) => {
     zdjecia: []
   };
   const [formData, setFormData] = useState(initialFormData);
-
   const [skladnikInput, setSkladnikInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+
+  const [activeAddOptionModal, setActiveAddOptionModal] = useState({ type: null, isOpen: false });
+
+  // Refs for DropdownFields to call their refreshAndSelect method
+  const rodzajProduktuDropdownRef = useRef(null);
+  const jednostkaDropdownRef = useRef(null);
+  const nadKategoriaDropdownRef = useRef(null);
+  const opakowanieDropdownRef = useRef(null);
+  const stawkaVatDropdownRef = useRef(null);
+
+  const dropdownRefs = {
+    rodzajProduktu: rodzajProduktuDropdownRef,
+    jednostka: jednostkaDropdownRef,
+    nadKategoria: nadKategoriaDropdownRef,
+    opakowanie: opakowanieDropdownRef,
+    stawkaVat: stawkaVatDropdownRef
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -112,76 +137,75 @@ const ProductForm = ({ onClose }) => {
           default:
             break;
         }
-      } else {
+      } else { // Clear fields if selectedOption is null (e.g. clearing selection)
         switch (dropdownName) {
-          case 'rodzajProduktu':
-            updatedFields = { rodzajProduktuId: '', rodzajProduktuNazwa: '', rodzajProduktuOpis: '' };
-            break;
-          case 'jednostka':
-            updatedFields = { jednostkaId: '', jednostkaNazwa: '', jednostkaSkrot: '' };
-            break;
-          case 'nadKategoria':
-            updatedFields = { nadKategoriaId: '', nadKategoriaNazwa: '', nadKategoriaOpis: '', nadKategoriaKolejnosc: 0 };
-            break;
-          case 'opakowanie':
-            updatedFields = { opakowanieId: '', opakowanieNazwa: '', opakowanieSkrot: '', opakowanieOpis: '' };
-            break;
-          case 'stawkaVat':
-            updatedFields = { stawkaVatId: '', stawkaVatWartosc: 0 };
-            break;
-          default:
-            break;
+            case 'rodzajProduktu': updatedFields = { rodzajProduktuId: '', rodzajProduktuNazwa: '', rodzajProduktuOpis: '' }; break;
+            case 'jednostka': updatedFields = { jednostkaId: '', jednostkaNazwa: '', jednostkaSkrot: '' }; break;
+            case 'nadKategoria': updatedFields = { nadKategoriaId: '', nadKategoriaNazwa: '', nadKategoriaOpis: '', nadKategoriaKolejnosc: 0 }; break;
+            case 'opakowanie': updatedFields = { opakowanieId: '', opakowanieNazwa: '', opakowanieSkrot: '', opakowanieOpis: '' }; break;
+            case 'stawkaVat': updatedFields = { stawkaVatId: '', stawkaVatWartosc: 0 }; break;
+            default: break;
         }
       }
       return { ...prev, ...updatedFields };
     });
   };
 
-  const handleSkladnikInputChange = (e) => {
-    setSkladnikInput(e.target.value);
+  const handleOpenAddOptionModal = (entityType) => {
+    setActiveAddOptionModal({ type: entityType, isOpen: true });
   };
+
+  const handleCloseAddOptionModal = () => {
+    setActiveAddOptionModal({ type: null, isOpen: false });
+  };
+
+  const handleOptionSuccessfullyAdded = (newlyAddedOption, entityType) => {
+    if (newlyAddedOption && entityType) {
+      // 1. Update the main form data by simulating a dropdown change
+      handleDropdownChange(entityType, newlyAddedOption);
+      
+      // 2. Trigger the relevant DropdownField to refresh its options and select the new one
+      const dropdownRef = dropdownRefs[entityType];
+      if (dropdownRef && dropdownRef.current && typeof dropdownRef.current.refreshAndSelect === 'function') {
+        dropdownRef.current.refreshAndSelect(newlyAddedOption);
+      } else {
+        console.warn(`Dropdown ref or refreshAndSelect method not found for ${entityType}`);
+        // As a fallback, you might just re-fetch all options for that dropdown if the ref method fails
+      }
+    }
+    handleCloseAddOptionModal();
+  };
+
+  const handleSkladnikInputChange = (e) => setSkladnikInput(e.target.value);
 
   const handleAddSkladnik = () => {
     if (skladnikInput.trim() !== '') {
-      setFormData(prev => ({
-        ...prev,
-        skladniki: [...prev.skladniki, skladnikInput.trim()]
-      }));
+      setFormData(prev => ({ ...prev, skladniki: [...prev.skladniki, skladnikInput.trim()] }));
       setSkladnikInput('');
     }
   };
 
   const handleRemoveSkladnik = (indexToRemove) => {
-    setFormData(prev => ({
-      ...prev,
-      skladniki: prev.skladniki.filter((_, index) => index !== indexToRemove)
-    }));
+    setFormData(prev => ({ ...prev, skladniki: prev.skladniki.filter((_, index) => index !== indexToRemove) }));
   };
 
   const handleImagesChange = useCallback((newImages) => {
-    setFormData(prev => ({
-      ...prev,
-      zdjecia: newImages // Assuming newImages is already in the format [{ daneZdjecia: "base64...", opis: "...", kolejnosc: 0 }, ...]
-    }));
+    setFormData(prev => ({ ...prev, zdjecia: newImages }));
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitError(null);
-
     const token = localStorage.getItem("token");
     if (!token) {
       setSubmitError("Brak tokenu autoryzacyjnego. Zaloguj się ponownie.");
       setIsSubmitting(false);
       return;
     }
-
     try {
       const encodedToken = encodeURIComponent(token);
       const url = `http://localhost:8080/api/app-data/produkt?token=${encodedToken}`;
-      
-      // Construct payload according to ProduktRequestDTO
       const payload = {
         nazwa: formData.nazwa,
         waga: parseFloat(formData.waga) || 0,
@@ -200,68 +224,35 @@ const ProductForm = ({ onClose }) => {
         wartoKupic: formData.wartoKupic,
         bezglutenowy: formData.bezglutenowy,
         opis: formData.opis,
-
-        // Fields from RodzajProduktu
         rodzajProduktuNazwa: formData.rodzajProduktuNazwa,
         rodzajProduktuOpis: formData.rodzajProduktuOpis,
-
-        // Fields from Jednostka
         jednostkaNazwa: formData.jednostkaNazwa,
         jednostkaSkrot: formData.jednostkaSkrot,
-
-        // Fields from NadKategoria
         nadKategoriaNazwa: formData.nadKategoriaNazwa,
         nadKategoriaOpis: formData.nadKategoriaOpis,
         nadKategoriaKolejnosc: parseInt(formData.nadKategoriaKolejnosc, 10) || 0,
-
-        // Fields from Opakowanie
         opakowanieNazwa: formData.opakowanieNazwa,
         opakowanieSkrot: formData.opakowanieSkrot,
         opakowanieOpis: formData.opakowanieOpis,
-
-        // Fields from StawkaVat
         stawkaVatWartosc: parseFloat(formData.stawkaVatWartosc) || 0,
-
-        // Values for KodTowaru, KodEan, Identyfikator
         kodTowaruKod: formData.kodTowaruKod,
         kodEanKod: formData.kodEanKod,
         identyfikatorWartosc: formData.identyfikatorWartosc,
-
-        // List of ingredient names (already an array of strings in formData.skladniki)
         skladniki: formData.skladniki,
-
-        // List of photo data
-        // Assuming formData.zdjecia is already an array of objects matching ZdjecieRequestDTO structure
-        // e.g., [{ daneZdjecia: "base64string", opis: "opis1", kolejnosc: 1 }, ...]
-        // The ImageUploadManager should provide images in this format.
-        zdjecia: formData.zdjecia.map(img => ({
-            daneZdjecia: img.daneZdjecia, // Assuming this is the base64 string
-            opis: img.opis,
-            kolejnosc: img.kolejnosc
-        }))
+        zdjecia: formData.zdjecia.map(img => ({ daneZdjecia: img.daneZdjecia, opis: img.opis, kolejnosc: img.kolejnosc }))
       };
-
-      // console.log("Final payload being sent:", JSON.stringify(payload, null, 2));
-
       const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(payload)
       });
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Nie udało się przetworzyć odpowiedzi błędu serwera.' }));
-        console.error("Server error data:", errorData);
         throw new Error(`Błąd serwera: ${response.status} - ${errorData.message || 'Nieznany błąd'}`);
       }
-
       alert('Produkt dodany pomyślnie!');
       onClose();
     } catch (error) {
-      console.error("Błąd podczas dodawania produktu:", error);
       setSubmitError(error.message || "Wystąpił nieoczekiwany błąd.");
     } finally {
       setIsSubmitting(false);
@@ -269,82 +260,98 @@ const ProductForm = ({ onClose }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.productForm}>
-      {submitError && <div className={styles.errorMessage}>{submitError}</div>}
-      <div className={styles.formGrid}>
-        <div className={styles.formGroup}>
-          <label htmlFor="nazwa">Nazwa Produktu:</label>
-          <input type="text" id="nazwa" name="nazwa" value={formData.nazwa} onChange={handleInputChange} required className={styles.formInput} />
-        </div>
-        <div className={styles.formGroupFullWidth}>
-          <label htmlFor="opis">Opis Produktu:</label>
-          <textarea id="opis" name="opis" value={formData.opis} onChange={handleInputChange} rows="4" className={styles.formInput}></textarea>
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="waga">Waga (kg):</label>
-          <input type="number" id="waga" name="waga" value={formData.waga} onChange={handleInputChange} step="0.01" className={styles.formInput} />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="cena">Cena (PLN):</label>
-          <input type="number" id="cena" name="cena" value={formData.cena} onChange={handleInputChange} step="0.01" className={styles.formInput} />
-        </div>
+    <>
+      <form onSubmit={handleSubmit} className={styles.productForm}>
+        {submitError && <div className={styles.errorMessage}>{submitError}</div>}
+        <div className={styles.formGrid}>
+          <div className={styles.formGroup}>
+            <label htmlFor="nazwa">Nazwa Produktu:</label>
+            <input type="text" id="nazwa" name="nazwa" value={formData.nazwa} onChange={handleInputChange} required className={styles.formInput} />
+          </div>
+          <div className={styles.formGroupFullWidth}>
+            <label htmlFor="opis">Opis Produktu:</label>
+            <textarea id="opis" name="opis" value={formData.opis} onChange={handleInputChange} rows="4" className={styles.formInput}></textarea>
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="waga">Waga (kg):</label>
+            <input type="number" id="waga" name="waga" value={formData.waga} onChange={handleInputChange} step="0.01" className={styles.formInput} />
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="cena">Cena (PLN):</label>
+            <input type="number" id="cena" name="cena" value={formData.cena} onChange={handleInputChange} step="0.01" className={styles.formInput} />
+          </div>
 
-        <DropdownField
-          label="Rodzaj Produktu"
-          name="rodzajProduktuId" 
-          value={formData.rodzajProduktuId}
-          onChange={(e, selectedOption) => handleDropdownChange('rodzajProduktu', selectedOption)}
-          fetchDataFunction={fetchRodzajeProduktu}
-          optionValueKey="id"
-          optionLabelKey="nazwa"
-          required
-        />
+          <DropdownField
+            label="Rodzaj Produktu"
+            name="rodzajProduktuId"
+            value={formData.rodzajProduktuId}
+            onChange={(e, selectedOption) => handleDropdownChange('rodzajProduktu', selectedOption)}
+            fetchDataFunction={fetchRodzajeProduktu}
+            optionValueKey="id"
+            optionLabelKey="nazwa"
+            required
+            entityType="rodzajProduktu"
+            onOpenAddModal={handleOpenAddOptionModal}
+            onOptionAdded={(refMethods) => { rodzajProduktuDropdownRef.current = refMethods; }}
+          />
 
-        <DropdownField
-          label="Jednostka"
-          name="jednostkaId"
-          value={formData.jednostkaId}
-          onChange={(e, selectedOption) => handleDropdownChange('jednostka', selectedOption)}
-          fetchDataFunction={fetchJednostki}
-          optionValueKey="id"
-          optionLabelKey="nazwa"
-          required
-        />
+          <DropdownField
+            label="Jednostka"
+            name="jednostkaId"
+            value={formData.jednostkaId}
+            onChange={(e, selectedOption) => handleDropdownChange('jednostka', selectedOption)}
+            fetchDataFunction={fetchJednostki}
+            optionValueKey="id"
+            optionLabelKey="nazwa"
+            required
+            entityType="jednostka"
+            onOpenAddModal={handleOpenAddOptionModal}
+            onOptionAdded={(refMethods) => { jednostkaDropdownRef.current = refMethods; }}
+          />
 
-        <DropdownField
-          label="Nadkategoria"
-          name="nadKategoriaId"
-          value={formData.nadKategoriaId}
-          onChange={(e, selectedOption) => handleDropdownChange('nadKategoria', selectedOption)}
-          fetchDataFunction={fetchNadKategorie}
-          optionValueKey="id"
-          optionLabelKey="nazwa"
-          required
-        />
+          <DropdownField
+            label="Nadkategoria"
+            name="nadKategoriaId"
+            value={formData.nadKategoriaId}
+            onChange={(e, selectedOption) => handleDropdownChange('nadKategoria', selectedOption)}
+            fetchDataFunction={fetchNadKategorie}
+            optionValueKey="id"
+            optionLabelKey="nazwa"
+            required
+            entityType="nadKategoria"
+            onOpenAddModal={handleOpenAddOptionModal}
+            onOptionAdded={(refMethods) => { nadKategoriaDropdownRef.current = refMethods; }}
+          />
 
-        <DropdownField
-          label="Opakowanie"
-          name="opakowanieId"
-          value={formData.opakowanieId}
-          onChange={(e, selectedOption) => handleDropdownChange('opakowanie', selectedOption)}
-          fetchDataFunction={fetchOpakowania}
-          optionValueKey="id"
-          optionLabelKey="nazwa"
-          required
-        />
+          <DropdownField
+            label="Opakowanie"
+            name="opakowanieId"
+            value={formData.opakowanieId}
+            onChange={(e, selectedOption) => handleDropdownChange('opakowanie', selectedOption)}
+            fetchDataFunction={fetchOpakowania}
+            optionValueKey="id"
+            optionLabelKey="nazwa"
+            required
+            entityType="opakowanie"
+            onOpenAddModal={handleOpenAddOptionModal}
+            onOptionAdded={(refMethods) => { opakowanieDropdownRef.current = refMethods; }}
+          />
 
-        <DropdownField
-          label="Stawka VAT (%)"
-          name="stawkaVatId" 
-          value={formData.stawkaVatId} 
-          onChange={(e, selectedOption) => handleDropdownChange('stawkaVat', selectedOption)}
-          fetchDataFunction={fetchStawkiVat}
-          optionValueKey="id" 
-          optionLabelKey="wartosc"
-          required
-        />
-
-        <div className={styles.formGroupCheckboxesFullWidth}>
+          <DropdownField
+            label="Stawka VAT (%)"
+            name="stawkaVatId"
+            value={formData.stawkaVatId}
+            onChange={(e, selectedOption) => handleDropdownChange('stawkaVat', selectedOption)}
+            fetchDataFunction={fetchStawkiVat}
+            optionValueKey="id"
+            optionLabelKey="wartosc"
+            required
+            entityType="stawkaVat"
+            onOpenAddModal={handleOpenAddOptionModal}
+            onOptionAdded={(refMethods) => { stawkaVatDropdownRef.current = refMethods; }}
+          />
+          
+          <div className={styles.formGroupCheckboxesFullWidth}>
             <h4 className={styles.checkboxGroupTitle}>Opcje Produktu:</h4>
             <div className={styles.checkboxGrid}>
                 <div className={styles.checkboxItem}><input type="checkbox" id="superProdukt" name="superProdukt" checked={formData.superProdukt} onChange={handleInputChange} /> <label htmlFor="superProdukt">Super Produkt</label></div>
@@ -377,43 +384,83 @@ const ProductForm = ({ onClose }) => {
           <input type="text" id="kodEanKod" name="kodEanKod" value={formData.kodEanKod} onChange={handleInputChange} className={styles.formInput} />
         </div>
         <div className={styles.formGroup}>
-          <label htmlFor="identyfikatorWartosc">Identyfikator Wewnętrzny:</label>
+          <label htmlFor="identyfikatorWartosc">Identyfikator:</label>
           <input type="text" id="identyfikatorWartosc" name="identyfikatorWartosc" value={formData.identyfikatorWartosc} onChange={handleInputChange} className={styles.formInput} />
         </div>
+
         <div className={styles.formGroupFullWidth}>
-          <label htmlFor="skladnikInput">Składniki:</label>
-          <div className={styles.skladnikiList}>
+          <label htmlFor="skladnikInput">Składniki (dodaj pojedynczo):</label>
+          <div className={styles.inputWithButton}>
+            <input type="text" id="skladnikInput" value={skladnikInput} onChange={handleSkladnikInputChange} className={styles.formInput} />
+            <button type="button" onClick={handleAddSkladnik} className={styles.addButtonSkladnik}>Dodaj Składnik</button>
+          </div>
+          <ul className={styles.skladnikiList}>
             {formData.skladniki.map((skladnik, index) => (
-              <div key={index} className={styles.skladnikItem}>
+              <li key={index} className={styles.skladnikItem}>
                 {skladnik}
-                <button type="button" onClick={() => handleRemoveSkladnik(index)} className={styles.removeButton}>Usuń</button>
-              </div>
+                <button type="button" onClick={() => handleRemoveSkladnik(index)} className={styles.removeButtonSkladnik}>Usuń</button>
+              </li>
             ))}
-          </div>
-          <div className={styles.addSkladnikContainer}>
-            <input 
-              type="text" 
-              id="skladnikInput" 
-              value={skladnikInput} 
-              onChange={handleSkladnikInputChange} 
-              placeholder="Dodaj składnik"
-              className={styles.formInput}
-            />
-            <button type="button" onClick={handleAddSkladnik} className={styles.addButton}>Dodaj Składnik</button>
-          </div>
+          </ul>
         </div>
-      </div> 
-      <div className={styles.formGroupFullWidth}>
-        <label>Zdjęcia Produktu:</label>
-        <ImageUploadManager images={formData.zdjecia} onImagesChange={handleImagesChange} />
-      </div>
-      <div className={styles.formActions}>
-        <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
-          {isSubmitting ? 'Dodawanie...' : 'Dodaj Produkt'}
-        </button>
-        <button type="button" onClick={onClose} className={styles.cancelButton} disabled={isSubmitting}>Anuluj</button>
-      </div>
-    </form>
+
+        <div className={styles.formGroupFullWidth}>
+            <ImageUploadManager onImagesChange={handleImagesChange} currentImages={formData.zdjecia} />
+        </div>
+
+        </div>
+        <div className={styles.formActionsMain}>
+          <button type="submit" className={styles.submitButtonMain} disabled={isSubmitting}>
+            {isSubmitting ? 'Dodawanie Produktu...' : 'Dodaj Produkt'}
+          </button>
+          <button type="button" onClick={onClose} className={styles.cancelButtonMain} disabled={isSubmitting}>
+            Anuluj
+          </button>
+        </div>
+      </form>
+
+      {/* Render Add Option Modals */}
+      {activeAddOptionModal.isOpen && activeAddOptionModal.type === 'rodzajProduktu' && (
+        <AddRodzajProduktuModal 
+          isOpen={true} 
+          onClose={handleCloseAddOptionModal} 
+          onOptionSuccessfullyAdded={handleOptionSuccessfullyAdded}
+          apiAddFunction={addRodzajProduktu}
+        />
+      )}
+      {activeAddOptionModal.isOpen && activeAddOptionModal.type === 'jednostka' && (
+        <AddJednostkaModal 
+          isOpen={true} 
+          onClose={handleCloseAddOptionModal} 
+          onOptionSuccessfullyAdded={handleOptionSuccessfullyAdded}
+          apiAddFunction={addJednostka}
+        />
+      )}
+      {activeAddOptionModal.isOpen && activeAddOptionModal.type === 'nadKategoria' && (
+        <AddNadKategoriaModal 
+          isOpen={true} 
+          onClose={handleCloseAddOptionModal} 
+          onOptionSuccessfullyAdded={handleOptionSuccessfullyAdded}
+          apiAddFunction={addNadKategoria}
+        />
+      )}
+      {activeAddOptionModal.isOpen && activeAddOptionModal.type === 'opakowanie' && (
+        <AddOpakowanieModal 
+          isOpen={true} 
+          onClose={handleCloseAddOptionModal} 
+          onOptionSuccessfullyAdded={handleOptionSuccessfullyAdded}
+          apiAddFunction={addOpakowanie}
+        />
+      )}
+      {activeAddOptionModal.isOpen && activeAddOptionModal.type === 'stawkaVat' && (
+        <AddStawkaVatModal 
+          isOpen={true} 
+          onClose={handleCloseAddOptionModal} 
+          onOptionSuccessfullyAdded={handleOptionSuccessfullyAdded}
+          apiAddFunction={addStawkaVat}
+        />
+      )}
+    </>
   );
 };
 

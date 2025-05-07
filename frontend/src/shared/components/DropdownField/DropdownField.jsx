@@ -3,40 +3,27 @@ import styles from './DropdownField.module.css';
 
 const DropdownField = ({
   label,
-  name, // Name of the form field this dropdown controls
-  value, // The current value of the form field (e.g., an ID)
-  onChange, // Function to call when an option is selected: onChange(syntheticEvent, selectedOptionObject)
-  fetchDataFunction, // Async function to fetch options
-  optionValueKey, // Key in option objects for the value (e.g., 'id')
-  optionLabelKey, // Key in option objects for the display label (e.g., 'nazwa', 'wartosc')
+  name, 
+  value, 
+  onChange, 
+  fetchDataFunction, 
+  optionValueKey, 
+  optionLabelKey, 
   required,
-  placeholder = 'Wybierz...'
+  placeholder = 'Wybierz...',
+  entityType, // New prop: e.g., "rodzajProduktu", "jednostka"
+  onOpenAddModal, // New prop: callback to open the add modal for this entity type
+  onOptionAdded // New prop: callback to inform DropdownField that a new option was added externally
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedLabelState, setSelectedLabelState] = useState(''); // Renamed to avoid conflict with label prop
+  const [selectedLabelState, setSelectedLabelState] = useState('');
   const dropdownRef = useRef(null);
 
-  // Effect to update selectedLabelState when the initial value changes or options are loaded
-  useEffect(() => {
-    if (value && options.length > 0) {
-      const currentOption = options.find(opt => String(opt[optionValueKey]) === String(value));
-      if (currentOption) {
-        setSelectedLabelState(String(currentOption[optionLabelKey]));
-      } else {
-        // If value exists but not in options, it might be an initial load before options are fetched
-        // or an invalid value. We can clear or show the value itself if no label found.
-        setSelectedLabelState(''); // Or String(value) if you want to show the ID
-      }
-    } else if (!value) {
-      setSelectedLabelState(''); // Clear label if value is cleared externally
-    }
-  }, [value, options, optionValueKey, optionLabelKey]);
-
-  const loadOptions = useCallback(async () => {
+  const loadOptions = useCallback(async (selectOptionAfterLoad = null) => {
     if (loading) return;
     setLoading(true);
     setError(null);
@@ -44,13 +31,24 @@ const DropdownField = ({
       const dataFromService = await fetchDataFunction();
       if (Array.isArray(dataFromService)) {
         setOptions(dataFromService);
-        // If there's an initial value, find its label after loading
-        if (value) {
-          const currentOption = dataFromService.find(opt => String(opt[optionValueKey]) === String(value));
-          if (currentOption) {
-            setSelectedLabelState(String(currentOption[optionLabelKey]));
-          }
+        let optionToSelect = null;
+        if (selectOptionAfterLoad) {
+          optionToSelect = dataFromService.find(opt => String(opt[optionValueKey]) === String(selectOptionAfterLoad[optionValueKey]));
+        } else if (value) {
+          optionToSelect = dataFromService.find(opt => String(opt[optionValueKey]) === String(value));
         }
+
+        if (optionToSelect) {
+          setSelectedLabelState(String(optionToSelect[optionLabelKey]));
+          // Ensure ProductForm is also updated if a new option was auto-selected after add
+          if (selectOptionAfterLoad) {
+            const syntheticEvent = { target: { name: name, value: optionToSelect[optionValueKey] } };
+            onChange(syntheticEvent, optionToSelect);
+          }
+        } else if (!value) {
+            setSelectedLabelState('');
+        }
+
       } else {
         setOptions([]);
         setError(`Nieprawidłowy format danych dla ${label}.`);
@@ -61,16 +59,40 @@ const DropdownField = ({
     } finally {
       setLoading(false);
     }
-  }, [fetchDataFunction, label, loading, value, optionValueKey, optionLabelKey]);
+  }, [fetchDataFunction, label, loading, value, optionValueKey, optionLabelKey, name, onChange]);
 
-  // Load options when dropdown opens for the first time or if options are empty and not loading/error
+  // Effect to update selectedLabelState when the initial value changes or options are loaded
+  useEffect(() => {
+    if (value && options.length > 0) {
+      const currentOption = options.find(opt => String(opt[optionValueKey]) === String(value));
+      if (currentOption) {
+        setSelectedLabelState(String(currentOption[optionLabelKey]));
+      } else {
+        setSelectedLabelState('');
+      }
+    } else if (!value) {
+      setSelectedLabelState('');
+    }
+  }, [value, options, optionValueKey, optionLabelKey]);
+
+  // Handle externally added option
+  useEffect(() => {
+    if (onOptionAdded) { // This prop would be a signal, perhaps with the new option data
+        // The actual logic to use onOptionAdded will be more complex.
+        // For now, let's assume ProductForm will manage re-selecting or re-loading.
+        // A better approach: ProductForm calls a method on DropdownField ref, or DropdownField re-fetches.
+        // Simplest for now: if onOptionAdded is a new option object, try to select it.
+        // This is a placeholder for a more robust mechanism.
+    }
+  }, [onOptionAdded, loadOptions]); 
+
+
   useEffect(() => {
     if (isOpen && options.length === 0 && !loading && !error) {
       loadOptions();
     }
   }, [isOpen, options.length, loadOptions, loading, error]);
 
-  // Handle clicks outside the dropdown to close it
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -85,7 +107,6 @@ const DropdownField = ({
 
   const toggleDropdown = () => {
     setIsOpen(prevIsOpen => !prevIsOpen);
-    // If opening and options are not loaded yet, trigger load
     if (!isOpen && options.length === 0 && !loading) {
         loadOptions();
     }
@@ -108,9 +129,32 @@ const DropdownField = ({
     setSearchTerm('');
   };
 
+  const handleAddNewClick = (e) => {
+    e.stopPropagation(); // Prevent dropdown from closing if button is inside header
+    if (onOpenAddModal && entityType) {
+      onOpenAddModal(entityType);
+      setIsOpen(false); // Close dropdown when opening modal
+    }
+  };
+
+  // Public method to refresh options and select a new one (called via ref from ProductForm)
+  // This is a more robust way to handle option added from modal
+  const refreshAndSelectOption = useCallback((newOption) => {
+    loadOptions(newOption); // Reload all options and try to select the new one
+  }, [loadOptions]);
+
+  // Expose the refresh method via onOptionAdded prop (which ProductForm will use to pass the ref's method)
+  useEffect(() => {
+    if (typeof onOptionAdded === 'function') {
+        onOptionAdded({
+            refreshAndSelect: refreshAndSelectOption
+        });
+    }
+  }, [onOptionAdded, refreshAndSelectOption]);
+
+
   const filteredOptions = options.filter(option => {
-    // Ensure option and option[optionLabelKey] are valid before calling toLowerCase()
-    if (option && option[optionLabelKey] != null) { // != null checks for both null and undefined
+    if (option && option[optionLabelKey] != null) {
         return String(option[optionLabelKey]).toLowerCase().includes(searchTerm.toLowerCase());
     }
     return false;
@@ -126,16 +170,27 @@ const DropdownField = ({
         </div>
         {isOpen && (
           <div className={styles.dropdownListContainer}>
-            <input
-              type="text"
-              id={`${name}-search-input`}
-              className={styles.searchInput}
-              placeholder="Szukaj..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              onClick={(e) => e.stopPropagation()} // Prevent closing dropdown when clicking input
-              autoFocus
-            />
+            <div className={styles.searchAndAddContainer}>
+              <input
+                type="text"
+                id={`${name}-search-input`}
+                className={styles.searchInput}
+                placeholder="Szukaj..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                onClick={(e) => e.stopPropagation()} 
+                autoFocus
+              />
+              {onOpenAddModal && entityType && (
+                <button 
+                  type="button" 
+                  className={styles.addButton}
+                  onClick={handleAddNewClick}
+                >
+                  Dodaj
+                </button>
+              )}
+            </div>
             {loading && <div className={styles.dropdownMessage}>Ładowanie...</div>}
             {error && <div className={`${styles.dropdownMessage} ${styles.errorMessage}`}>{error}</div>}
             {!loading && !error && (
