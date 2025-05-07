@@ -2,7 +2,8 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import styles from './ProductForm.module.css';
 import ImageUploadManager from './components/ImageUploadManager';
 import DropdownField from '../../../../../../shared/components/DropdownField/DropdownField';
-import SkladnikiDropdownField from './components/SkladnikiDropdownField'; // Added import
+import SkladnikiDropdownField from './components/SkladnikiDropdownField';
+import InfoModal from '../../../../../../shared/components/InfoModal'; // Added import for InfoModal
 import {
   fetchRodzajeProduktu,
   fetchJednostki,
@@ -65,10 +66,13 @@ const ProductForm = ({ onClose }) => {
     zdjecia: []
   };
   const [formData, setFormData] = useState(initialFormData);
-  // Removed: const [skladnikInput, setSkladnikInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [apiToken, setApiToken] = useState(null);
+
+  // New state for duplicate modal
+  const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
+  const [duplicateModalMessage, setDuplicateModalMessage] = useState('Składnik już istnieje na liście. Nie można dodać duplikatów.');
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -180,25 +184,37 @@ const ProductForm = ({ onClose }) => {
     handleCloseAddOptionModal();
   };
 
-  // Removed: const handleSkladnikInputChange = (e) => setSkladnikInput(e.target.value);
-  // Removed: handleAddSkladnik function
-
-  // New handlers for SkladnikiDropdownField
+  // Updated handlers for SkladnikiDropdownField with duplicate check
   const handleSkladnikSelectedFromDropdown = (selectedSkladnik) => {
     if (selectedSkladnik && selectedSkladnik.nazwa) {
-      setFormData(prev => ({
-        ...prev,
-        skladniki: [...prev.skladniki, selectedSkladnik.nazwa]
-      }));
+      const normalizedNewSkladnik = selectedSkladnik.nazwa.trim().toLowerCase();
+      const isDuplicate = formData.skladniki.some(s => s.trim().toLowerCase() === normalizedNewSkladnik);
+      if (isDuplicate) {
+        setIsDuplicateModalOpen(true);
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          skladniki: [...prev.skladniki, selectedSkladnik.nazwa.trim()] // Add trimmed original name
+        }));
+        setIsDuplicateModalOpen(false); // Ensure modal is closed if it was open
+      }
     }
   };
 
   const handleAddNewSkladnikManual = (newSkladnikName) => {
-    if (newSkladnikName.trim() !== '') {
-      setFormData(prev => ({
-        ...prev,
-        skladniki: [...prev.skladniki, newSkladnikName.trim()]
-      }));
+    const trimmedSkladnikName = newSkladnikName.trim();
+    if (trimmedSkladnikName !== '') {
+      const normalizedNewSkladnik = trimmedSkladnikName.toLowerCase();
+      const isDuplicate = formData.skladniki.some(s => s.trim().toLowerCase() === normalizedNewSkladnik);
+      if (isDuplicate) {
+        setIsDuplicateModalOpen(true);
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          skladniki: [...prev.skladniki, trimmedSkladnikName] // Add trimmed original name
+        }));
+        setIsDuplicateModalOpen(false); // Ensure modal is closed
+      }
     }
   };
 
@@ -214,7 +230,6 @@ const ProductForm = ({ onClose }) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitError(null);
-    // const token = localStorage.getItem("token"); // Token is now in state: apiToken
     if (!apiToken) {
       setSubmitError("Brak tokenu autoryzacyjnego. Zaloguj się ponownie.");
       setIsSubmitting(false);
@@ -442,6 +457,15 @@ const ProductForm = ({ onClose }) => {
           </button>
         </div>
       </form>
+
+      {/* Duplicate Ingredient Modal */}
+      <InfoModal
+        isOpen={isDuplicateModalOpen}
+        onClose={() => setIsDuplicateModalOpen(false)}
+        title="Błąd Walidacji"
+        message={duplicateModalMessage}
+        buttonText="OK"
+      />
 
       {activeAddOptionModal.isOpen && activeAddOptionModal.type === 'rodzajProduktu' && (
         <AddRodzajProduktuModal 
