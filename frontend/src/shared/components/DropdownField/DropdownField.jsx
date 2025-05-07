@@ -11,9 +11,9 @@ const DropdownField = ({
   optionLabelKey, 
   required,
   placeholder = 'Wybierz...',
-  entityType, // New prop: e.g., "rodzajProduktu", "jednostka"
-  onOpenAddModal, // New prop: callback to open the add modal for this entity type
-  onOptionAdded // New prop: callback to inform DropdownField that a new option was added externally
+  entityType, 
+  onOpenAddModal, 
+  onOptionAdded 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,7 +40,6 @@ const DropdownField = ({
 
         if (optionToSelect) {
           setSelectedLabelState(String(optionToSelect[optionLabelKey]));
-          // Ensure ProductForm is also updated if a new option was auto-selected after add
           if (selectOptionAfterLoad) {
             const syntheticEvent = { target: { name: name, value: optionToSelect[optionValueKey] } };
             onChange(syntheticEvent, optionToSelect);
@@ -61,7 +60,6 @@ const DropdownField = ({
     }
   }, [fetchDataFunction, label, loading, value, optionValueKey, optionLabelKey, name, onChange]);
 
-  // Effect to update selectedLabelState when the initial value changes or options are loaded
   useEffect(() => {
     if (value && options.length > 0) {
       const currentOption = options.find(opt => String(opt[optionValueKey]) === String(value));
@@ -75,17 +73,11 @@ const DropdownField = ({
     }
   }, [value, options, optionValueKey, optionLabelKey]);
 
-  // Handle externally added option
   useEffect(() => {
-    if (onOptionAdded) { // This prop would be a signal, perhaps with the new option data
-        // The actual logic to use onOptionAdded will be more complex.
-        // For now, let's assume ProductForm will manage re-selecting or re-loading.
-        // A better approach: ProductForm calls a method on DropdownField ref, or DropdownField re-fetches.
-        // Simplest for now: if onOptionAdded is a new option object, try to select it.
-        // This is a placeholder for a more robust mechanism.
+    if (onOptionAdded) { 
+        // Placeholder for a more robust mechanism handled by ProductForm and refs
     }
   }, [onOptionAdded, loadOptions]); 
-
 
   useEffect(() => {
     if (isOpen && options.length === 0 && !loading && !error) {
@@ -130,20 +122,17 @@ const DropdownField = ({
   };
 
   const handleAddNewClick = (e) => {
-    e.stopPropagation(); // Prevent dropdown from closing if button is inside header
+    e.stopPropagation(); 
     if (onOpenAddModal && entityType) {
       onOpenAddModal(entityType);
-      setIsOpen(false); // Close dropdown when opening modal
+      setIsOpen(false); 
     }
   };
 
-  // Public method to refresh options and select a new one (called via ref from ProductForm)
-  // This is a more robust way to handle option added from modal
   const refreshAndSelectOption = useCallback((newOption) => {
-    loadOptions(newOption); // Reload all options and try to select the new one
+    loadOptions(newOption); 
   }, [loadOptions]);
 
-  // Expose the refresh method via onOptionAdded prop (which ProductForm will use to pass the ref's method)
   useEffect(() => {
     if (typeof onOptionAdded === 'function') {
         onOptionAdded({
@@ -151,7 +140,6 @@ const DropdownField = ({
         });
     }
   }, [onOptionAdded, refreshAndSelectOption]);
-
 
   const filteredOptions = options.filter(option => {
     if (option && option[optionLabelKey] != null) {
@@ -170,27 +158,27 @@ const DropdownField = ({
         </div>
         {isOpen && (
           <div className={styles.dropdownListContainer}>
-            <div className={styles.searchAndAddContainer}>
-              <input
-                type="text"
-                id={`${name}-search-input`}
-                className={styles.searchInput}
-                placeholder="Szukaj..."
-                value={searchTerm}
-                onChange={handleSearchChange}
-                onClick={(e) => e.stopPropagation()} 
-                autoFocus
-              />
-              {onOpenAddModal && entityType && (
+            <input
+              type="text"
+              id={`${name}-search-input`}
+              className={styles.searchInput}
+              placeholder="Szukaj..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              onClick={(e) => e.stopPropagation()} 
+              autoFocus
+            />
+            {onOpenAddModal && entityType && (
+              <div className={styles.addButtonContainer}> {/* New container for centering */}
                 <button 
                   type="button" 
-                  className={styles.addButton}
+                  className={`${styles.button} ${styles.addButtonGreen}`}
                   onClick={handleAddNewClick}
                 >
                   Dodaj
                 </button>
-              )}
-            </div>
+              </div>
+            )}
             {loading && <div className={styles.dropdownMessage}>Ładowanie...</div>}
             {error && <div className={`${styles.dropdownMessage} ${styles.errorMessage}`}>{error}</div>}
             {!loading && !error && (
