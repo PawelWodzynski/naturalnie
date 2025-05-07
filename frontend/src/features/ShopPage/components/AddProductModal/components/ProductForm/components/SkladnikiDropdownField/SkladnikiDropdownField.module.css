@@ -61,6 +61,9 @@
   padding: 10px;
   cursor: pointer;
   border-bottom: 1px solid #eee;
+  display: flex; /* For aligning label and delete button */
+  justify-content: space-between; /* Pushes label and button apart */
+  align-items: center; /* Vertically aligns them */
 }
 
 .suggestionItem:last-child {
@@ -70,6 +73,33 @@
 .suggestionItem:hover {
   background-color: #f0f0f0;
 }
+
+.suggestionLabel {
+  flex-grow: 1; /* Allows label to take available space */
+  margin-right: 8px; /* Space before delete button */
+  /* Ensure text doesn't overflow and push button out */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.deleteButtonSkladnik {
+  background-color: #dc3545; /* Red color */
+  color: white;
+  border: none;
+  padding: 0.2rem 0.4rem; /* Small padding */
+  font-size: 0.7rem; /* Small font */
+  border-radius: 3px;
+  cursor: pointer;
+  margin-left: auto; /* Pushes button to the right if not using space-between on parent */
+  flex-shrink: 0; /* Prevent button from shrinking */
+  line-height: 1; /* Ensure text fits in small button */
+}
+
+.deleteButtonSkladnik:hover {
+  background-color: #c82333; /* Darker red on hover */
+}
+
 
 .loadingMessage, .errorMessage, .noSuggestions {
   padding: 10px;

@@ -14,7 +14,7 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
   const fetchAllSkladniki = useCallback(async () => {
     if (!apiToken) {
       setError('Brak tokenu API do pobrania składników.');
-      return null; // Return null on failure or if no token
+      return null;
     }
     setIsLoading(true);
     setError(null);
@@ -31,15 +31,15 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
       }
       const data = await response.json();
       if (data.success && Array.isArray(data.data)) {
-        setAllSkladniki(data.data); // Set the master list
-        return data.data; // Return the fetched ingredients
+        setAllSkladniki(data.data);
+        return data.data;
       } else {
         throw new Error(data.message || 'Nieprawidłowy format danych odpowiedzi API dla składników.');
       }
     } catch (err) {
       setError(err.message);
-      setAllSkladniki([]); // Clear master list on error
-      return null; // Return null on error
+      setAllSkladniki([]);
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -47,10 +47,10 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
 
   const filterSuggestions = useCallback((value) => {
     if (!value) {
-      setSuggestions(allSkladniki); 
+      setSuggestions(allSkladniki);
       return;
     }
-    const filtered = allSkladniki.filter(s => 
+    const filtered = allSkladniki.filter(s =>
       s.nazwa.toLowerCase().includes(value.toLowerCase())
     );
     setSuggestions(filtered);
@@ -67,12 +67,12 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
     debounceTimeoutRef.current = setTimeout(async () => {
       if (value.trim() === '') {
         if (allSkladniki.length > 0) {
-            setSuggestions(allSkladniki);
+          setSuggestions(allSkladniki);
         } else if (!isLoading) {
-            const fetchedIngredients = await fetchAllSkladniki();
-            if (fetchedIngredients) {
-                setSuggestions(fetchedIngredients);
-            }
+          const fetchedIngredients = await fetchAllSkladniki();
+          if (fetchedIngredients) {
+            setSuggestions(fetchedIngredients);
+          }
         }
       } else {
         filterSuggestions(value);
@@ -92,7 +92,6 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
         setSuggestions(allSkladniki);
       }
     } else {
-      // If input is not empty on focus, filter based on current input value
       filterSuggestions(inputValue);
     }
   };
@@ -113,19 +112,72 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
   }, []);
 
   const handleSuggestionClick = (suggestion) => {
-    onSkladnikSelected(suggestion); 
-    setInputValue(''); // Clear input field after selection
+    onSkladnikSelected(suggestion);
+    setInputValue('');
     setIsDropdownVisible(false);
-    // After selection and clearing input, if user re-focuses, they should see all suggestions
-    setSuggestions(allSkladniki); 
+    setSuggestions(allSkladniki);
   };
 
   const handleAddButtonClick = () => {
     if (inputValue.trim() !== '') {
       onNewSkladnikAdd(inputValue.trim());
-      setInputValue(''); 
-      setSuggestions(allSkladniki); 
+      setInputValue('');
+      setSuggestions(allSkladniki);
       setIsDropdownVisible(false);
+    }
+  };
+
+  const handleDeleteSkladnik = async (skladnikId, e) => {
+    e.stopPropagation(); // Prevent item selection or dropdown closing
+    if (!apiToken) {
+      alert('Brak tokenu API do wykonania operacji.');
+      return;
+    }
+
+    const confirmed = window.confirm("Czy na pewno chcesz usunąć ten składnik?");
+    if (!confirmed) return;
+
+    const encodedToken = encodeURIComponent(apiToken);
+    const url = `http://localhost:8080/api/app-data/skladnik/${skladnikId}?token=${encodedToken}`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Błąd serwera bez szczegółów.' }));
+        console.error(`Błąd API (${response.status}): ${errorData.message}`);
+        alert(`Nie udało się usunąć składnika: ${errorData.message || response.statusText}`);
+        return;
+      }
+
+      const result = await response.json();
+      console.log('Składnik usunięty:', result);
+      // alert(result.message || 'Składnik usunięty pomyślnie.');
+      
+      // Refresh the list of all ingredients and suggestions
+      const updatedSkladniki = await fetchAllSkladniki();
+      if (updatedSkladniki) {
+        // If input is empty, show all new suggestions, otherwise filter by current input
+        if (inputValue.trim() === '') {
+            setSuggestions(updatedSkladniki);
+        } else {
+            const filtered = updatedSkladniki.filter(s => 
+                s.nazwa.toLowerCase().includes(inputValue.toLowerCase())
+            );
+            setSuggestions(filtered);
+        }
+      }
+      // Note: This does not automatically remove the Skladnik from the ProductForm's formData.skladniki list.
+      // That would require a callback to the parent, which is not specified in the current design for Skladniki.
+
+    } catch (error) {
+      console.error('Błąd sieci lub wykonania fetch podczas usuwania składnika:', error);
+      alert('Wystąpił błąd sieciowy podczas próby usunięcia składnika.');
     }
   };
 
@@ -149,25 +201,27 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
       {isDropdownVisible && suggestions.length > 0 && (
         <ul className={styles.suggestionsList}>
           {suggestions.map((suggestion) => (
-            <li 
-              key={suggestion.id} 
-              onClick={() => handleSuggestionClick(suggestion)} 
+            <li
+              key={suggestion.id}
+              onClick={() => handleSuggestionClick(suggestion)}
               className={styles.suggestionItem}
             >
-              {suggestion.nazwa}
+              <span className={styles.suggestionLabel}>{suggestion.nazwa}</span>
+              <button
+                type="button"
+                className={styles.deleteButtonSkladnik} // Use specific class if needed, or generic
+                onClick={(e) => handleDeleteSkladnik(suggestion.id, e)}
+                aria-label={`Usuń ${suggestion.nazwa}`}
+              >
+                Usuń
+              </button>
             </li>
           ))}
         </ul>
       )}
-      {/* This message should appear if user types and no matches are found */}
       {isDropdownVisible && !isLoading && suggestions.length === 0 && inputValue.trim() !== '' && (
-         <div className={styles.noSuggestions}>Brak pasujących składników. Możesz dodać nowy.</div>
+        <div className={styles.noSuggestions}>Brak pasujących składników. Możesz dodać nowy.</div>
       )}
-      {/* The message "Rozpocznij wpisywanie..." should no longer appear with the new logic,
-          as suggestions will be populated if input is empty and data is available or fetched. 
-          The condition for it was: 
-          isDropdownVisible && !isLoading && suggestions.length === 0 && inputValue.trim() === '' && allSkladniki.length > 0 
-          This should now be false if logic is correct. */}
     </div>
   );
 };

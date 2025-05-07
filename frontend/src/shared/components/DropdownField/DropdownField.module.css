@@ -118,6 +118,9 @@
   padding: 0.75rem;
   cursor: pointer;
   border-bottom: 1px solid #f0f0f0;
+  display: flex; /* For aligning label and delete button */
+  justify-content: space-between; /* Pushes label and button apart */
+  align-items: center; /* Vertically aligns them */
 }
 
 .dropdownItem:last-child {
@@ -127,6 +130,28 @@
 .dropdownItem:hover {
   background-color: #f0f0f0;
 }
+
+.optionLabel {
+  flex-grow: 1; /* Allows label to take available space */
+  margin-right: 8px; /* Space before delete button */
+}
+
+.deleteButton {
+  background-color: #dc3545; /* Red color */
+  color: white;
+  border: none;
+  padding: 0.2rem 0.4rem; /* Small padding */
+  font-size: 0.7rem; /* Small font */
+  border-radius: 3px;
+  cursor: pointer;
+  margin-left: auto; /* Pushes button to the right if not using space-between on parent */
+  flex-shrink: 0; /* Prevent button from shrinking */
+}
+
+.deleteButton:hover {
+  background-color: #c82333; /* Darker red on hover */
+}
+
 
 .dropdownMessage {
   padding: 0.75rem;
