@@ -70,7 +70,6 @@ const ProductForm = ({ onClose }) => {
 
   const [activeAddOptionModal, setActiveAddOptionModal] = useState({ type: null, isOpen: false });
 
-  // Refs for DropdownFields to call their refreshAndSelect method
   const rodzajProduktuDropdownRef = useRef(null);
   const jednostkaDropdownRef = useRef(null);
   const nadKategoriaDropdownRef = useRef(null);
@@ -137,7 +136,7 @@ const ProductForm = ({ onClose }) => {
           default:
             break;
         }
-      } else { // Clear fields if selectedOption is null (e.g. clearing selection)
+      } else { 
         switch (dropdownName) {
             case 'rodzajProduktu': updatedFields = { rodzajProduktuId: '', rodzajProduktuNazwa: '', rodzajProduktuOpis: '' }; break;
             case 'jednostka': updatedFields = { jednostkaId: '', jednostkaNazwa: '', jednostkaSkrot: '' }; break;
@@ -161,16 +160,12 @@ const ProductForm = ({ onClose }) => {
 
   const handleOptionSuccessfullyAdded = (newlyAddedOption, entityType) => {
     if (newlyAddedOption && entityType) {
-      // 1. Update the main form data by simulating a dropdown change
       handleDropdownChange(entityType, newlyAddedOption);
-      
-      // 2. Trigger the relevant DropdownField to refresh its options and select the new one
       const dropdownRef = dropdownRefs[entityType];
       if (dropdownRef && dropdownRef.current && typeof dropdownRef.current.refreshAndSelect === 'function') {
         dropdownRef.current.refreshAndSelect(newlyAddedOption);
       } else {
         console.warn(`Dropdown ref or refreshAndSelect method not found for ${entityType}`);
-        // As a fallback, you might just re-fetch all options for that dropdown if the ref method fails
       }
     }
     handleCloseAddOptionModal();
@@ -264,6 +259,7 @@ const ProductForm = ({ onClose }) => {
       <form onSubmit={handleSubmit} className={styles.productForm}>
         {submitError && <div className={styles.errorMessage}>{submitError}</div>}
         <div className={styles.formGrid}>
+          {/* Form groups as before */}
           <div className={styles.formGroup}>
             <label htmlFor="nazwa">Nazwa Produktu:</label>
             <input type="text" id="nazwa" name="nazwa" value={formData.nazwa} onChange={handleInputChange} required className={styles.formInput} />
@@ -405,21 +401,21 @@ const ProductForm = ({ onClose }) => {
         </div>
 
         <div className={styles.formGroupFullWidth}>
-            <ImageUploadManager onImagesChange={handleImagesChange} currentImages={formData.zdjecia} />
+            <ImageUploadManager images={formData.zdjecia} onImagesChange={handleImagesChange} />
         </div>
 
         </div>
         <div className={styles.formActionsMain}>
-          <button type="submit" className={styles.submitButtonMain} disabled={isSubmitting}>
-            {isSubmitting ? 'Dodawanie Produktu...' : 'Dodaj Produkt'}
-          </button>
-          <button type="button" onClick={onClose} className={styles.cancelButtonMain} disabled={isSubmitting}>
+          {/* Swapped order of buttons */}
+          <button type="button" onClick={onClose} className={`${styles.buttonMain} ${styles.cancelButtonMain}`} disabled={isSubmitting}>
             Anuluj
+          </button>
+          <button type="submit" className={`${styles.buttonMain} ${styles.submitButtonMain}`} disabled={isSubmitting}>
+            {isSubmitting ? 'Dodawanie Produktu...' : 'Dodaj Produkt'}
           </button>
         </div>
       </form>
 
-      {/* Render Add Option Modals */}
       {activeAddOptionModal.isOpen && activeAddOptionModal.type === 'rodzajProduktu' && (
         <AddRodzajProduktuModal 
           isOpen={true} 
