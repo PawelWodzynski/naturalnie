@@ -14,7 +14,6 @@ import java.util.Optional;
 @Repository
 public interface ZdjecieRepository extends JpaRepository<Zdjecie, Integer> {
     List<Zdjecie> findByProduktId(Integer produktId);
-    // Optional<Zdjecie> findByUrlAndProdukt_Id(String url, Integer produktId); // Removed obsolete method
 
     @Transactional
     @Modifying
@@ -23,7 +22,7 @@ public interface ZdjecieRepository extends JpaRepository<Zdjecie, Integer> {
 
     @Transactional
     @Modifying
-    void deleteByProduktId(Integer produktId); // Added this method
+    void deleteAllByProduktId(Integer produktId); // Corrected method name
 
 }
 
