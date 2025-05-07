@@ -30,15 +30,12 @@ const ProductForm = ({ onClose }) => {
     bezglutenowy: false,
     opis: '',
 
-    // --- Fields for Dropdown Selections (will store the ID of the selected item) ---
     rodzajProduktuId: '', 
     jednostkaId: '',
     nadKategoriaId: '',
     opakowanieId: '',
-    stawkaVatId: '', // Will store the ID of the selected VAT rate
+    stawkaVatId: '',
 
-    // --- Fields to be populated based on dropdown selection for the payload ---
-    // These will hold the actual values corresponding to the selected IDs
     rodzajProduktuNazwa: '',
     rodzajProduktuOpis: '',
     jednostkaNazwa: '',
@@ -49,7 +46,7 @@ const ProductForm = ({ onClose }) => {
     opakowanieNazwa: '',
     opakowanieSkrot: '',
     opakowanieOpis: '',
-    stawkaVatWartosc: 0, // Will store the actual numeric VAT rate value
+    stawkaVatWartosc: 0,
 
     kodTowaruKod: '',
     kodEanKod: '',
@@ -71,7 +68,6 @@ const ProductForm = ({ onClose }) => {
     }));
   };
 
-  // Generic handler for dropdown changes
   const handleDropdownChange = (dropdownName, selectedOption) => {
     setFormData(prev => {
       let updatedFields = {};
@@ -109,15 +105,14 @@ const ProductForm = ({ onClose }) => {
             break;
           case 'stawkaVat':
             updatedFields = {
-              stawkaVatId: selectedOption.id, // Store the ID of the VAT rate
-              stawkaVatWartosc: parseFloat(selectedOption.wartosc) // Store the actual numeric value
+              stawkaVatId: selectedOption.id,
+              stawkaVatWartosc: parseFloat(selectedOption.wartosc)
             };
             break;
           default:
             break;
         }
       } else {
-        // Reset fields if 'Wybierz...' is selected
         switch (dropdownName) {
           case 'rodzajProduktu':
             updatedFields = { rodzajProduktuId: '', rodzajProduktuNazwa: '', rodzajProduktuOpis: '' };
@@ -166,7 +161,7 @@ const ProductForm = ({ onClose }) => {
   const handleImagesChange = useCallback((newImages) => {
     setFormData(prev => ({
       ...prev,
-      zdjecia: newImages
+      zdjecia: newImages // Assuming newImages is already in the format [{ daneZdjecia: "base64...", opis: "...", kolejnosc: 0 }, ...]
     }));
   }, []);
 
@@ -186,6 +181,7 @@ const ProductForm = ({ onClose }) => {
       const encodedToken = encodeURIComponent(token);
       const url = `http://localhost:8080/api/app-data/produkt?token=${encodedToken}`;
       
+      // Construct payload according to ProduktRequestDTO
       const payload = {
         nazwa: formData.nazwa,
         waga: parseFloat(formData.waga) || 0,
@@ -204,47 +200,48 @@ const ProductForm = ({ onClose }) => {
         wartoKupic: formData.wartoKupic,
         bezglutenowy: formData.bezglutenowy,
         opis: formData.opis,
-        rodzajProduktu: {
-            nazwa: formData.rodzajProduktuNazwa,
-            opis: formData.rodzajProduktuOpis
-        },
-        jednostka: {
-            nazwa: formData.jednostkaNazwa,
-            skrot: formData.jednostkaSkrot
-        },
-        nadKategoria: {
-            nazwa: formData.nadKategoriaNazwa,
-            opis: formData.nadKategoriaOpis,
-            kolejnosc: parseInt(formData.nadKategoriaKolejnosc, 10) || 0
-        },
-        opakowanie: {
-            nazwa: formData.opakowanieNazwa,
-            skrot: formData.opakowanieSkrot,
-            opis: formData.opakowanieOpis
-        },
-        stawkaVat: {
-            // Backend expects the actual VAT value for the 'wartosc' field
-            wartosc: parseFloat(formData.stawkaVatWartosc) || 0 
-        },
-        kodTowaru: { kod: formData.kodTowaruKod },
-        kodEan: { kod: formData.kodEanKod },
-        identyfikator: { wartosc: formData.identyfikatorWartosc },
-        skladniki: formData.skladniki.map(s => ({ nazwa: s })), 
-        zdjecia: formData.zdjecia.map(({ id, ...restOfImage }) => ({
-            daneZdjecia: restOfImage.daneZdjecia,
-            opis: restOfImage.opis,
-            kolejnosc: restOfImage.kolejnosc
+
+        // Fields from RodzajProduktu
+        rodzajProduktuNazwa: formData.rodzajProduktuNazwa,
+        rodzajProduktuOpis: formData.rodzajProduktuOpis,
+
+        // Fields from Jednostka
+        jednostkaNazwa: formData.jednostkaNazwa,
+        jednostkaSkrot: formData.jednostkaSkrot,
+
+        // Fields from NadKategoria
+        nadKategoriaNazwa: formData.nadKategoriaNazwa,
+        nadKategoriaOpis: formData.nadKategoriaOpis,
+        nadKategoriaKolejnosc: parseInt(formData.nadKategoriaKolejnosc, 10) || 0,
+
+        // Fields from Opakowanie
+        opakowanieNazwa: formData.opakowanieNazwa,
+        opakowanieSkrot: formData.opakowanieSkrot,
+        opakowanieOpis: formData.opakowanieOpis,
+
+        // Fields from StawkaVat
+        stawkaVatWartosc: parseFloat(formData.stawkaVatWartosc) || 0,
+
+        // Values for KodTowaru, KodEan, Identyfikator
+        kodTowaruKod: formData.kodTowaruKod,
+        kodEanKod: formData.kodEanKod,
+        identyfikatorWartosc: formData.identyfikatorWartosc,
+
+        // List of ingredient names (already an array of strings in formData.skladniki)
+        skladniki: formData.skladniki,
+
+        // List of photo data
+        // Assuming formData.zdjecia is already an array of objects matching ZdjecieRequestDTO structure
+        // e.g., [{ daneZdjecia: "base64string", opis: "opis1", kolejnosc: 1 }, ...]
+        // The ImageUploadManager should provide images in this format.
+        zdjecia: formData.zdjecia.map(img => ({
+            daneZdjecia: img.daneZdjecia, // Assuming this is the base64 string
+            opis: img.opis,
+            kolejnosc: img.kolejnosc
         }))
       };
 
-      // Clean up payload: remove Id fields that were used for select control but not for payload
-      // The nested objects now contain the necessary info.
-      const finalPayload = { ...payload };
-      delete finalPayload.rodzajProduktuId;
-      delete finalPayload.jednostkaId;
-      delete finalPayload.nadKategoriaId;
-      delete finalPayload.opakowanieId;
-      delete finalPayload.stawkaVatId;
+      // console.log("Final payload being sent:", JSON.stringify(payload, null, 2));
 
       const response = await fetch(url, {
         method: 'POST',
@@ -252,11 +249,12 @@ const ProductForm = ({ onClose }) => {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify(finalPayload)
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Nie udało się przetworzyć odpowiedzi błędu serwera.' }));
+        console.error("Server error data:", errorData);
         throw new Error(`Błąd serwera: ${response.status} - ${errorData.message || 'Nieznany błąd'}`);
       }
 
@@ -342,7 +340,7 @@ const ProductForm = ({ onClose }) => {
           onChange={(e, selectedOption) => handleDropdownChange('stawkaVat', selectedOption)}
           fetchDataFunction={fetchStawkiVat}
           optionValueKey="id" 
-          optionLabelKey="wartosc" // Display the VAT value as the label
+          optionLabelKey="wartosc"
           required
         />
 
