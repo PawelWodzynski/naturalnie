@@ -8,12 +8,24 @@ const DropdownField = ({ label, name, value, onChange, fetchDataFunction, option
   const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
 
   const loadOptions = useCallback(async () => {
+    if (loading) return; // Prevent multiple simultaneous fetches
     setLoading(true);
     setError(null);
     setHasAttemptedFetch(true);
     try {
       const data = await fetchDataFunction();
-      setOptions(data || []);
+      // Assuming data is an array of objects. If not, it might need transformation here or in apiService.
+      if (Array.isArray(data)) {
+        setOptions(data);
+        if (data.length > 0) {
+          // For debugging: Log the structure of the first item to verify keys
+          // console.log(`DropdownField (${name}) - First option data:`, JSON.stringify(data[0]));
+        }
+      } else {
+        console.warn(`DropdownField (${name}): fetchDataFunction did not return an array. Received:`, data);
+        setOptions([]);
+        setError(`Nieprawidłowy format danych dla ${label}.`);
+      }
     } catch (err) {
       console.error(`Error fetching data for ${name} (${label}):`, err);
       setError(`Nie udało się załadować danych dla pola ${label}.`);
@@ -21,16 +33,23 @@ const DropdownField = ({ label, name, value, onChange, fetchDataFunction, option
     } finally {
       setLoading(false);
     }
-  }, [fetchDataFunction, name, label]);
+  }, [fetchDataFunction, name, label, loading]);
 
   const handleFocus = () => {
-    // Fetch options on focus. This will re-fetch every time the dropdown is focused.
+    // Fetch options only if they haven't been fetched yet or to refresh them.
+    // Current implementation fetches every time on focus.
+    // If data should be fetched only once, add a condition like !hasAttemptedFetch || options.length === 0
     loadOptions();
   };
 
   const handleChange = (e) => {
     const selectedValue = e.target.value;
-    const selectedOption = options.find(option => String(option[optionValueKey]) === selectedValue) || null;
+    const selectedOption = Array.isArray(options) ? options.find(option => {
+        if (typeof option === 'object' && option !== null && option.hasOwnProperty(optionValueKey)) {
+            return String(option[optionValueKey]) === selectedValue;
+        }
+        return false;
+    }) || null : null;
     onChange(e, selectedOption); // Pass the original event and the full selected option object
   };
 
@@ -40,19 +59,37 @@ const DropdownField = ({ label, name, value, onChange, fetchDataFunction, option
       <select
         id={name}
         name={name}
-        value={value}
+        value={value} // This should be the ID (or whatever optionValueKey represents)
         onChange={handleChange}
-        onFocus={handleFocus} // Load options when the select field gains focus
+        onFocus={handleFocus}
         className={styles.formInput}
         required={required}
       >
         <option value="">Wybierz...</option>
         {loading && <option value="" disabled>Ładowanie...</option>}
-        {!loading && Array.isArray(options) && options.map((option) => (
-          <option key={option[optionValueKey]} value={option[optionValueKey]}>
-            {option[optionLabelKey]}
-          </option>
-        ))}
+        {!loading && Array.isArray(options) && options.map((option, index) => {
+          if (typeof option !== 'object' || option === null) {
+            return <option key={`invalid-option-${index}`} value="" disabled>Nieprawidłowa opcja</option>;
+          }
+
+          const optVal = option[optionValueKey];
+          let optLabel = option[optionLabelKey];
+
+          if (optVal === undefined || optVal === null) {
+            // Skip options that don't have a valid value key
+            return null; 
+          }
+
+          if (optLabel === undefined || optLabel === null) {
+            optLabel = `[ID: ${optVal}]`; // Fallback label if the primary label key is missing
+          }
+
+          return (
+            <option key={optVal} value={optVal}>
+              {String(optLabel)}
+            </option>
+          );
+        })}
       </select>
       {error && <p className={styles.errorMessage}>{error}</p>}
       {!loading && !error && hasAttemptedFetch && Array.isArray(options) && options.length === 0 && (
