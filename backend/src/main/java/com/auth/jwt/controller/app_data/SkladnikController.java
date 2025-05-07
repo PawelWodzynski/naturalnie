@@ -1,6 +1,7 @@
 package com.auth.jwt.controller.app_data;
 
-import com.auth.jwt.data.entity.app_data.Skladnik;
+import com.auth.jwt.data.dto.app_data.SkladnikDto;
+import com.auth.jwt.data.entity.app_data.Skladnik; // Keep for POST/PUT if they still use Skladnik entity directly
 import com.auth.jwt.exception.ResourceNotFoundException;
 import com.auth.jwt.exception.UserNotAuthenticatedException;
 import com.auth.jwt.service.app_data.SkladnikService;
@@ -31,14 +32,16 @@ public class SkladnikController {
     @GetMapping
     public ResponseEntity<?> getAllSkladniki(@RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(); // Fixed
-            List<Skladnik> skladniki = skladnikService.getAllSkladniki();
-            return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano listę składników.", skladniki));
+            authUtil.getAuthenticatedUserOrThrow();
+            // Updated to call the method returning List<SkladnikDto>
+            List<SkladnikDto> skladnikiDto = skladnikService.getAllSkladniki();
+            return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano listę składników.", skladnikiDto));
         } catch (UserNotAuthenticatedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(responseUtil.createErrorResponse(e.getMessage()));
         } catch (Exception e) {
             System.err.println("Błąd w endpoincie /api/app-data/skladnik (GET): " + e.getMessage());
+            e.printStackTrace(); // It's good to print stack trace for debugging
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(responseUtil.createErrorResponse("Wystąpił wewnętrzny błąd serwera przy pobieraniu składników."));
         }
@@ -47,10 +50,11 @@ public class SkladnikController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getSkladnikById(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(); // Fixed
-            Skladnik skladnik = skladnikService.getSkladnikById(id)
+            authUtil.getAuthenticatedUserOrThrow();
+            // Using the new service method that returns Optional<SkladnikDto>
+            SkladnikDto skladnikDto = skladnikService.getSkladnikDtoById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Skladnik o ID " + id + " nie znaleziony."));
-            return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano składnik.", skladnik));
+            return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano składnik.", skladnikDto));
         } catch (UserNotAuthenticatedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(responseUtil.createErrorResponse(e.getMessage()));
@@ -59,18 +63,26 @@ public class SkladnikController {
                     .body(responseUtil.createErrorResponse(e.getMessage()));
         } catch (Exception e) {
             System.err.println("Błąd w endpoincie /api/app-data/skladnik/{id} (GET): " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(responseUtil.createErrorResponse("Wystąpił wewnętrzny błąd serwera przy pobieraniu składnika."));
         }
     }
 
+    // POST, PUT, DELETE methods remain largely the same if they operate on Skladnik entity directly for creation/update
+    // and don't need to return the full Skladnik with its lazy collections in the response body.
+    // If they *do* return the created/updated entity, they should also be changed to return DTOs.
+    // For now, assuming they return the entity as before, or a simple success message.
+
     @PostMapping
     public ResponseEntity<?> createSkladnik(@RequestBody Skladnik skladnik, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(); // Fixed
-            Skladnik createdSkladnik = skladnikService.createSkladnik(skladnik);
+            authUtil.getAuthenticatedUserOrThrow();
+            Skladnik createdSkladnikEntity = skladnikService.createSkladnik(skladnik);
+            // Convert to DTO before sending in response
+            SkladnikDto createdSkladnikDto = new SkladnikDto(createdSkladnikEntity.getId(), createdSkladnikEntity.getNazwa());
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(responseUtil.createSuccessResponse("Utworzono nowy składnik.", createdSkladnik));
+                    .body(responseUtil.createSuccessResponse("Utworzono nowy składnik.", createdSkladnikDto));
         } catch (UserNotAuthenticatedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(responseUtil.createErrorResponse(e.getMessage()));
@@ -79,6 +91,7 @@ public class SkladnikController {
                     .body(responseUtil.createErrorResponse(e.getMessage()));
         } catch (Exception e) {
             System.err.println("Błąd w endpoincie /api/app-data/skladnik (POST): " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(responseUtil.createErrorResponse("Wystąpił wewnętrzny błąd serwera przy tworzeniu składnika."));
         }
@@ -87,9 +100,11 @@ public class SkladnikController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateSkladnik(@PathVariable Integer id, @RequestBody Skladnik skladnikDetails, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(); // Fixed
-            Skladnik updatedSkladnik = skladnikService.updateSkladnik(id, skladnikDetails);
-            return ResponseEntity.ok(responseUtil.createSuccessResponse("Zaktualizowano składnik.", updatedSkladnik));
+            authUtil.getAuthenticatedUserOrThrow();
+            Skladnik updatedSkladnikEntity = skladnikService.updateSkladnik(id, skladnikDetails);
+            // Convert to DTO before sending in response
+            SkladnikDto updatedSkladnikDto = new SkladnikDto(updatedSkladnikEntity.getId(), updatedSkladnikEntity.getNazwa());
+            return ResponseEntity.ok(responseUtil.createSuccessResponse("Zaktualizowano składnik.", updatedSkladnikDto));
         } catch (UserNotAuthenticatedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(responseUtil.createErrorResponse(e.getMessage()));
@@ -101,6 +116,7 @@ public class SkladnikController {
                     .body(responseUtil.createErrorResponse(e.getMessage()));
         } catch (Exception e) {
             System.err.println("Błąd w endpoincie /api/app-data/skladnik/{id} (PUT): " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(responseUtil.createErrorResponse("Wystąpił wewnętrzny błąd serwera przy aktualizacji składnika."));
         }
@@ -109,7 +125,7 @@ public class SkladnikController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteSkladnik(@PathVariable Integer id, @RequestParam(required = true) String token) {
         try {
-            authUtil.getAuthenticatedUserOrThrow(); // Fixed
+            authUtil.getAuthenticatedUserOrThrow();
             skladnikService.deleteSkladnik(id);
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Usunięto składnik o ID " + id + ".", null));
         } catch (UserNotAuthenticatedException e) {
@@ -120,6 +136,7 @@ public class SkladnikController {
                     .body(responseUtil.createErrorResponse(e.getMessage()));
         } catch (Exception e) {
             System.err.println("Błąd w endpoincie /api/app-data/skladnik/{id} (DELETE): " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(responseUtil.createErrorResponse("Wystąpił wewnętrzny błąd serwera przy usuwaniu składnika."));
         }
