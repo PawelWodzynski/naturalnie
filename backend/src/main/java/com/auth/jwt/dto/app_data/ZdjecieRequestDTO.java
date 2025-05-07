@@ -5,7 +5,6 @@ import lombok.Data;
 @Data
 public class ZdjecieRequestDTO {
     private byte[] daneZdjecia;
-    private String url; // Added URL field
     private String opis;
     private Integer kolejnosc;
 }

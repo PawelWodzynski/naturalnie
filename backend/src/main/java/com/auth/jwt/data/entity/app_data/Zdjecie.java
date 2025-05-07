@@ -17,11 +17,8 @@ public class Zdjecie {
     private Integer id;
 
     @Lob
-    @Column(name = "dane_zdjecia", nullable = true, columnDefinition="LONGBLOB") // Assuming URL might be primary, so data can be nullable if URL is present
+    @Column(name = "dane_zdjecia", nullable = false, columnDefinition="LONGBLOB")
     private byte[] daneZdjecia;
-
-    @Column(name = "url", nullable = false, length = 1024) // Added URL field, assuming it's a required field
-    private String url;
 
     @Column(name = "opis", length = 255)
     private String opis;

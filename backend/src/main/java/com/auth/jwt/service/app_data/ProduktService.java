@@ -229,19 +229,16 @@ public class ProduktService {
         List<Integer> zdjeciaIds = new ArrayList<>();
         if (dto.getZdjecia() != null && !dto.getZdjecia().isEmpty()) {
             for (ZdjecieRequestDTO zdjecieDto : dto.getZdjecia()) {
-                // Ensure URL is provided, otherwise this will fail due to NOT NULL constraint
-                if (!StringUtils.hasText(zdjecieDto.getUrl())) {
-                    throw new IllegalArgumentException("URL dla zdjęcia jest wymagany.");
+                if (zdjecieDto.getDaneZdjecia() != null && zdjecieDto.getDaneZdjecia().length > 0) { // Check if binary data is present
+                    Zdjecie zdjecie = new Zdjecie();
+                    zdjecie.setDaneZdjecia(zdjecieDto.getDaneZdjecia());
+                    zdjecie.setOpis(zdjecieDto.getOpis());
+                    zdjecie.setKolejnosc(zdjecieDto.getKolejnosc());
+                    zdjecie.setProdukt(savedProdukt);
+                    Zdjecie savedZdjecie = zdjecieRepository.save(zdjecie);
+                    managedZdjecia.add(savedZdjecie);
+                    zdjeciaIds.add(savedZdjecie.getId());
                 }
-                Zdjecie zdjecie = new Zdjecie();
-                zdjecie.setDaneZdjecia(zdjecieDto.getDaneZdjecia());
-                zdjecie.setUrl(zdjecieDto.getUrl()); // Set the URL from DTO
-                zdjecie.setOpis(zdjecieDto.getOpis());
-                zdjecie.setKolejnosc(zdjecieDto.getKolejnosc());
-                zdjecie.setProdukt(savedProdukt);
-                Zdjecie savedZdjecie = zdjecieRepository.save(zdjecie);
-                managedZdjecia.add(savedZdjecie);
-                zdjeciaIds.add(savedZdjecie.getId());
             }
         }
         savedProdukt.setZdjeciaEntities(managedZdjecia);
@@ -378,7 +375,7 @@ public class ProduktService {
         }
 
         // Handle Skladniki update
-        if (dto.getSkladniki() != null) { // Allow clearing skladniki if an empty list is passed
+        if (dto.getSkladniki() != null) { 
             Set<Skladnik> managedSkladniki = new HashSet<>();
             List<Integer> skladnikiIds = new ArrayList<>();
             if (!dto.getSkladniki().isEmpty()) {
@@ -405,28 +402,24 @@ public class ProduktService {
         }
 
         // Handle Zdjecia update
-        if (dto.getZdjecia() != null) { // Allow clearing/updating zdjecia
-            // First, remove old images not present in the new DTO list (if managing by ID is needed)
-            // For simplicity here, we'll clear and add. More sophisticated logic might be needed for partial updates.
-            produkt.getZdjeciaEntities().clear(); // Clear existing images linked to the product
-            zdjecieRepository.deleteAllByProduktId(produkt.getId()); // Ensure orphans are removed if cascade doesn't cover all scenarios
+        if (dto.getZdjecia() != null) { 
+            produkt.getZdjeciaEntities().clear(); 
+            zdjecieRepository.deleteAllByProduktId(produkt.getId()); 
 
             List<Zdjecie> managedZdjecia = new ArrayList<>();
             List<Integer> zdjeciaIds = new ArrayList<>();
             if (!dto.getZdjecia().isEmpty()) {
                 for (ZdjecieRequestDTO zdjecieDto : dto.getZdjecia()) {
-                    if (!StringUtils.hasText(zdjecieDto.getUrl())) {
-                         throw new IllegalArgumentException("URL dla zdjęcia jest wymagany.");
+                    if (zdjecieDto.getDaneZdjecia() != null && zdjecieDto.getDaneZdjecia().length > 0) { // Check if binary data is present
+                        Zdjecie zdjecie = new Zdjecie();
+                        zdjecie.setDaneZdjecia(zdjecieDto.getDaneZdjecia());
+                        zdjecie.setOpis(zdjecieDto.getOpis());
+                        zdjecie.setKolejnosc(zdjecieDto.getKolejnosc());
+                        zdjecie.setProdukt(produkt); 
+                        Zdjecie savedZdjecie = zdjecieRepository.save(zdjecie); 
+                        managedZdjecia.add(savedZdjecie);
+                        zdjeciaIds.add(savedZdjecie.getId());
                     }
-                    Zdjecie zdjecie = new Zdjecie();
-                    zdjecie.setDaneZdjecia(zdjecieDto.getDaneZdjecia());
-                    zdjecie.setUrl(zdjecieDto.getUrl()); // Set the URL from DTO
-                    zdjecie.setOpis(zdjecieDto.getOpis());
-                    zdjecie.setKolejnosc(zdjecieDto.getKolejnosc());
-                    zdjecie.setProdukt(produkt); // Link to the current Produkt
-                    Zdjecie savedZdjecie = zdjecieRepository.save(zdjecie); // Save each new Zdjecie
-                    managedZdjecia.add(savedZdjecie);
-                    zdjeciaIds.add(savedZdjecie.getId());
                 }
             }
             produkt.setZdjeciaEntities(managedZdjecia);
