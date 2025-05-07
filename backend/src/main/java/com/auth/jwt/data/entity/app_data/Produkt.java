@@ -93,6 +93,8 @@ public class Produkt {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rodzaj_produktu_id")
     @JsonBackReference("rodzajproduktu-produkt")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private RodzajProduktu rodzajProduktu;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -102,6 +104,8 @@ public class Produkt {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nad_kategoria_id")
     @JsonBackReference("nadkategoria-produkt")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private NadKategoria nadKategoria;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -116,14 +120,20 @@ public class Produkt {
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "kod_towaru_id", referencedColumnName = "kod_towaru_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private KodTowaru kodTowaru;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "kod_ean_id", referencedColumnName = "kod_ean_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private KodEan kodEan;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "identyfikator_id", referencedColumnName = "identyfikator_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Identyfikator identyfikator;
 
     @Column(name = "skladniki", columnDefinition = "TEXT")
@@ -143,7 +153,7 @@ public class Produkt {
     )
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private Set<Skladnik> skladnikiEntities = new HashSet<>(); // Made this a JPA managed ManyToMany field
+    private Set<Skladnik> skladnikiEntities = new HashSet<>();
 
 }
 

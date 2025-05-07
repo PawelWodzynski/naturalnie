@@ -3,6 +3,9 @@ package com.auth.jwt.data.entity.app_data;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 import java.util.List;
 
 @Entity
@@ -25,12 +28,14 @@ public class RodzajProduktu {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nad_kategoria_id")
     @JsonBackReference("nadkategoria-rodzajeproduktu")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private NadKategoria nadKategoria;
 
     // Relacja OneToMany z Produkt
     @OneToMany(mappedBy = "rodzajProduktu", cascade = CascadeType.ALL, orphanRemoval = true)
-    // If Produkt also has a @JsonManagedReference to this, consider adding @JsonManagedReference here too.
-    // For now, assuming Produkt might have @JsonBackReference to RodzajProduktu or this side is not serialized from here in a cycle.
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Produkt> produkty;
 }
 

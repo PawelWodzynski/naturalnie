@@ -3,6 +3,9 @@ package com.auth.jwt.data.entity.app_data;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 import java.util.List;
 
 @Entity
@@ -27,11 +30,15 @@ public class NadKategoria {
     // Relacja OneToMany z RodzajProduktu
     @OneToMany(mappedBy = "nadKategoria", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference("nadkategoria-rodzajeproduktu")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<RodzajProduktu> rodzajeProduktow;
 
     // Relacja OneToMany z Produkt (jeśli produkt może należeć bezpośrednio do nadkategorii)
     @OneToMany(mappedBy = "nadKategoria", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("nadkategoria-produkt") // Assuming a corresponding @JsonBackReference in Produkt
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Produkt> produkty;
 }
 

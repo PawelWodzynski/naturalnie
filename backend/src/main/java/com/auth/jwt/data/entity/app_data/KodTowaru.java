@@ -2,6 +2,8 @@ package com.auth.jwt.data.entity.app_data;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Table(name = "kod_towaru", schema = "app_data")
@@ -18,6 +20,8 @@ public class KodTowaru {
 
     // Relacja OneToOne z Produkt (Produkt jest właścicielem)
     @OneToOne(mappedBy = "kodTowaru", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Produkt produkt;
 }
 
