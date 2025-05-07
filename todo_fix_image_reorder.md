@@ -1,0 +1,11 @@
+- [x] Przeanalizuj logikę zmiany kolejności zdjęć w `ImageUploadManager.jsx` i `ProductForm.jsx`.
+- [x] Zidentyfikuj, że `ProductForm` usuwał tymczasowe `id` z obrazów, co psuło funkcję przeciągnij i upuść.
+- [x] Zmodyfikuj `ProductForm.jsx`:
+    - [x] Upewnij się, że `formData.zdjecia` przechowuje obrazy z ich tymczasowym `id`.
+    - [x] Zaktualizuj `handleImagesChange`, aby przekazywał obrazy z `id` do `setFormData`.
+    - [x] Zaktualizuj `handleSubmit`, aby usuwał tymczasowe `id` z `zdjecia` tylko podczas przygotowywania ostatecznego ładunku API.
+- [x] Zmodyfikuj `ImageUploadManager.jsx`:
+    - [x] Zweryfikowano, że `handleDragStart` i `handleDrop` poprawnie używają `id` obrazów do identyfikacji i zmiany kolejności (kod z odzyskanego pliku był już poprawny w tym zakresie po poprawkach w `ProductForm.jsx`).
+- [x] Przetestuj funkcjonalność zmiany kolejności zdjęć (teoretycznie, poprzez przegląd zmian w kodzie).
+- [x] Zgłoś poprawkę użytkownikowi.
+- [ ] Zatwierdź i wypchnij zmiany na GitHub.

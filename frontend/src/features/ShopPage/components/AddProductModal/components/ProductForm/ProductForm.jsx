@@ -36,7 +36,7 @@ const ProductForm = ({ onClose }) => {
     kodEanKod: '',
     identyfikatorWartosc: '',
     skladniki: [],
-    zdjecia: []
+    zdjecia: [] // This will store images with their temporary 'id' for DnD
   });
 
   const [skladnikInput, setSkladnikInput] = useState('');
@@ -72,12 +72,12 @@ const ProductForm = ({ onClose }) => {
     }));
   };
 
+  // Corrected: Keep the temporary 'id' for images in formData for DnD purposes.
+  // The 'id' will be stripped only when preparing the payload for the API.
   const handleImagesChange = useCallback((newImages) => {
-    // Remove the temporary 'id' field before setting to formData
-    const imagesToSave = newImages.map(({ id, ...rest }) => rest);
     setFormData(prev => ({
       ...prev,
-      zdjecia: imagesToSave
+      zdjecia: newImages // Store images with their 'id' and other data
     }));
   }, []);
 
@@ -97,13 +97,14 @@ const ProductForm = ({ onClose }) => {
       const encodedToken = encodeURIComponent(token);
       const url = `http://localhost:8080/api/app-data/produkt?token=${encodedToken}`;
       
-      // Prepare payload, ensuring 'zdjecia' only contains necessary fields
+      // Prepare payload: strip temporary 'id' from zdjecia before sending to API
       const payload = {
         ...formData,
-        zdjecia: formData.zdjecia.map(img => ({
-          daneZdjecia: img.daneZdjecia,
-          opis: img.opis,
-          kolejnosc: img.kolejnosc
+        zdjecia: formData.zdjecia.map(({ id, ...restOfImage }) => ({
+            // Ensure only fields expected by the backend are sent
+            daneZdjecia: restOfImage.daneZdjecia,
+            opis: restOfImage.opis,
+            kolejnosc: restOfImage.kolejnosc
         }))
       };
 
@@ -121,10 +122,8 @@ const ProductForm = ({ onClose }) => {
         throw new Error(`Błąd serwera: ${response.status} - ${errorData.message || 'Nieznany błąd'}`);
       }
 
-      // const result = await response.json(); // Assuming backend returns the created product or a success message
-      // console.log('Produkt dodany pomyślnie:', result);
-      alert('Produkt dodany pomyślnie!'); // Simple alert for now
-      onClose(); // Close modal on success
+      alert('Produkt dodany pomyślnie!');
+      onClose();
     } catch (error) {
       console.error("Błąd podczas dodawania produktu:", error);
       setSubmitError(error.message || "Wystąpił nieoczekiwany błąd.");
