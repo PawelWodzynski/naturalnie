@@ -1,8 +1,12 @@
 package com.auth.jwt.data.entity.app_data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 import java.util.List;
 
 @Entity
@@ -27,6 +31,9 @@ public class Opakowanie {
     // Relacja OneToMany z Produkt
     @OneToMany(mappedBy = "opakowanie", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("opakowanie-produkt")
+    @ToString.Exclude // Added to prevent issues with Lombok's toString
+    @EqualsAndHashCode.Exclude // Added to prevent issues with Lombok's equals/hashCode
+    @JsonIgnore // Added JsonIgnore
     private List<Produkt> produkty;
 }
 

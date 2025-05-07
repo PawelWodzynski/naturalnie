@@ -1,5 +1,6 @@
 package com.auth.jwt.data.entity.app_data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -32,6 +33,7 @@ public class NadKategoria {
     @JsonManagedReference("nadkategoria-rodzajeproduktu")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonIgnore // Added JsonIgnore
     private List<RodzajProduktu> rodzajeProduktow;
 
     // Relacja OneToMany z Produkt (jeśli produkt może należeć bezpośrednio do nadkategorii)
@@ -39,6 +41,7 @@ public class NadKategoria {
     @JsonManagedReference("nadkategoria-produkt") // Assuming a corresponding @JsonBackReference in Produkt
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonIgnore // Added JsonIgnore
     private List<Produkt> produkty;
 }
 

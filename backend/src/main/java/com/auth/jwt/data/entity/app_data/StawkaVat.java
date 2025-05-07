@@ -1,8 +1,12 @@
 package com.auth.jwt.data.entity.app_data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -22,6 +26,9 @@ public class StawkaVat {
     // Relacja OneToMany z Produkt
     @OneToMany(mappedBy = "stawkaVat", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("stawkavat-produkt")
+    @ToString.Exclude // Added to prevent issues with Lombok's toString
+    @EqualsAndHashCode.Exclude // Added to prevent issues with Lombok's equals/hashCode
+    @JsonIgnore // Added JsonIgnore
     private List<Produkt> produkty;
 }
 
