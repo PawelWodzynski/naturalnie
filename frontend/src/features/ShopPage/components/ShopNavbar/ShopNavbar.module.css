@@ -1,0 +1,24 @@
+.navbar {
+  background-color: #F0E68C; /* Ciemniejszy kremowy */
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #333;
+}
+
+.logoPlaceholder {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+.actionsContainer {
+  display: flex;
+  align-items: center;
+}
+
+/* Dodatkowe style dla przycisków w actionsContainer, jeśli potrzebne */
+.actionsContainer > * {
+  margin-left: 15px;
+}
+

@@ -1,0 +1,14 @@
+.addProductButton {
+  background-color: #4CAF50; /* Green */
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.addProductButton:hover {
+  background-color: #45a049; /* Darker Green */
+}
+

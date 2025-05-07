@@ -1,0 +1,14 @@
+.logoutButton {
+  background-color: #DC143C; /* Crimson */
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.logoutButton:hover {
+  background-color: #B22222; /* Firebrick */
+}
+

@@ -1,0 +1,13 @@
+.shopPageContainer {
+  background-color: #FDF5E6; /* Kremowe tło */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.shopContent {
+  flex-grow: 1;
+  padding: 20px;
+  /* Dodatkowe style dla zawartości sklepu */
+}
+
