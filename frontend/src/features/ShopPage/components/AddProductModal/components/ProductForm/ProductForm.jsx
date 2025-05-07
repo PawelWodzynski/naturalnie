@@ -1,7 +1,8 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import styles from './ProductForm.module.css';
 import ImageUploadManager from './components/ImageUploadManager';
 import DropdownField from '../../../../../../shared/components/DropdownField/DropdownField';
+import SkladnikiDropdownField from './components/SkladnikiDropdownField'; // Added import
 import {
   fetchRodzajeProduktu,
   fetchJednostki,
@@ -64,9 +65,17 @@ const ProductForm = ({ onClose }) => {
     zdjecia: []
   };
   const [formData, setFormData] = useState(initialFormData);
-  const [skladnikInput, setSkladnikInput] = useState('');
+  // Removed: const [skladnikInput, setSkladnikInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [apiToken, setApiToken] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setApiToken(token);
+    }
+  }, []);
 
   const [activeAddOptionModal, setActiveAddOptionModal] = useState({ type: null, isOpen: false });
 
@@ -171,12 +180,25 @@ const ProductForm = ({ onClose }) => {
     handleCloseAddOptionModal();
   };
 
-  const handleSkladnikInputChange = (e) => setSkladnikInput(e.target.value);
+  // Removed: const handleSkladnikInputChange = (e) => setSkladnikInput(e.target.value);
+  // Removed: handleAddSkladnik function
 
-  const handleAddSkladnik = () => {
-    if (skladnikInput.trim() !== '') {
-      setFormData(prev => ({ ...prev, skladniki: [...prev.skladniki, skladnikInput.trim()] }));
-      setSkladnikInput('');
+  // New handlers for SkladnikiDropdownField
+  const handleSkladnikSelectedFromDropdown = (selectedSkladnik) => {
+    if (selectedSkladnik && selectedSkladnik.nazwa) {
+      setFormData(prev => ({
+        ...prev,
+        skladniki: [...prev.skladniki, selectedSkladnik.nazwa]
+      }));
+    }
+  };
+
+  const handleAddNewSkladnikManual = (newSkladnikName) => {
+    if (newSkladnikName.trim() !== '') {
+      setFormData(prev => ({
+        ...prev,
+        skladniki: [...prev.skladniki, newSkladnikName.trim()]
+      }));
     }
   };
 
@@ -192,14 +214,14 @@ const ProductForm = ({ onClose }) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitError(null);
-    const token = localStorage.getItem("token");
-    if (!token) {
+    // const token = localStorage.getItem("token"); // Token is now in state: apiToken
+    if (!apiToken) {
       setSubmitError("Brak tokenu autoryzacyjnego. Zaloguj się ponownie.");
       setIsSubmitting(false);
       return;
     }
     try {
-      const encodedToken = encodeURIComponent(token);
+      const encodedToken = encodeURIComponent(apiToken);
       const url = `http://localhost:8080/api/app-data/produkt?token=${encodedToken}`;
       const payload = {
         nazwa: formData.nazwa,
@@ -384,12 +406,18 @@ const ProductForm = ({ onClose }) => {
           <input type="text" id="identyfikatorWartosc" name="identyfikatorWartosc" value={formData.identyfikatorWartosc} onChange={handleInputChange} className={styles.formInput} />
         </div>
 
+        {/* Modified Skladniki Section */}
         <div className={styles.formGroupFullWidth}>
-          <label htmlFor="skladnikInput">Składniki (dodaj pojedynczo):</label>
-          <div className={styles.inputWithButton}>
-            <input type="text" id="skladnikInput" value={skladnikInput} onChange={handleSkladnikInputChange} className={styles.formInput} />
-            <button type="button" onClick={handleAddSkladnik} className={styles.addButtonSkladnik}>Dodaj Składnik</button>
-          </div>
+          <label>Składniki (dodaj pojedynczo):</label>
+          {apiToken ? (
+            <SkladnikiDropdownField
+              apiToken={apiToken}
+              onSkladnikSelected={handleSkladnikSelectedFromDropdown}
+              onNewSkladnikAdd={handleAddNewSkladnikManual}
+            />
+          ) : (
+            <div>Ładowanie tokenu API lub token niedostępny...</div>
+          )}
           <ul className={styles.skladnikiList}>
             {formData.skladniki.map((skladnik, index) => (
               <li key={index} className={styles.skladnikItem}>
@@ -406,7 +434,6 @@ const ProductForm = ({ onClose }) => {
 
         </div>
         <div className={styles.formActionsMain}>
-          {/* Swapped order of buttons */}
           <button type="button" onClick={onClose} className={`${styles.buttonMain} ${styles.cancelButtonMain}`} disabled={isSubmitting}>
             Anuluj
           </button>
