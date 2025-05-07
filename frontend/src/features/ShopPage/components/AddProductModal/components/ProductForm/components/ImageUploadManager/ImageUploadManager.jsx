@@ -2,67 +2,69 @@ import React, { useCallback, useState } from 'react';
 import styles from './ImageUploadManager.module.css';
 import ImageTile from './components/ImageTile';
 
-const ImageUploadManager = ({ images, onImagesChange }) => {
+const ImageUploadManager = ({ images = [], onImagesChange }) => { // Added default value for images
   const [draggedImage, setDraggedImage] = useState(null);
 
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
+    const currentImages = images || []; // Ensure images is an array
     files.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
         const newImage = {
-          daneZdjecia: reader.result.split(',')[1], // Get base64 part
-          opis: '', // User can add description later if needed, or we add a field
-          kolejnosc: images.length + 1,
-          id: Date.now() + Math.random() // Temporary unique ID for mapping and drag-drop key
+          daneZdjecia: reader.result.split(',')[1], 
+          opis: '', 
+          kolejnosc: currentImages.length + 1,
+          id: Date.now() + Math.random()
         };
-        onImagesChange([...images, newImage]);
+        onImagesChange([...currentImages, newImage]);
       };
       reader.readAsDataURL(file);
     });
-    event.target.value = null; // Reset file input
+    event.target.value = null; 
   };
 
   const handleRemoveImage = (indexToRemove) => {
-    const newImages = images.filter((_, index) => index !== indexToRemove)
+    const currentImages = images || [];
+    const newImages = currentImages.filter((_, index) => index !== indexToRemove)
                             .map((img, idx) => ({ ...img, kolejnosc: idx + 1 }));
     onImagesChange(newImages);
   };
 
   const handleDescriptionChange = (index, newDescription) => {
-    const newImages = images.map((img, idx) => 
+    const currentImages = images || [];
+    const newImages = currentImages.map((img, idx) => 
       idx === index ? { ...img, opis: newDescription } : img
     );
     onImagesChange(newImages);
   };
 
-  // Drag and Drop Handlers
   const handleDragStart = (index) => {
-    setDraggedImage(images[index]);
+    const currentImages = images || [];
+    setDraggedImage(currentImages[index]);
   };
 
   const handleDragOver = (event) => {
-    event.preventDefault(); // Necessary to allow dropping
+    event.preventDefault(); 
   };
 
   const handleDrop = (targetIndex) => {
     if (!draggedImage) return;
-
-    const newImages = [...images];
+    const currentImages = images || [];
+    const newImages = [...currentImages];
     const draggedImageIndex = newImages.findIndex(img => img.id === draggedImage.id);
 
-    if (draggedImageIndex === -1) return; // Should not happen
+    if (draggedImageIndex === -1) return; 
 
-    // Remove dragged image from its original position
     newImages.splice(draggedImageIndex, 1);
-    // Insert dragged image at the target position
     newImages.splice(targetIndex, 0, draggedImage);
 
-    // Update 'kolejnosc' based on new order
     const reorderedImages = newImages.map((img, idx) => ({ ...img, kolejnosc: idx + 1 }));
     onImagesChange(reorderedImages);
     setDraggedImage(null);
   };
+  
+  const safeImages = images || []; // Ensure images is always an array for sort and map
 
   return (
     <div className={styles.imageManagerContainer}>
@@ -80,9 +82,9 @@ const ImageUploadManager = ({ images, onImagesChange }) => {
         />
       </div>
       <div className={styles.imageList}>
-        {images.sort((a, b) => a.kolejnosc - b.kolejnosc).map((image, index) => (
+        {safeImages.sort((a, b) => a.kolejnosc - b.kolejnosc).map((image, index) => (
           <ImageTile 
-            key={image.id || index} // Use a more stable key if available, e.g., image.id from backend
+            key={image.id || index} 
             image={image} 
             index={index} 
             onRemove={() => handleRemoveImage(index)}
@@ -98,3 +100,4 @@ const ImageUploadManager = ({ images, onImagesChange }) => {
 };
 
 export default ImageUploadManager;
+
