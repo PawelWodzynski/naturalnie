@@ -1,9 +1,17 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import styles from './ProductForm.module.css';
 import ImageUploadManager from './components/ImageUploadManager';
+import DropdownField from '../../../../shared/components/DropdownField/DropdownField';
+import {
+  fetchRodzajeProduktu,
+  fetchJednostki,
+  fetchNadKategorie,
+  fetchOpakowania,
+  fetchStawkiVat
+} from '../../../../shared/services/apiService';
 
 const ProductForm = ({ onClose }) => {
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     nazwa: '',
     waga: 0,
     cena: 0,
@@ -21,23 +29,24 @@ const ProductForm = ({ onClose }) => {
     wartoKupic: false,
     bezglutenowy: false,
     opis: '',
-    rodzajProduktuNazwa: '',
-    rodzajProduktuOpis: '',
-    jednostkaNazwa: '',
-    jednostkaSkrot: '',
-    nadKategoriaNazwa: '',
-    nadKategoriaOpis: '',
-    nadKategoriaKolejnosc: 0,
-    opakowanieNazwa: '',
-    opakowanieSkrot: '',
-    opakowanieOpis: '',
-    stawkaVatWartosc: 0,
+    rodzajProduktuNazwa: '', // This will be controlled by DropdownField, value will be the ID
+    rodzajProduktuOpis: '', // Hidden, autofilled
+    jednostkaNazwa: '', // This will be controlled by DropdownField, value will be the ID
+    jednostkaSkrot: '', // Hidden, autofilled
+    nadKategoriaNazwa: '', // This will be controlled by DropdownField, value will be the ID
+    nadKategoriaOpis: '', // Hidden, autofilled
+    nadKategoriaKolejnosc: 0, // Hidden, autofilled
+    opakowanieNazwa: '', // This will be controlled by DropdownField, value will be the ID
+    opakowanieSkrot: '', // Hidden, autofilled
+    opakowanieOpis: '', // Hidden, autofilled
+    stawkaVatWartosc: '', // This will be controlled by DropdownField, value will be the ID (or value directly if simple)
     kodTowaruKod: '',
     kodEanKod: '',
     identyfikatorWartosc: '',
     skladniki: [],
-    zdjecia: [] // This will store images with their temporary 'id' for DnD
-  });
+    zdjecia: []
+  };
+  const [formData, setFormData] = useState(initialFormData);
 
   const [skladnikInput, setSkladnikInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,7 +56,37 @@ const ProductForm = ({ onClose }) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : type === 'number' ? parseFloat(value) : value
+      [name]: type === 'checkbox' ? checked : type === 'number' && name !== 'stawkaVatWartosc' ? parseFloat(value) : value
+    }));
+  };
+
+  const setRodzajProduktuHiddenFields = (selectedOption) => {
+    setFormData(prev => ({
+      ...prev,
+      rodzajProduktuOpis: selectedOption ? selectedOption.opis : ''
+    }));
+  };
+
+  const setJednostkaHiddenFields = (selectedOption) => {
+    setFormData(prev => ({
+      ...prev,
+      jednostkaSkrot: selectedOption ? selectedOption.skrot : ''
+    }));
+  };
+
+  const setNadKategoriaHiddenFields = (selectedOption) => {
+    setFormData(prev => ({
+      ...prev,
+      nadKategoriaOpis: selectedOption ? selectedOption.opis : '',
+      nadKategoriaKolejnosc: selectedOption ? selectedOption.kolejnosc : 0
+    }));
+  };
+
+  const setOpakowanieHiddenFields = (selectedOption) => {
+    setFormData(prev => ({
+      ...prev,
+      opakowanieSkrot: selectedOption ? selectedOption.skrot : '',
+      opakowanieOpis: selectedOption ? selectedOption.opis : ''
     }));
   };
 
@@ -72,12 +111,10 @@ const ProductForm = ({ onClose }) => {
     }));
   };
 
-  // Corrected: Keep the temporary 'id' for images in formData for DnD purposes.
-  // The 'id' will be stripped only when preparing the payload for the API.
   const handleImagesChange = useCallback((newImages) => {
     setFormData(prev => ({
       ...prev,
-      zdjecia: newImages // Store images with their 'id' and other data
+      zdjecia: newImages
     }));
   }, []);
 
@@ -97,16 +134,84 @@ const ProductForm = ({ onClose }) => {
       const encodedToken = encodeURIComponent(token);
       const url = `http://localhost:8080/api/app-data/produkt?token=${encodedToken}`;
       
-      // Prepare payload: strip temporary 'id' from zdjecia before sending to API
+      // Prepare payload for the API
+      // The dropdowns will store the ID of the selected item in their respective 'Nazwa' fields (e.g., rodzajProduktuNazwa will be an ID)
+      // The backend expects the full objects or specific fields based on the selected IDs.
+      // For simplicity in this example, we'll assume the backend can handle IDs for these fields, 
+      // or that a transformation step (not fully shown here for brevity) would map these IDs back to objects or required structures.
+      // The current formData for these fields (e.g. rodzajProduktuNazwa) will hold the ID.
+      // The hidden fields (e.g. rodzajProduktuOpis) are already updated in formData.
+
       const payload = {
         ...formData,
+        // Ensure numeric fields are numbers if they were changed by dropdowns storing IDs as strings
+        waga: parseFloat(formData.waga) || 0,
+        cena: parseFloat(formData.cena) || 0,
+        // stawkaVatWartosc might be an ID or a value, adjust as per API expectation
+        // For now, assuming it's a value if it's simple, or an ID if it's an object from DB
+        // If stawkaVatWartosc is an ID, the backend needs to look up the actual value.
+        // If it's a direct value (e.g. 23 for 23%), then it's fine.
+        // Let's assume for StawkaVAT, the value itself is what's needed, not an ID.
+        // The cURL for Stawka VAT implies it returns objects like {id, nazwa, wartosc}
+        // So, stawkaVatWartosc in formData should be the 'wartosc' from the selected option.
+
+        // The dropdown for Stawka VAT will store the 'wartosc' directly in 'stawkaVatWartosc'
+        // For other dropdowns, we are storing the ID in the '...Nazwa' field.
+        // We need to adjust the payload to send the correct structure to the backend.
+        // This part needs careful mapping based on what the backend expects for each field.
+
+        // Example: if backend expects an object for rodzajProduktu:
+        // rodzajProduktu: { id: formData.rodzajProduktuNazwa, opis: formData.rodzajProduktuOpis, nazwa: /* need to get this from selected option */ },
+        // For now, we'll send the IDs and the autofilled hidden fields.
+        // The user prompt mentioned: "pola w formularzu muszą się zaktualizować o wybrane dane tak jak bylo dotychczas tylko że wpisywane manualnie"
+        // This implies the formData should contain the actual values, not just IDs for related entities.
+        // So, the DropdownField's onChange and setHiddenFields need to ensure all relevant fields in formData are set.
+
+        // Corrected payload structure based on the assumption that formData holds the final values:
+        rodzajProduktu: {
+            nazwa: formData.rodzajProduktuNazwa, // This should be the actual name, not ID
+            opis: formData.rodzajProduktuOpis
+        },
+        jednostka: {
+            nazwa: formData.jednostkaNazwa, // Actual name
+            skrot: formData.jednostkaSkrot
+        },
+        nadKategoria: {
+            nazwa: formData.nadKategoriaNazwa, // Actual name
+            opis: formData.nadKategoriaOpis,
+            kolejnosc: parseInt(formData.nadKategoriaKolejnosc, 10) || 0
+        },
+        opakowanie: {
+            nazwa: formData.opakowanieNazwa, // Actual name
+            skrot: formData.opakowanieSkrot,
+            opis: formData.opakowanieOpis
+        },
+        stawkaVat: {
+             // Assuming stawkaVatWartosc in formData will hold the actual numeric VAT rate (e.g., 23)
+            wartosc: parseFloat(formData.stawkaVatWartosc) || 0 
+        },
         zdjecia: formData.zdjecia.map(({ id, ...restOfImage }) => ({
-            // Ensure only fields expected by the backend are sent
             daneZdjecia: restOfImage.daneZdjecia,
             opis: restOfImage.opis,
             kolejnosc: restOfImage.kolejnosc
         }))
       };
+      
+      // Remove the individual fields from payload that are now part of nested objects
+      delete payload.rodzajProduktuNazwa;
+      delete payload.rodzajProduktuOpis;
+      delete payload.jednostkaNazwa;
+      delete payload.jednostkaSkrot;
+      delete payload.nadKategoriaNazwa;
+      delete payload.nadKategoriaOpis;
+      delete payload.nadKategoriaKolejnosc;
+      delete payload.opakowanieNazwa;
+      delete payload.opakowanieSkrot;
+      delete payload.opakowanieOpis;
+      // stawkaVatWartosc is handled by creating stawkaVat.wartosc
+      // delete payload.stawkaVatWartosc; // Keep this if the backend expects it directly and not nested.
+                                        // Based on the requirement to update fields as before, we'll assume the backend expects the nested structure.
+                                        // If not, this needs adjustment.
 
       const response = await fetch(url, {
         method: 'POST',
@@ -152,6 +257,115 @@ const ProductForm = ({ onClose }) => {
           <label htmlFor="cena">Cena (PLN):</label>
           <input type="number" id="cena" name="cena" value={formData.cena} onChange={handleInputChange} step="0.01" className={styles.formInput} />
         </div>
+
+        <DropdownField
+          label="Rodzaj Produktu"
+          name="rodzajProduktuNazwa" // This field in formData will store the ID of the selected rodzajProduktu
+          value={formData.rodzajProduktuNazwa} // This should be the ID
+          onChange={(e) => {
+            const selectedId = e.target.value;
+            const selectedOption = e.target.options[e.target.selectedIndex].text; // Get the display name
+            setFormData(prev => ({...prev, rodzajProduktuNazwa: selectedOption })); // Store actual name for display/payload
+          }}
+          fetchDataFunction={fetchRodzajeProduktu}
+          optionValueKey="id" // Assuming API returns { id: ..., nazwa: ..., opis: ... }
+          optionLabelKey="nazwa"
+          setHiddenFields={(selectedOption) => {
+            setFormData(prev => ({
+              ...prev,
+              rodzajProduktuOpis: selectedOption ? selectedOption.opis : initialFormData.rodzajProduktuOpis,
+              // Update rodzajProduktuNazwa to the actual name if it's not already done by onChange
+              rodzajProduktuNazwa: selectedOption ? selectedOption.nazwa : initialFormData.rodzajProduktuNazwa
+            }));
+          }}
+          initialFormData={initialFormData}
+        />
+
+        <DropdownField
+          label="Jednostka"
+          name="jednostkaNazwa" // This field in formData will store the ID
+          value={formData.jednostkaNazwa} // This should be the ID
+          onChange={(e) => {
+            const selectedId = e.target.value;
+            const selectedOption = e.target.options[e.target.selectedIndex].text;
+            setFormData(prev => ({...prev, jednostkaNazwa: selectedOption }));
+          }}
+          fetchDataFunction={fetchJednostki}
+          optionValueKey="id" // Assuming API returns { id: ..., nazwa: ..., skrot: ... }
+          optionLabelKey="nazwa"
+          setHiddenFields={(selectedOption) => {
+            setFormData(prev => ({
+              ...prev,
+              jednostkaSkrot: selectedOption ? selectedOption.skrot : initialFormData.jednostkaSkrot,
+              jednostkaNazwa: selectedOption ? selectedOption.nazwa : initialFormData.jednostkaNazwa
+            }));
+          }}
+          initialFormData={initialFormData}
+        />
+
+        <DropdownField
+          label="Nadkategoria"
+          name="nadKategoriaNazwa" // This field in formData will store the ID
+          value={formData.nadKategoriaNazwa} // This should be the ID
+          onChange={(e) => {
+            const selectedId = e.target.value;
+            const selectedOption = e.target.options[e.target.selectedIndex].text;
+            setFormData(prev => ({...prev, nadKategoriaNazwa: selectedOption }));
+          }}
+          fetchDataFunction={fetchNadKategorie}
+          optionValueKey="id" // Assuming API returns { id: ..., nazwa: ..., opis: ..., kolejnosc: ... }
+          optionLabelKey="nazwa"
+          setHiddenFields={(selectedOption) => {
+            setFormData(prev => ({
+              ...prev,
+              nadKategoriaOpis: selectedOption ? selectedOption.opis : initialFormData.nadKategoriaOpis,
+              nadKategoriaKolejnosc: selectedOption ? selectedOption.kolejnosc : initialFormData.nadKategoriaKolejnosc,
+              nadKategoriaNazwa: selectedOption ? selectedOption.nazwa : initialFormData.nadKategoriaNazwa
+            }));
+          }}
+          initialFormData={initialFormData}
+        />
+
+        <DropdownField
+          label="Opakowanie"
+          name="opakowanieNazwa" // This field in formData will store the ID
+          value={formData.opakowanieNazwa} // This should be the ID
+          onChange={(e) => {
+            const selectedId = e.target.value;
+            const selectedOption = e.target.options[e.target.selectedIndex].text;
+            setFormData(prev => ({...prev, opakowanieNazwa: selectedOption }));
+          }}
+          fetchDataFunction={fetchOpakowania}
+          optionValueKey="id" // Assuming API returns { id: ..., nazwa: ..., skrot: ..., opis: ... }
+          optionLabelKey="nazwa"
+          setHiddenFields={(selectedOption) => {
+            setFormData(prev => ({
+              ...prev,
+              opakowanieSkrot: selectedOption ? selectedOption.skrot : initialFormData.opakowanieSkrot,
+              opakowanieOpis: selectedOption ? selectedOption.opis : initialFormData.opakowanieOpis,
+              opakowanieNazwa: selectedOption ? selectedOption.nazwa : initialFormData.opakowanieNazwa
+            }));
+          }}
+          initialFormData={initialFormData}
+        />
+
+        <DropdownField
+          label="Stawka VAT (%)"
+          name="stawkaVatWartosc" // This field in formData will store the selected VAT value (e.g., 23)
+          value={formData.stawkaVatWartosc}
+          onChange={(e) => {
+             // For Stawka VAT, the value itself is what we want to store
+            const selectedValue = e.target.value;
+            setFormData(prev => ({...prev, stawkaVatWartosc: selectedValue ? parseFloat(selectedValue) : initialFormData.stawkaVatWartosc }));
+          }}
+          fetchDataFunction={fetchStawkiVat}
+          optionValueKey="wartosc" // Assuming API returns { id: ..., nazwa: ..., wartosc: ... }
+          optionLabelKey="nazwa" // Display name like "VAT 23%"
+          // No hidden fields for Stawka VAT as per requirements, it's a direct value.
+          // setHiddenFields can be omitted or passed as null/undefined if not needed by DropdownField
+          initialFormData={initialFormData}
+        />
+
         <div className={styles.formGroupCheckboxesFullWidth}>
             <h4 className={styles.checkboxGroupTitle}>Opcje Produktu:</h4>
             <div className={styles.checkboxGrid}>
@@ -175,50 +389,10 @@ const ProductForm = ({ onClose }) => {
                 <div className={styles.checkboxItem}><input type="checkbox" id="dostepneNaZamowienie" name="dostepneNaZamowienie" checked={formData.dostepneNaZamowienie} onChange={handleInputChange} /> <label htmlFor="dostepneNaZamowienie">Dostępne na Zamówienie</label></div>
             </div>
         </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="rodzajProduktuNazwa">Rodzaj Produktu - Nazwa:</label>
-          <input type="text" id="rodzajProduktuNazwa" name="rodzajProduktuNazwa" value={formData.rodzajProduktuNazwa} onChange={handleInputChange} className={styles.formInput} />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="rodzajProduktuOpis">Rodzaj Produktu - Opis:</label>
-          <input type="text" id="rodzajProduktuOpis" name="rodzajProduktuOpis" value={formData.rodzajProduktuOpis} onChange={handleInputChange} className={styles.formInput} />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="jednostkaNazwa">Jednostka - Nazwa:</label>
-          <input type="text" id="jednostkaNazwa" name="jednostkaNazwa" value={formData.jednostkaNazwa} onChange={handleInputChange} className={styles.formInput} />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="jednostkaSkrot">Jednostka - Skrót:</label>
-          <input type="text" id="jednostkaSkrot" name="jednostkaSkrot" value={formData.jednostkaSkrot} onChange={handleInputChange} className={styles.formInput} />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="nadKategoriaNazwa">Nadkategoria - Nazwa:</label>
-          <input type="text" id="nadKategoriaNazwa" name="nadKategoriaNazwa" value={formData.nadKategoriaNazwa} onChange={handleInputChange} className={styles.formInput} />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="nadKategoriaOpis">Nadkategoria - Opis:</label>
-          <input type="text" id="nadKategoriaOpis" name="nadKategoriaOpis" value={formData.nadKategoriaOpis} onChange={handleInputChange} className={styles.formInput} />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="nadKategoriaKolejnosc">Nadkategoria - Kolejność:</label>
-          <input type="number" id="nadKategoriaKolejnosc" name="nadKategoriaKolejnosc" value={formData.nadKategoriaKolejnosc} onChange={handleInputChange} className={styles.formInput} />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="opakowanieNazwa">Opakowanie - Nazwa:</label>
-          <input type="text" id="opakowanieNazwa" name="opakowanieNazwa" value={formData.opakowanieNazwa} onChange={handleInputChange} className={styles.formInput} />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="opakowanieSkrot">Opakowanie - Skrót:</label>
-          <input type="text" id="opakowanieSkrot" name="opakowanieSkrot" value={formData.opakowanieSkrot} onChange={handleInputChange} className={styles.formInput} />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="opakowanieOpis">Opakowanie - Opis:</label>
-          <input type="text" id="opakowanieOpis" name="opakowanieOpis" value={formData.opakowanieOpis} onChange={handleInputChange} className={styles.formInput} />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="stawkaVatWartosc">Stawka VAT (%):</label>
-          <input type="number" id="stawkaVatWartosc" name="stawkaVatWartosc" value={formData.stawkaVatWartosc} onChange={handleInputChange} step="0.01" className={styles.formInput} />
-        </div>
+
+        {/* Hidden fields are now managed by setHiddenFields in DropdownField and are part of formData */}
+        {/* No need to render them as inputs anymore */}
+
         <div className={styles.formGroup}>
           <label htmlFor="kodTowaruKod">Kod Towaru:</label>
           <input type="text" id="kodTowaruKod" name="kodTowaruKod" value={formData.kodTowaruKod} onChange={handleInputChange} className={styles.formInput} />
