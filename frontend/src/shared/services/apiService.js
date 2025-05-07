@@ -1,8 +1,5 @@
 const BASE_URL = "http://localhost:8080/api/app-data";
 
-
-
-
 const fetchData = async (endpoint) => {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -24,7 +21,13 @@ const fetchData = async (endpoint) => {
       console.error(`API request failed for ${endpoint}: ${response.status} - ${errorData.message || "Nieznany błąd"}`);
       throw new Error(`Błąd serwera: ${response.status} - ${errorData.message || "Nieznany błąd"}`);
     }
-    return await response.json();
+    const result = await response.json();
+    if (result && result.data && Array.isArray(result.data)) {
+        return result.data; // Return the array under the 'data' key
+    } else {
+        console.error(`API response for ${endpoint} does not contain 'data' array:`, result);
+        throw new Error(`Nieprawidłowa odpowiedź API dla ${endpoint}.`);
+    }
   } catch (error) {
     console.error(`Error fetching ${endpoint}:`, error);
     throw error;

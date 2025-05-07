@@ -29,13 +29,16 @@ const ProductForm = ({ onClose }) => {
     wartoKupic: false,
     bezglutenowy: false,
     opis: '',
-    // Fields for dropdown selection (will store IDs or direct values)
+
+    // --- Fields for Dropdown Selections (will store the ID of the selected item) ---
     rodzajProduktuId: '', 
     jednostkaId: '',
     nadKategoriaId: '',
     opakowanieId: '',
-    stawkaVatId: '', // Can store ID if needed, or direct value in stawkaVatWartosc
-    // Fields to be populated based on dropdown selection for the payload
+    stawkaVatId: '', // Will store the ID of the selected VAT rate
+
+    // --- Fields to be populated based on dropdown selection for the payload ---
+    // These will hold the actual values corresponding to the selected IDs
     rodzajProduktuNazwa: '',
     rodzajProduktuOpis: '',
     jednostkaNazwa: '',
@@ -46,7 +49,7 @@ const ProductForm = ({ onClose }) => {
     opakowanieNazwa: '',
     opakowanieSkrot: '',
     opakowanieOpis: '',
-    stawkaVatWartosc: 0, // Will store the actual VAT rate value
+    stawkaVatWartosc: 0, // Will store the actual numeric VAT rate value
 
     kodTowaruKod: '',
     kodEanKod: '',
@@ -64,59 +67,80 @@ const ProductForm = ({ onClose }) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : type === 'number' ? parseFloat(value) : value
+      [name]: type === 'checkbox' ? checked : (type === 'number' && name !== 'stawkaVatWartosc') ? parseFloat(value) : value
     }));
   };
 
-  const handleDropdownChange = (fieldName, selectedOption, eventTargetName) => {
+  // Generic handler for dropdown changes
+  const handleDropdownChange = (dropdownName, selectedOption) => {
     setFormData(prev => {
       let updatedFields = {};
-      switch (fieldName) {
-        case 'rodzajProduktu':
-          updatedFields = {
-            rodzajProduktuId: selectedOption ? selectedOption.id : '',
-            rodzajProduktuNazwa: selectedOption ? selectedOption.nazwa : '',
-            rodzajProduktuOpis: selectedOption ? selectedOption.opis : ''
-          };
-          break;
-        case 'jednostka':
-          updatedFields = {
-            jednostkaId: selectedOption ? selectedOption.id : '',
-            jednostkaNazwa: selectedOption ? selectedOption.nazwa : '',
-            jednostkaSkrot: selectedOption ? selectedOption.skrot : ''
-          };
-          break;
-        case 'nadKategoria':
-          updatedFields = {
-            nadKategoriaId: selectedOption ? selectedOption.id : '',
-            nadKategoriaNazwa: selectedOption ? selectedOption.nazwa : '',
-            nadKategoriaOpis: selectedOption ? selectedOption.opis : '',
-            nadKategoriaKolejnosc: selectedOption ? selectedOption.kolejnosc : 0
-          };
-          break;
-        case 'opakowanie':
-          updatedFields = {
-            opakowanieId: selectedOption ? selectedOption.id : '',
-            opakowanieNazwa: selectedOption ? selectedOption.nazwa : '',
-            opakowanieSkrot: selectedOption ? selectedOption.skrot : '',
-            opakowanieOpis: selectedOption ? selectedOption.opis : ''
-          };
-          break;
-        case 'stawkaVat':
-          updatedFields = {
-            stawkaVatId: selectedOption ? selectedOption.id : '', // Store ID if needed
-            stawkaVatWartosc: selectedOption ? parseFloat(selectedOption.wartosc) : 0, // Store the actual VAT rate
-            // If the dropdown's 'name' prop was 'stawkaVatWartosc', this ensures it's updated if needed
-            // However, we are using 'stawkaVatId' as the name for the select element now.
-          };
-          break;
-        default:
-          break;
+      if (selectedOption) {
+        switch (dropdownName) {
+          case 'rodzajProduktu':
+            updatedFields = {
+              rodzajProduktuId: selectedOption.id,
+              rodzajProduktuNazwa: selectedOption.nazwa,
+              rodzajProduktuOpis: selectedOption.opis
+            };
+            break;
+          case 'jednostka':
+            updatedFields = {
+              jednostkaId: selectedOption.id,
+              jednostkaNazwa: selectedOption.nazwa,
+              jednostkaSkrot: selectedOption.skrot
+            };
+            break;
+          case 'nadKategoria':
+            updatedFields = {
+              nadKategoriaId: selectedOption.id,
+              nadKategoriaNazwa: selectedOption.nazwa,
+              nadKategoriaOpis: selectedOption.opis,
+              nadKategoriaKolejnosc: selectedOption.kolejnosc
+            };
+            break;
+          case 'opakowanie':
+            updatedFields = {
+              opakowanieId: selectedOption.id,
+              opakowanieNazwa: selectedOption.nazwa,
+              opakowanieSkrot: selectedOption.skrot,
+              opakowanieOpis: selectedOption.opis
+            };
+            break;
+          case 'stawkaVat':
+            updatedFields = {
+              stawkaVatId: selectedOption.id, // Store the ID of the VAT rate
+              stawkaVatWartosc: parseFloat(selectedOption.wartosc) // Store the actual numeric value
+            };
+            break;
+          default:
+            break;
+        }
+      } else {
+        // Reset fields if 'Wybierz...' is selected
+        switch (dropdownName) {
+          case 'rodzajProduktu':
+            updatedFields = { rodzajProduktuId: '', rodzajProduktuNazwa: '', rodzajProduktuOpis: '' };
+            break;
+          case 'jednostka':
+            updatedFields = { jednostkaId: '', jednostkaNazwa: '', jednostkaSkrot: '' };
+            break;
+          case 'nadKategoria':
+            updatedFields = { nadKategoriaId: '', nadKategoriaNazwa: '', nadKategoriaOpis: '', nadKategoriaKolejnosc: 0 };
+            break;
+          case 'opakowanie':
+            updatedFields = { opakowanieId: '', opakowanieNazwa: '', opakowanieSkrot: '', opakowanieOpis: '' };
+            break;
+          case 'stawkaVat':
+            updatedFields = { stawkaVatId: '', stawkaVatWartosc: 0 };
+            break;
+          default:
+            break;
+        }
       }
       return { ...prev, ...updatedFields };
     });
   };
-
 
   const handleSkladnikInputChange = (e) => {
     setSkladnikInput(e.target.value);
@@ -199,12 +223,13 @@ const ProductForm = ({ onClose }) => {
             opis: formData.opakowanieOpis
         },
         stawkaVat: {
+            // Backend expects the actual VAT value for the 'wartosc' field
             wartosc: parseFloat(formData.stawkaVatWartosc) || 0 
         },
-        kodTowaru: { kod: formData.kodTowaruKod }, // Assuming backend expects object structure
-        kodEan: { kod: formData.kodEanKod }, // Assuming backend expects object structure
-        identyfikator: { wartosc: formData.identyfikatorWartosc }, // Assuming backend expects object structure
-        skladniki: formData.skladniki.map(s => ({ nazwa: s })), // Assuming backend expects list of objects
+        kodTowaru: { kod: formData.kodTowaruKod },
+        kodEan: { kod: formData.kodEanKod },
+        identyfikator: { wartosc: formData.identyfikatorWartosc },
+        skladniki: formData.skladniki.map(s => ({ nazwa: s })), 
         zdjecia: formData.zdjecia.map(({ id, ...restOfImage }) => ({
             daneZdjecia: restOfImage.daneZdjecia,
             opis: restOfImage.opis,
@@ -212,13 +237,22 @@ const ProductForm = ({ onClose }) => {
         }))
       };
 
+      // Clean up payload: remove Id fields that were used for select control but not for payload
+      // The nested objects now contain the necessary info.
+      const finalPayload = { ...payload };
+      delete finalPayload.rodzajProduktuId;
+      delete finalPayload.jednostkaId;
+      delete finalPayload.nadKategoriaId;
+      delete finalPayload.opakowanieId;
+      delete finalPayload.stawkaVatId;
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(finalPayload)
       });
 
       if (!response.ok) {
@@ -261,7 +295,7 @@ const ProductForm = ({ onClose }) => {
           label="Rodzaj Produktu"
           name="rodzajProduktuId" 
           value={formData.rodzajProduktuId}
-          onChange={(e, selectedOption) => handleDropdownChange('rodzajProduktu', selectedOption, e.target.name)}
+          onChange={(e, selectedOption) => handleDropdownChange('rodzajProduktu', selectedOption)}
           fetchDataFunction={fetchRodzajeProduktu}
           optionValueKey="id"
           optionLabelKey="nazwa"
@@ -272,7 +306,7 @@ const ProductForm = ({ onClose }) => {
           label="Jednostka"
           name="jednostkaId"
           value={formData.jednostkaId}
-          onChange={(e, selectedOption) => handleDropdownChange('jednostka', selectedOption, e.target.name)}
+          onChange={(e, selectedOption) => handleDropdownChange('jednostka', selectedOption)}
           fetchDataFunction={fetchJednostki}
           optionValueKey="id"
           optionLabelKey="nazwa"
@@ -283,7 +317,7 @@ const ProductForm = ({ onClose }) => {
           label="Nadkategoria"
           name="nadKategoriaId"
           value={formData.nadKategoriaId}
-          onChange={(e, selectedOption) => handleDropdownChange('nadKategoria', selectedOption, e.target.name)}
+          onChange={(e, selectedOption) => handleDropdownChange('nadKategoria', selectedOption)}
           fetchDataFunction={fetchNadKategorie}
           optionValueKey="id"
           optionLabelKey="nazwa"
@@ -294,7 +328,7 @@ const ProductForm = ({ onClose }) => {
           label="Opakowanie"
           name="opakowanieId"
           value={formData.opakowanieId}
-          onChange={(e, selectedOption) => handleDropdownChange('opakowanie', selectedOption, e.target.name)}
+          onChange={(e, selectedOption) => handleDropdownChange('opakowanie', selectedOption)}
           fetchDataFunction={fetchOpakowania}
           optionValueKey="id"
           optionLabelKey="nazwa"
@@ -303,12 +337,12 @@ const ProductForm = ({ onClose }) => {
 
         <DropdownField
           label="Stawka VAT (%)"
-          name="stawkaVatId" // Using stawkaVatId for the select, value will be the ID from API
-          value={formData.stawkaVatId} // formData.stawkaVatId will store the ID of the selected VAT rate
-          onChange={(e, selectedOption) => handleDropdownChange('stawkaVat', selectedOption, e.target.name)}
+          name="stawkaVatId" 
+          value={formData.stawkaVatId} 
+          onChange={(e, selectedOption) => handleDropdownChange('stawkaVat', selectedOption)}
           fetchDataFunction={fetchStawkiVat}
-          optionValueKey="id" // API returns {id, nazwa, wartosc}, so ID is the value for the select
-          optionLabelKey="nazwa" // Display name like "VAT 23%"
+          optionValueKey="id" 
+          optionLabelKey="wartosc" // Display the VAT value as the label
           required
         />
 

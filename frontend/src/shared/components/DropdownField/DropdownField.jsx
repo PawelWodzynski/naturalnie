@@ -8,37 +8,33 @@ const DropdownField = ({ label, name, value, onChange, fetchDataFunction, option
   const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
 
   const loadOptions = useCallback(async () => {
-    if (loading) return; // Prevent multiple simultaneous fetches
+    if (loading) return;
     setLoading(true);
     setError(null);
     setHasAttemptedFetch(true);
     try {
-      const data = await fetchDataFunction();
-      // Assuming data is an array of objects. If not, it might need transformation here or in apiService.
-      if (Array.isArray(data)) {
-        setOptions(data);
-        if (data.length > 0) {
-          // For debugging: Log the structure of the first item to verify keys
-          // console.log(`DropdownField (${name}) - First option data:`, JSON.stringify(data[0]));
-        }
+      const dataFromService = await fetchDataFunction();
+      // console.log(`DropdownField (${label}) - Data received from service:`, JSON.stringify(dataFromService)); // For debugging
+
+      if (Array.isArray(dataFromService)) {
+        setOptions(dataFromService);
       } else {
-        console.warn(`DropdownField (${name}): fetchDataFunction did not return an array. Received:`, data);
+        console.warn(`DropdownField (${label}): fetchDataFunction did not return an array. Received:`, dataFromService);
         setOptions([]);
-        setError(`Nieprawidłowy format danych dla ${label}.`);
+        // Provide a more specific error message if dataFromService is not an array
+        setError(`Nieprawidłowy format danych dla ${label}. Oczekiwano tablicy, otrzymano: ${typeof dataFromService}`);
       }
     } catch (err) {
-      console.error(`Error fetching data for ${name} (${label}):`, err);
-      setError(`Nie udało się załadować danych dla pola ${label}.`);
+      // This catches errors thrown by apiService.js (e.g., network error, API error response)
+      console.error(`Error fetching data for ${label} in DropdownField catch:`, err);
+      setError(err.message || `Nie udało się załadować danych dla pola ${label}.`);
       setOptions([]);
     } finally {
       setLoading(false);
     }
-  }, [fetchDataFunction, name, label, loading]);
+  }, [fetchDataFunction, name, label, loading]); // Added name to dependencies as it's used in console logs
 
   const handleFocus = () => {
-    // Fetch options only if they haven't been fetched yet or to refresh them.
-    // Current implementation fetches every time on focus.
-    // If data should be fetched only once, add a condition like !hasAttemptedFetch || options.length === 0
     loadOptions();
   };
 
@@ -50,7 +46,7 @@ const DropdownField = ({ label, name, value, onChange, fetchDataFunction, option
         }
         return false;
     }) || null : null;
-    onChange(e, selectedOption); // Pass the original event and the full selected option object
+    onChange(e, selectedOption);
   };
 
   return (
@@ -59,7 +55,7 @@ const DropdownField = ({ label, name, value, onChange, fetchDataFunction, option
       <select
         id={name}
         name={name}
-        value={value} // This should be the ID (or whatever optionValueKey represents)
+        value={value}
         onChange={handleChange}
         onFocus={handleFocus}
         className={styles.formInput}
@@ -67,21 +63,24 @@ const DropdownField = ({ label, name, value, onChange, fetchDataFunction, option
       >
         <option value="">Wybierz...</option>
         {loading && <option value="" disabled>Ładowanie...</option>}
-        {!loading && Array.isArray(options) && options.map((option, index) => {
+        {!loading && !error && Array.isArray(options) && options.map((option, index) => {
           if (typeof option !== 'object' || option === null) {
-            return <option key={`invalid-option-${index}`} value="" disabled>Nieprawidłowa opcja</option>;
+            console.warn(`DropdownField (${label}): Invalid option item at index ${index}:`, option);
+            return <option key={`invalid-option-${index}-${name}`} value="" disabled>Nieprawidłowa opcja</option>;
           }
 
           const optVal = option[optionValueKey];
           let optLabel = option[optionLabelKey];
 
           if (optVal === undefined || optVal === null) {
-            // Skip options that don't have a valid value key
+            console.warn(`DropdownField (${label}): Option at index ${index} missing value for key '${optionValueKey}':`, option);
             return null; 
           }
 
           if (optLabel === undefined || optLabel === null) {
-            optLabel = `[ID: ${optVal}]`; // Fallback label if the primary label key is missing
+            // Fallback label, but ideally optionLabelKey should always exist if data is correct
+            optLabel = `[ID: ${optVal}]`; 
+            console.warn(`DropdownField (${label}): Option at index ${index} (ID: ${optVal}) missing label for key '${optionLabelKey}'. Using fallback.`);
           }
 
           return (
@@ -93,7 +92,7 @@ const DropdownField = ({ label, name, value, onChange, fetchDataFunction, option
       </select>
       {error && <p className={styles.errorMessage}>{error}</p>}
       {!loading && !error && hasAttemptedFetch && Array.isArray(options) && options.length === 0 && (
-        <p className={styles.infoMessage}>Brak dostępnych opcji.</p>
+        <p className={styles.infoMessage}>Brak dostępnych opcji dla pola {label}.</p>
       )}
     </div>
   );
