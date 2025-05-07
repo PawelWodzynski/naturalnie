@@ -14,7 +14,7 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
   const fetchAllSkladniki = useCallback(async () => {
     if (!apiToken) {
       setError('Brak tokenu API do pobrania składników.');
-      return;
+      return null; // Return null on failure or if no token
     }
     setIsLoading(true);
     setError(null);
@@ -31,28 +31,21 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
       }
       const data = await response.json();
       if (data.success && Array.isArray(data.data)) {
-        setAllSkladniki(data.data);
-        // Set suggestions to allSkladniki only if input is empty and dropdown is visible, handled in onFocus
+        setAllSkladniki(data.data); // Set the master list
+        return data.data; // Return the fetched ingredients
       } else {
         throw new Error(data.message || 'Nieprawidłowy format danych odpowiedzi API dla składników.');
       }
     } catch (err) {
       setError(err.message);
-      setAllSkladniki([]);
-      setSuggestions([]);
+      setAllSkladniki([]); // Clear master list on error
+      return null; // Return null on error
     } finally {
       setIsLoading(false);
     }
   }, [apiToken]);
 
-  useEffect(() => {
-    // Initial fetch on component mount if token is present and allSkladniki is empty
-    if (apiToken && allSkladniki.length === 0) {
-        // fetchAllSkladniki(); // Or fetch on first focus as per current design
-    }
-  }, [apiToken, allSkladniki.length, fetchAllSkladniki]);
-
-  const filterSuggestions = (value) => {
+  const filterSuggestions = useCallback((value) => {
     if (!value) {
       setSuggestions(allSkladniki); 
       return;
@@ -61,7 +54,7 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
       s.nazwa.toLowerCase().includes(value.toLowerCase())
     );
     setSuggestions(filtered);
-  };
+  }, [allSkladniki]);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -71,36 +64,37 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
     }
-    debounceTimeoutRef.current = setTimeout(() => {
+    debounceTimeoutRef.current = setTimeout(async () => {
       if (value.trim() === '') {
         if (allSkladniki.length > 0) {
             setSuggestions(allSkladniki);
         } else if (!isLoading) {
-            fetchAllSkladniki(); // Fetch if allSkladniki is empty and not already loading
+            const fetchedIngredients = await fetchAllSkladniki();
+            if (fetchedIngredients) {
+                setSuggestions(fetchedIngredients);
+            }
         }
       } else {
         filterSuggestions(value);
       }
-    }, 300); 
+    }, 300);
   };
 
-  const handleInputFocus = () => {
-    if (allSkladniki.length === 0 && !isLoading) {
-        fetchAllSkladniki().then(() => {
-            // After fetching, if input is still empty, show all suggestions
-            if (inputValue.trim() === '') {
-                // Need to access the updated allSkladniki, so might need a slight refactor or rely on useEffect
-                // For now, let's assume fetchAllSkladniki sets suggestions if it's the initial load
-            }
-        });
-    } else {
-        if (inputValue.trim() === '') {
-            setSuggestions(allSkladniki);
-        } else {
-            filterSuggestions(inputValue);
-        }
-    }
+  const handleInputFocus = async () => {
     setIsDropdownVisible(true);
+    if (inputValue.trim() === '') {
+      if (allSkladniki.length === 0 && !isLoading) {
+        const fetchedIngredients = await fetchAllSkladniki();
+        if (fetchedIngredients) {
+          setSuggestions(fetchedIngredients);
+        }
+      } else {
+        setSuggestions(allSkladniki);
+      }
+    } else {
+      // If input is not empty on focus, filter based on current input value
+      filterSuggestions(inputValue);
+    }
   };
 
   useEffect(() => {
@@ -122,7 +116,7 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
     onSkladnikSelected(suggestion); 
     setInputValue(''); // Clear input field after selection
     setIsDropdownVisible(false);
-    // Optionally, reset suggestions to the full list if the user re-focuses the empty input
+    // After selection and clearing input, if user re-focuses, they should see all suggestions
     setSuggestions(allSkladniki); 
   };
 
@@ -165,12 +159,15 @@ const SkladnikiDropdownField = ({ apiToken, onSkladnikSelected, onNewSkladnikAdd
           ))}
         </ul>
       )}
+      {/* This message should appear if user types and no matches are found */}
       {isDropdownVisible && !isLoading && suggestions.length === 0 && inputValue.trim() !== '' && (
          <div className={styles.noSuggestions}>Brak pasujących składników. Możesz dodać nowy.</div>
       )}
-       {isDropdownVisible && !isLoading && suggestions.length === 0 && inputValue.trim() === '' && allSkladniki.length > 0 && (
-         <div className={styles.noSuggestions}>Rozpocznij wpisywanie, aby wyszukać lub wybrać z listy.</div>
-      )}
+      {/* The message "Rozpocznij wpisywanie..." should no longer appear with the new logic,
+          as suggestions will be populated if input is empty and data is available or fetched. 
+          The condition for it was: 
+          isDropdownVisible && !isLoading && suggestions.length === 0 && inputValue.trim() === '' && allSkladniki.length > 0 
+          This should now be false if logic is correct. */}
     </div>
   );
 };
