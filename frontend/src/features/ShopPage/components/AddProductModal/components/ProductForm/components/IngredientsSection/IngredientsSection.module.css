@@ -1,0 +1,36 @@
+.formGroupFullWidth {
+  grid-column: 1 / -1;
+  margin-bottom: 20px;
+}
+
+.skladnikiList {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.skladnikItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  background-color: #f9f9f9;
+}
+
+.removeButtonSkladnik {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.removeButtonSkladnik:hover {
+  background-color: #d9363e;
+}
+

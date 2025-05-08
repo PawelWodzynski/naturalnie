@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import styles from './ProductForm.module.css';
 import ImageUploadManager from './components/ImageUploadManager';
 import DropdownField from '../../../../../../shared/components/DropdownField/DropdownField';
-import SkladnikiDropdownField from './components/SkladnikiDropdownField';
+// Removed SkladnikiDropdownField import as it's now part of IngredientsSection
 import InfoModal from '../../../../../../shared/components/InfoModal';
 import {
   fetchRodzajeProduktu,
@@ -23,6 +23,14 @@ import AddJednostkaModal from './components/addOptionModals/AddJednostkaModal';
 import AddNadKategoriaModal from './components/addOptionModals/AddNadKategoriaModal';
 import AddOpakowanieModal from './components/addOptionModals/AddOpakowanieModal';
 import AddStawkaVatModal from './components/addOptionModals/AddStawkaVatModal';
+
+// Import new section components
+import BasicProductInfoSection from './components/BasicProductInfoSection';
+import ProductOptionsCheckboxesSection from './components/ProductOptionsCheckboxesSection';
+import AvailabilityCheckboxesSection from './components/AvailabilityCheckboxesSection';
+import ProductCodesSection from './components/ProductCodesSection';
+import IngredientsSection from './components/IngredientsSection';
+import FormActionsSection from './components/FormActionsSection';
 
 const ProductForm = ({ onClose }) => {
   const initialFormData = {
@@ -185,7 +193,6 @@ const ProductForm = ({ onClose }) => {
 
   const handleItemDeletedFromDropdown = (deletedItemId, entityType) => {
     console.log(`Item ${deletedItemId} deleted from ${entityType}`);
-    // Check if the deleted item was the one selected in the form and clear it
     let fieldToClear = '';
     switch (entityType) {
       case 'rodzajProduktu': fieldToClear = 'rodzajProduktuId'; break;
@@ -197,9 +204,8 @@ const ProductForm = ({ onClose }) => {
     }
 
     if (fieldToClear && String(formData[fieldToClear]) === String(deletedItemId)) {
-      handleDropdownChange(entityType, null); // This will clear related fields
+      handleDropdownChange(entityType, null);
     }
-    // The DropdownField itself will refresh its options list.
   };
 
   const handleSkladnikSelectedFromDropdown = (selectedSkladnik) => {
@@ -207,6 +213,7 @@ const ProductForm = ({ onClose }) => {
       const normalizedNewSkladnik = selectedSkladnik.nazwa.trim().toLowerCase();
       const isDuplicate = formData.skladniki.some(s => s.trim().toLowerCase() === normalizedNewSkladnik);
       if (isDuplicate) {
+        setDuplicateModalMessage('Składnik już istnieje na liście. Nie można dodać duplikatów.');
         setIsDuplicateModalOpen(true);
       } else {
         setFormData(prev => ({
@@ -224,6 +231,7 @@ const ProductForm = ({ onClose }) => {
       const normalizedNewSkladnik = trimmedSkladnikName.toLowerCase();
       const isDuplicate = formData.skladniki.some(s => s.trim().toLowerCase() === normalizedNewSkladnik);
       if (isDuplicate) {
+        setDuplicateModalMessage('Wprowadzony składnik już istnieje na liście.');
         setIsDuplicateModalOpen(true);
       } else {
         setFormData(prev => ({
@@ -313,22 +321,7 @@ const ProductForm = ({ onClose }) => {
       <form onSubmit={handleSubmit} className={styles.productForm}>
         {submitError && <div className={styles.errorMessage}>{submitError}</div>}
         <div className={styles.formGrid}>
-          <div className={styles.formGroup}>
-            <label htmlFor="nazwa">Nazwa Produktu:</label>
-            <input type="text" id="nazwa" name="nazwa" value={formData.nazwa} onChange={handleInputChange} required className={styles.formInput} />
-          </div>
-          <div className={styles.formGroupFullWidth}>
-            <label htmlFor="opis">Opis Produktu:</label>
-            <textarea id="opis" name="opis" value={formData.opis} onChange={handleInputChange} rows="4" className={styles.formInput}></textarea>
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="waga">Waga (kg):</label>
-            <input type="number" id="waga" name="waga" value={formData.waga} onChange={handleInputChange} step="0.01" className={styles.formInput} />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="cena">Cena (PLN):</label>
-            <input type="number" id="cena" name="cena" value={formData.cena} onChange={handleInputChange} step="0.01" className={styles.formInput} />
-          </div>
+          <BasicProductInfoSection formData={formData} handleInputChange={handleInputChange} />
 
           <DropdownField
             label="Rodzaj Produktu"
@@ -420,77 +413,24 @@ const ProductForm = ({ onClose }) => {
             onItemDeleted={(deletedId) => handleItemDeletedFromDropdown(deletedId, 'stawkaVat')}
           />
           
-          <div className={styles.formGroupCheckboxesFullWidth}>
-            <h4 className={styles.checkboxGroupTitle}>Opcje Produktu:</h4>
-            <div className={styles.checkboxGrid}>
-                <div className={styles.checkboxItem}><input type="checkbox" id="superProdukt" name="superProdukt" checked={formData.superProdukt} onChange={handleInputChange} /> <label htmlFor="superProdukt">Super Produkt</label></div>
-                <div className={styles.checkboxItem}><input type="checkbox" id="towarPolecany" name="towarPolecany" checked={formData.towarPolecany} onChange={handleInputChange} /> <label htmlFor="towarPolecany">Towar Polecany</label></div>
-                <div className={styles.checkboxItem}><input type="checkbox" id="rekomendacjaSprzedawcy" name="rekomendacjaSprzedawcy" checked={formData.rekomendacjaSprzedawcy} onChange={handleInputChange} /> <label htmlFor="rekomendacjaSprzedawcy">Rekomendacja Sprzedawcy</label></div>
-                <div className={styles.checkboxItem}><input type="checkbox" id="superCena" name="superCena" checked={formData.superCena} onChange={handleInputChange} /> <label htmlFor="superCena">Super Cena</label></div>
-                <div className={styles.checkboxItem}><input type="checkbox" id="nowosc" name="nowosc" checked={formData.nowosc} onChange={handleInputChange} /> <label htmlFor="nowosc">Nowość</label></div>
-                <div className={styles.checkboxItem}><input type="checkbox" id="superjakosc" name="superjakosc" checked={formData.superjakosc} onChange={handleInputChange} /> <label htmlFor="superjakosc">Super Jakość</label></div>
-                <div className={styles.checkboxItem}><input type="checkbox" id="rabat" name="rabat" checked={formData.rabat} onChange={handleInputChange} /> <label htmlFor="rabat">Rabat</label></div>
-                <div className={styles.checkboxItem}><input type="checkbox" id="wartoKupic" name="wartoKupic" checked={formData.wartoKupic} onChange={handleInputChange} /> <label htmlFor="wartoKupic">Warto Kupić</label></div>
-                <div className={styles.checkboxItem}><input type="checkbox" id="bezglutenowy" name="bezglutenowy" checked={formData.bezglutenowy} onChange={handleInputChange} /> <label htmlFor="bezglutenowy">Bezglutenowy</label></div>
-            </div>
-        </div>
-        <div className={styles.formGroupCheckboxesFullWidth}>
-            <h4 className={styles.checkboxGroupTitle}>Dostępność:</h4>
-            <div className={styles.checkboxGrid}>
-                <div className={styles.checkboxItem}><input type="checkbox" id="dostepny" name="dostepny" checked={formData.dostepny} onChange={handleInputChange} /> <label htmlFor="dostepny">Dostępny</label></div>
-                <div className={styles.checkboxItem}><input type="checkbox" id="dostepneOdReki" name="dostepneOdReki" checked={formData.dostepneOdReki} onChange={handleInputChange} /> <label htmlFor="dostepneOdReki">Dostępne od Ręki</label></div>
-                <div className={styles.checkboxItem}><input type="checkbox" id="dostepneDo7Dni" name="dostepneDo7Dni" checked={formData.dostepneDo7Dni} onChange={handleInputChange} /> <label htmlFor="dostepneDo7Dni">Dostępne do 7 Dni</label></div>
-                <div className={styles.checkboxItem}><input type="checkbox" id="dostepneNaZamowienie" name="dostepneNaZamowienie" checked={formData.dostepneNaZamowienie} onChange={handleInputChange} /> <label htmlFor="dostepneNaZamowienie">Dostępne na Zamówienie</label></div>
-            </div>
-        </div>
+          <ProductOptionsCheckboxesSection formData={formData} handleInputChange={handleInputChange} />
+          <AvailabilityCheckboxesSection formData={formData} handleInputChange={handleInputChange} />
+          <ProductCodesSection formData={formData} handleInputChange={handleInputChange} />
 
-        <div className={styles.formGroup}>
-          <label htmlFor="kodTowaruKod">Kod Towaru:</label>
-          <input type="text" id="kodTowaruKod" name="kodTowaruKod" value={formData.kodTowaruKod} onChange={handleInputChange} className={styles.formInput} />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="kodEanKod">Kod EAN:</label>
-          <input type="text" id="kodEanKod" name="kodEanKod" value={formData.kodEanKod} onChange={handleInputChange} className={styles.formInput} />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="identyfikatorWartosc">Identyfikator:</label>
-          <input type="text" id="identyfikatorWartosc" name="identyfikatorWartosc" value={formData.identyfikatorWartosc} onChange={handleInputChange} className={styles.formInput} />
-        </div>
+          <IngredientsSection 
+            skladniki={formData.skladniki}
+            apiToken={apiToken}
+            handleSkladnikSelectedFromDropdown={handleSkladnikSelectedFromDropdown}
+            handleAddNewSkladnikManual={handleAddNewSkladnikManual}
+            handleRemoveSkladnik={handleRemoveSkladnik}
+          />
 
-        <div className={styles.formGroupFullWidth}>
-          <label>Składniki (dodaj pojedynczo):</label>
-          {apiToken ? (
-            <SkladnikiDropdownField
-              apiToken={apiToken}
-              onSkladnikSelected={handleSkladnikSelectedFromDropdown}
-              onNewSkladnikAdd={handleAddNewSkladnikManual}
-            />
-          ) : (
-            <div>Ładowanie tokenu API lub token niedostępny...</div>
-          )}
-          <ul className={styles.skladnikiList}>
-            {formData.skladniki.map((skladnik, index) => (
-              <li key={index} className={styles.skladnikItem}>
-                {skladnik}
-                <button type="button" onClick={() => handleRemoveSkladnik(index)} className={styles.removeButtonSkladnik}>Usuń</button>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className={styles.formGroupFullWidth}>
+          <div className={styles.formGroupFullWidth}>
             <ImageUploadManager images={formData.zdjecia} onImagesChange={handleImagesChange} />
-        </div>
+          </div>
 
         </div>
-        <div className={styles.formActionsMain}>
-          <button type="button" onClick={onClose} className={`${styles.buttonMain} ${styles.cancelButtonMain}`} disabled={isSubmitting}>
-            Anuluj
-          </button>
-          <button type="submit" className={`${styles.buttonMain} ${styles.submitButtonMain}`} disabled={isSubmitting}>
-            {isSubmitting ? 'Dodawanie Produktu...' : 'Dodaj Produkt'}
-          </button>
-        </div>
+        <FormActionsSection onClose={onClose} isSubmitting={isSubmitting} />
       </form>
 
       <InfoModal

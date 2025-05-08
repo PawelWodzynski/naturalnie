@@ -1,0 +1,47 @@
+.formActionsMain {
+  grid-column: 1 / -1; /* Span across all columns in the grid */
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 10px; /* Space between buttons */
+  margin-top: 20px; /* Space above the action buttons */
+  padding-top: 20px; /* Padding above the buttons */
+  border-top: 1px solid #eee; /* Separator line */
+}
+
+.buttonMain {
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submitButtonMain {
+  background-color: #4CAF50; /* Green */
+  color: white;
+}
+
+.submitButtonMain:hover {
+  background-color: #45a049;
+}
+
+.submitButtonMain:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.cancelButtonMain {
+  background-color: #f44336; /* Red */
+  color: white;
+}
+
+.cancelButtonMain:hover {
+  background-color: #da190b;
+}
+
+.cancelButtonMain:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+

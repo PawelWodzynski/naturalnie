@@ -1,0 +1,36 @@
+.formGroupCheckboxesFullWidth {
+  grid-column: 1 / -1;
+  margin-bottom: 20px;
+}
+
+.checkboxGroupTitle {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.checkboxGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.checkboxItem {
+  display: flex;
+  align-items: center;
+}
+
+.checkboxItem input[type="checkbox"] {
+  margin-right: 8px;
+  width: 18px; 
+  height: 18px;
+  cursor: pointer;
+}
+
+.checkboxItem label {
+  font-size: 0.95rem;
+  color: #555;
+  cursor: pointer;
+}
+
