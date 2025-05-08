@@ -18,11 +18,13 @@ import java.util.Set;
 @Entity
 @Table(name = "produkt", schema = "app_data")
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true) // Added for correct equals/hashCode generation
 public class Produkt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "produkt_id")
+    @EqualsAndHashCode.Include // Ensures only ID is used for equals/hashCode
     private Integer id;
 
     @Column(name = "nazwa", nullable = false, length = 255)
