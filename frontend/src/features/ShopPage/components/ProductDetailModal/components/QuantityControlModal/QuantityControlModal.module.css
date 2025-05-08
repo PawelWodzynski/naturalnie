@@ -1,0 +1,40 @@
+.quantityControlContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center the items within the container */
+}
+
+.quantityButton {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  color: #333;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 4px;
+  margin: 0 5px;
+  min-width: 30px; /* Ensure buttons have a decent size */
+  text-align: center;
+}
+
+.quantityButton:hover {
+  background-color: #e0e0e0;
+}
+
+.quantityInput {
+  width: 50px;
+  text-align: center;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  /* Remove spinners for a cleaner look if desired */
+  -moz-appearance: textfield; /* Firefox */
+}
+
+.quantityInput::-webkit-outer-spin-button,
+.quantityInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0; /* Safari and Chrome */
+}
+

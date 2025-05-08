@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react'; // Added useState
 import styles from './ProductDetailModal.module.css';
 import ImageCarousel from './components/ImageCarousel';
 import ProductDetailItem from './components/ProductDetailItem';
+import QuantityControlModal from './components/QuantityControlModal'; // Import QuantityControlModal
 
 const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
+  const [currentQuantity, setCurrentQuantity] = useState(1); // State for quantity
+
   if (!isOpen || !productItem) {
     return null;
   }
@@ -11,8 +14,18 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
   const { produkt, zdjecia } = productItem;
   const p = produkt || {}; // Fallback for produkt if it's null or undefined
 
-  // Helper to display boolean values as 'Tak'/'Nie'
   const formatBoolean = (value) => (value === true ? 'Tak' : value === false ? 'Nie' : '-');
+
+  const handleQuantityChange = (newQuantity) => {
+    setCurrentQuantity(newQuantity);
+    console.log(`Quantity changed to: ${newQuantity}`); // Placeholder
+  };
+
+  const handleAddToCart = () => {
+    console.log(`Adding ${currentQuantity} of ${p.nazwa} to cart.`); // Placeholder
+    // Here you would typically dispatch an action to add to cart
+    // onClose(); // Optionally close modal after adding to cart
+  };
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -32,7 +45,7 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
             <ProductDetailItem label="Kod towaru" value={p.kodTowaruKod} />
             <ProductDetailItem label="Identyfikator" value={p.identyfikatorWartosc} />
             <ProductDetailItem label="Cena" value={p.cena ? `${(p.cena / 100).toFixed(2)} zł` : '-'} />
-            <ProductDetailItem label="Waga" value={p.waga ? `${p.waga} kg` : '-'} /> {/* Assuming waga is in kg, adjust if needed */}
+            <ProductDetailItem label="Waga" value={p.waga ? `${p.waga} kg` : '-'} />
             <ProductDetailItem label="Jednostka" value={p.jednostkaNazwa} />
             <ProductDetailItem label="Skrót jednostki" value={p.jednostkaSkrot} />
             <ProductDetailItem label="Opakowanie" value={p.opakowanieNazwa} />
@@ -67,6 +80,15 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
           </div>
         </div>
         <div className={styles.modalFooter}>
+          <div className={styles.cartControlsContainer}> {/* New container for centering */}
+            <QuantityControlModal 
+              initialQuantity={currentQuantity} 
+              onQuantityChange={handleQuantityChange} 
+            />
+            <button onClick={handleAddToCart} className={styles.addToCartButton}>
+              Dodaj do koszyka
+            </button>
+          </div>
           <button onClick={onClose} className={styles.footerCloseButton}>Zamknij</button>
         </div>
       </div>
