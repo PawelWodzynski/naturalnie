@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import styles from './NadkategorieBar.module.css';
 
-const NadkategorieBar = ({ apiToken }) => {
+const NadkategorieBar = ({ apiToken, onCategoryClick }) => { // Added onCategoryClick prop
   const [nadkategorie, setNadkategorie] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!apiToken) {
-      // setError('Brak tokenu API do pobrania nadkategorii.'); // Or simply don't fetch
       return;
     }
 
@@ -21,7 +20,6 @@ const NadkategorieBar = ({ apiToken }) => {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
-            // 'Content-Type': 'application/json', // Not strictly needed for GET
           },
         });
 
@@ -38,7 +36,7 @@ const NadkategorieBar = ({ apiToken }) => {
         }
       } catch (err) {
         setError(err.message);
-        setNadkategorie([]); // Clear on error
+        setNadkategorie([]);
       } finally {
         setLoading(false);
       }
@@ -65,7 +63,7 @@ const NadkategorieBar = ({ apiToken }) => {
         <button 
           key={nadkategoria.id} 
           className={styles.nadkategoriaButton}
-          // onClick={() => console.log('Nadkategoria clicked:', nadkategoria.nazwa)} // Placeholder for future action
+          onClick={() => onCategoryClick && onCategoryClick(nadkategoria.id)} // Call onCategoryClick with id
         >
           {nadkategoria.nazwa}
         </button>
@@ -75,4 +73,3 @@ const NadkategorieBar = ({ apiToken }) => {
 };
 
 export default NadkategorieBar;
-

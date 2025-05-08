@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ProductsTable.module.css';
-import ProductRow from './components/ProductRow'; // Will create this next
+import ProductRow from './components/ProductRow';
 
-const ProductsTable = () => {
+// Accept selectedNadKategoriaId as a prop
+const ProductsTable = ({ selectedNadKategoriaId }) => {
   const [productsData, setProductsData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Add selectedNadKategoriaId to the dependency array of useEffect
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
       setError(null);
+      setProductsData([]); // Clear previous data on new fetch
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -21,16 +24,19 @@ const ProductsTable = () => {
 
       try {
         const encodedToken = encodeURIComponent(token);
-        // Parameters from user's cURL, can be made dynamic later
-        const page = 0;
-        const size = 12;
-        const nadKategoriaId = 4; // Example, make dynamic if needed
-        const sort = "nazwa,asc";
+        const page = 0; // Can be made dynamic later
+        const size = 12; // Can be made dynamic later
+        const sort = "nazwa,asc"; // Can be made dynamic later
         
         let url = `http://localhost:8080/api/app-data/produkt/paginated?token=${encodedToken}&page=${page}&size=${size}&sort=${sort}`;
-        if (nadKategoriaId) {
-          url += `&nadKategoriaId=${nadKategoriaId}`;
+        
+        // Use the selectedNadKategoriaId prop to filter
+        if (selectedNadKategoriaId !== null && selectedNadKategoriaId !== undefined) {
+          url += `&nadKategoriaId=${selectedNadKategoriaId}`;
         }
+        // If selectedNadKategoriaId is null, the parameter is not added, fetching all (or default) products as per API design
+
+        console.log(`Fetching products with URL: ${url}`); // For debugging
 
         const response = await fetch(url, {
           method: 'GET',
@@ -48,7 +54,12 @@ const ProductsTable = () => {
         if (result.success && result.data) {
           setProductsData(result.data);
         } else {
-          throw new Error(result.message || 'Nie udało się pobrać danych produktów.');
+          // If result.data is empty but success is true, it means no products for that category
+          if (result.success && Array.isArray(result.data) && result.data.length === 0) {
+            setProductsData([]);
+          } else {
+            throw new Error(result.message || 'Nie udało się pobrać danych produktów.');
+          }
         }
       } catch (err) {
         setError(err.message);
@@ -58,7 +69,7 @@ const ProductsTable = () => {
     };
 
     fetchProducts();
-  }, []);
+  }, [selectedNadKategoriaId]); // Re-fetch when selectedNadKategoriaId changes
 
   if (isLoading) {
     return <div className={styles.productsTableContainer}><p>Ładowanie produktów...</p></div>;
@@ -68,35 +79,34 @@ const ProductsTable = () => {
     return <div className={styles.productsTableContainer}><p style={{ color: 'red' }}>Błąd: {error}</p></div>;
   }
 
-  if (productsData.length === 0) {
-    return <div className={styles.productsTableContainer}><p>Brak produktów do wyświetlenia.</p></div>;
-  }
-
   return (
     <div className={styles.productsTableContainer}>
       <h2>Tabela Produktów</h2>
-      <table className={styles.productsTable}>
-        <thead>
-          <tr>
-            <th>Kod EAN</th>
-            <th>Zdjęcie</th>
-            <th>Nazwa produktu</th>
-            <th>Rodzaj Produktu</th>
-            <th>Dostępność</th>
-            <th>Cena (zł)</th>
-            <th>Ilość</th>
-            {/* Akcje będą w kolumnie Ilość jako przycisk "Dodaj" */}
-          </tr>
-        </thead>
-        <tbody>
-          {productsData.map(item => (
-            <ProductRow key={item.produkt.id} productItem={item} />
-          ))}
-        </tbody>
-      </table>
+      {productsData.length === 0 && !isLoading && (
+        <p>Brak produktów do wyświetlenia dla wybranej kategorii.</p>
+      )}
+      {productsData.length > 0 && (
+        <table className={styles.productsTable}>
+          <thead>
+            <tr>
+              <th>Kod EAN</th>
+              <th>Zdjęcie</th>
+              <th>Nazwa produktu</th>
+              <th>Rodzaj Produktu</th>
+              <th>Dostępność</th>
+              <th>Cena (zł)</th>
+              <th>Ilość</th>
+            </tr>
+          </thead>
+          <tbody>
+            {productsData.map(item => (
+              <ProductRow key={item.produkt.id} productItem={item} />
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };
 
 export default ProductsTable;
-
