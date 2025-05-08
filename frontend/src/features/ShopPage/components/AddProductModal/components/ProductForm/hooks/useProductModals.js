@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useNadkategorie } from '../../../context/NadkategorieContext'; // Import the context hook
+import { useNadkategorie } from '../../../../../../../context/NadkategorieContext'; // Import the context hook
 
 const useProductModals = (handleDropdownChangeCallback, dropdownRefs) => {
   const [activeAddOptionModal, setActiveAddOptionModal] = useState({ type: null, isOpen: false });

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './NadkategorieBar.module.css';
-import { useNadkategorie } from '../../../../context/NadkategorieContext'; // Import the context hook
+import { useNadkategorie } from '../../../../../../context/NadkategorieContext' // Import the context hook
 
 const NadkategorieBar = ({ apiToken, onCategoryClick }) => {
   const [nadkategorie, setNadkategorie] = useState([]);
