@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.util.List; // Import List
+
 @Entity
 @Table(name = "kod_towaru", schema = "app_data")
 @Data
@@ -18,10 +20,9 @@ public class KodTowaru {
     @Column(name = "kod", nullable = false, unique = true, length = 20)
     private String kod;
 
-    // Relacja OneToOne z Produkt (Produkt jest właścicielem)
-    @OneToOne(mappedBy = "kodTowaru", fetch = FetchType.LAZY)
+    // Changed to OneToMany as one KodTowaru can be associated with multiple Produkty
+    @OneToMany(mappedBy = "kodTowaru", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private Produkt produkt;
+    private List<Produkt> produkty; // Changed from Produkt to List<Produkt>
 }
-
