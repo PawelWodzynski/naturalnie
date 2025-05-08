@@ -73,7 +73,7 @@ public class ProduktController {
             Sort.Order order = new Sort.Order(direction, sort[0]);
             Pageable pageable = PageRequest.of(page, size, Sort.by(order));
 
-            List<ProduktAndZdjeciaDto>produktyPage = produktService.getAllProduktyPaginated(pageable, nadKategoriaId);
+            List<ProduktAndZdjeciaDto>produktyPage = produktService.getAllProduktyPaginated(pageable, nadKategoriaId, rodzajProduktuId);
 
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano paginowaną listę produktów.", produktyPage));
         } catch (UserNotAuthenticatedException e) {
