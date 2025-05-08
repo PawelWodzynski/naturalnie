@@ -124,13 +124,13 @@ public class Produkt {
     @EqualsAndHashCode.Exclude
     private KodTowaru kodTowaru;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "kod_ean_id", referencedColumnName = "kod_ean_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private KodEan kodEan;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "identyfikator_id", referencedColumnName = "identyfikator_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

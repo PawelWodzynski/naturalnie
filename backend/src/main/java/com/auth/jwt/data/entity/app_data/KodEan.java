@@ -2,6 +2,9 @@ package com.auth.jwt.data.entity.app_data;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode; // Added for consistency
+import lombok.ToString; // Added for consistency
+import java.util.List; // Import List
 
 @Entity
 @Table(name = "kod_ean", schema = "app_data")
@@ -16,8 +19,9 @@ public class KodEan {
     @Column(name = "kod", nullable = false, unique = true, length = 30)
     private String kod;
 
-    // Relacja OneToOne z Produkt (Produkt jest właścicielem)
-    @OneToOne(mappedBy = "kodEan", fetch = FetchType.LAZY)
-    private Produkt produkt;
+    // Changed to OneToMany as one KodEan can be associated with multiple Produkty
+    @OneToMany(mappedBy = "kodEan", fetch = FetchType.LAZY)
+    @ToString.Exclude // Added for consistency
+    @EqualsAndHashCode.Exclude // Added for consistency
+    private List<Produkt> produkty; // Changed from Produkt to List<Produkt>
 }
-
