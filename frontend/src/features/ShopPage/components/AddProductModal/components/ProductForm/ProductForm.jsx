@@ -3,7 +3,7 @@ import styles from './ProductForm.module.css';
 import ImageUploadManager from './components/ImageUploadManager';
 import DropdownField from '../../../../../../shared/components/DropdownField/DropdownField';
 import SkladnikiDropdownField from './components/SkladnikiDropdownField';
-import InfoModal from '../../../../../../shared/components/InfoModal'; // Added import for InfoModal
+import InfoModal from '../../../../../../shared/components/InfoModal';
 import {
   fetchRodzajeProduktu,
   fetchJednostki,
@@ -70,7 +70,6 @@ const ProductForm = ({ onClose }) => {
   const [submitError, setSubmitError] = useState(null);
   const [apiToken, setApiToken] = useState(null);
 
-  // New state for duplicate modal
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
   const [duplicateModalMessage, setDuplicateModalMessage] = useState('Składnik już istnieje na liście. Nie można dodać duplikatów.');
 
@@ -184,7 +183,25 @@ const ProductForm = ({ onClose }) => {
     handleCloseAddOptionModal();
   };
 
-  // Updated handlers for SkladnikiDropdownField with duplicate check
+  const handleItemDeletedFromDropdown = (deletedItemId, entityType) => {
+    console.log(`Item ${deletedItemId} deleted from ${entityType}`);
+    // Check if the deleted item was the one selected in the form and clear it
+    let fieldToClear = '';
+    switch (entityType) {
+      case 'rodzajProduktu': fieldToClear = 'rodzajProduktuId'; break;
+      case 'jednostka': fieldToClear = 'jednostkaId'; break;
+      case 'nadKategoria': fieldToClear = 'nadKategoriaId'; break;
+      case 'opakowanie': fieldToClear = 'opakowanieId'; break;
+      case 'stawkaVat': fieldToClear = 'stawkaVatId'; break;
+      default: break;
+    }
+
+    if (fieldToClear && String(formData[fieldToClear]) === String(deletedItemId)) {
+      handleDropdownChange(entityType, null); // This will clear related fields
+    }
+    // The DropdownField itself will refresh its options list.
+  };
+
   const handleSkladnikSelectedFromDropdown = (selectedSkladnik) => {
     if (selectedSkladnik && selectedSkladnik.nazwa) {
       const normalizedNewSkladnik = selectedSkladnik.nazwa.trim().toLowerCase();
@@ -194,9 +211,9 @@ const ProductForm = ({ onClose }) => {
       } else {
         setFormData(prev => ({
           ...prev,
-          skladniki: [...prev.skladniki, selectedSkladnik.nazwa.trim()] // Add trimmed original name
+          skladniki: [...prev.skladniki, selectedSkladnik.nazwa.trim()]
         }));
-        setIsDuplicateModalOpen(false); // Ensure modal is closed if it was open
+        setIsDuplicateModalOpen(false);
       }
     }
   };
@@ -211,9 +228,9 @@ const ProductForm = ({ onClose }) => {
       } else {
         setFormData(prev => ({
           ...prev,
-          skladniki: [...prev.skladniki, trimmedSkladnikName] // Add trimmed original name
+          skladniki: [...prev.skladniki, trimmedSkladnikName]
         }));
-        setIsDuplicateModalOpen(false); // Ensure modal is closed
+        setIsDuplicateModalOpen(false);
       }
     }
   };
@@ -296,7 +313,6 @@ const ProductForm = ({ onClose }) => {
       <form onSubmit={handleSubmit} className={styles.productForm}>
         {submitError && <div className={styles.errorMessage}>{submitError}</div>}
         <div className={styles.formGrid}>
-          {/* Form groups as before */}
           <div className={styles.formGroup}>
             <label htmlFor="nazwa">Nazwa Produktu:</label>
             <input type="text" id="nazwa" name="nazwa" value={formData.nazwa} onChange={handleInputChange} required className={styles.formInput} />
@@ -326,6 +342,10 @@ const ProductForm = ({ onClose }) => {
             entityType="rodzajProduktu"
             onOpenAddModal={handleOpenAddOptionModal}
             onOptionAdded={(refMethods) => { rodzajProduktuDropdownRef.current = refMethods; }}
+            enableDelete={true}
+            deleteApiEndpoint="/api/app-data/rodzaj-produktu"
+            apiToken={apiToken}
+            onItemDeleted={(deletedId) => handleItemDeletedFromDropdown(deletedId, 'rodzajProduktu')}
           />
 
           <DropdownField
@@ -340,6 +360,10 @@ const ProductForm = ({ onClose }) => {
             entityType="jednostka"
             onOpenAddModal={handleOpenAddOptionModal}
             onOptionAdded={(refMethods) => { jednostkaDropdownRef.current = refMethods; }}
+            enableDelete={true}
+            deleteApiEndpoint="/api/app-data/jednostka"
+            apiToken={apiToken}
+            onItemDeleted={(deletedId) => handleItemDeletedFromDropdown(deletedId, 'jednostka')}
           />
 
           <DropdownField
@@ -354,6 +378,10 @@ const ProductForm = ({ onClose }) => {
             entityType="nadKategoria"
             onOpenAddModal={handleOpenAddOptionModal}
             onOptionAdded={(refMethods) => { nadKategoriaDropdownRef.current = refMethods; }}
+            enableDelete={true}
+            deleteApiEndpoint="/api/app-data/nad-kategoria"
+            apiToken={apiToken}
+            onItemDeleted={(deletedId) => handleItemDeletedFromDropdown(deletedId, 'nadKategoria')}
           />
 
           <DropdownField
@@ -368,6 +396,10 @@ const ProductForm = ({ onClose }) => {
             entityType="opakowanie"
             onOpenAddModal={handleOpenAddOptionModal}
             onOptionAdded={(refMethods) => { opakowanieDropdownRef.current = refMethods; }}
+            enableDelete={true}
+            deleteApiEndpoint="/api/app-data/opakowanie"
+            apiToken={apiToken}
+            onItemDeleted={(deletedId) => handleItemDeletedFromDropdown(deletedId, 'opakowanie')}
           />
 
           <DropdownField
@@ -382,6 +414,10 @@ const ProductForm = ({ onClose }) => {
             entityType="stawkaVat"
             onOpenAddModal={handleOpenAddOptionModal}
             onOptionAdded={(refMethods) => { stawkaVatDropdownRef.current = refMethods; }}
+            enableDelete={true}
+            deleteApiEndpoint="/api/app-data/stawka-vat"
+            apiToken={apiToken}
+            onItemDeleted={(deletedId) => handleItemDeletedFromDropdown(deletedId, 'stawkaVat')}
           />
           
           <div className={styles.formGroupCheckboxesFullWidth}>
@@ -421,7 +457,6 @@ const ProductForm = ({ onClose }) => {
           <input type="text" id="identyfikatorWartosc" name="identyfikatorWartosc" value={formData.identyfikatorWartosc} onChange={handleInputChange} className={styles.formInput} />
         </div>
 
-        {/* Modified Skladniki Section */}
         <div className={styles.formGroupFullWidth}>
           <label>Składniki (dodaj pojedynczo):</label>
           {apiToken ? (
@@ -458,7 +493,6 @@ const ProductForm = ({ onClose }) => {
         </div>
       </form>
 
-      {/* Duplicate Ingredient Modal */}
       <InfoModal
         isOpen={isDuplicateModalOpen}
         onClose={() => setIsDuplicateModalOpen(false)}
