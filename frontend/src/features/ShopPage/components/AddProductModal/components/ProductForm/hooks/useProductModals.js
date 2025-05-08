@@ -1,7 +1,9 @@
 import { useState, useCallback } from 'react';
+import { useNadkategorie } from '../../../context/NadkategorieContext'; // Import the context hook
 
 const useProductModals = (handleDropdownChangeCallback, dropdownRefs) => {
   const [activeAddOptionModal, setActiveAddOptionModal] = useState({ type: null, isOpen: false });
+  const { triggerRefresh: triggerNadkategorieRefresh } = useNadkategorie(); // Get the trigger function
 
   const handleOpenAddOptionModal = useCallback((entityType) => {
     setActiveAddOptionModal({ type: entityType, isOpen: true });
@@ -29,13 +31,18 @@ const useProductModals = (handleDropdownChangeCallback, dropdownRefs) => {
       } else {
         console.warn(`dropdownRefs or dropdownRefs[${entityType}] is not available in useProductModals`);
       }
+
+      // If a nadkategoria was added, trigger the refresh for NadkategorieBar
+      if (entityType === 'nadKategoria') {
+        triggerNadkategorieRefresh();
+        console.log("Nadkategoria added, refresh triggered from useProductModals.");
+      }
     }
     handleCloseAddOptionModal();
-  }, [handleDropdownChangeCallback, dropdownRefs, handleCloseAddOptionModal]);
+  }, [handleDropdownChangeCallback, dropdownRefs, handleCloseAddOptionModal, triggerNadkategorieRefresh]);
 
   return {
     activeAddOptionModal,
-    // setActiveAddOptionModal, // Not exposing setter directly unless needed by parent
     handleOpenAddOptionModal,
     handleCloseAddOptionModal,
     handleOptionSuccessfullyAdded,

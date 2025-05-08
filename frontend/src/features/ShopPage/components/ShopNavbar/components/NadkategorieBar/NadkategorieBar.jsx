@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import styles from './NadkategorieBar.module.css';
+import { useNadkategorie } from '../../../../context/NadkategorieContext'; // Import the context hook
 
-const NadkategorieBar = ({ apiToken, onCategoryClick }) => { // Added onCategoryClick prop
+const NadkategorieBar = ({ apiToken, onCategoryClick }) => {
   const [nadkategorie, setNadkategorie] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { refreshKey } = useNadkategorie(); // Consume the context
 
   useEffect(() => {
     if (!apiToken) {
@@ -14,14 +16,17 @@ const NadkategorieBar = ({ apiToken, onCategoryClick }) => { // Added onCategory
     const fetchNadkategorie = async () => {
       setLoading(true);
       setError(null);
+      console.log("NadkategorieBar: Fetching nadkategorie due to token or refreshKey change. Refresh key:", refreshKey);
       try {
         const encodedToken = encodeURIComponent(apiToken);
-        const response = await fetch(`http://localhost:8080/api/app-data/nad-kategoria?token=${encodedToken}`, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-          },
-        });
+        const response = await fetch(`http://localhost:8080/api/app-data/nad-kategoria?token=${encodedToken}`,
+          {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+            },
+          }
+        );
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ message: 'Nie udało się przetworzyć odpowiedzi błędu serwera.' }));
@@ -36,14 +41,14 @@ const NadkategorieBar = ({ apiToken, onCategoryClick }) => { // Added onCategory
         }
       } catch (err) {
         setError(err.message);
-        setNadkategorie([]);
+        setNadkategorie([]); // Clear categories on error
       } finally {
         setLoading(false);
       }
     };
 
     fetchNadkategorie();
-  }, [apiToken]);
+  }, [apiToken, refreshKey]); // Add refreshKey to the dependency array
 
   if (loading) {
     return <div className={styles.loadingMessage}>Ładowanie nadkategorii...</div>;
@@ -53,7 +58,9 @@ const NadkategorieBar = ({ apiToken, onCategoryClick }) => { // Added onCategory
     return <div className={styles.errorMessage}>{error}</div>;
   }
 
-  if (nadkategorie.length === 0) {
+  // It's better to show a message if no categories are found after a successful fetch
+  // rather than treating it as an error state, unless the API guarantees categories.
+  if (nadkategorie.length === 0 && !loading) { // Check !loading to avoid showing this during initial load
     return <div className={styles.noDataMessage}>Brak nadkategorii do wyświetlenia.</div>;
   }
 
@@ -63,7 +70,7 @@ const NadkategorieBar = ({ apiToken, onCategoryClick }) => { // Added onCategory
         <button 
           key={nadkategoria.id} 
           className={styles.nadkategoriaButton}
-          onClick={() => onCategoryClick && onCategoryClick(nadkategoria.id)} // Call onCategoryClick with id
+          onClick={() => onCategoryClick && onCategoryClick(nadkategoria.id)}
         >
           {nadkategoria.nazwa}
         </button>
@@ -73,3 +80,4 @@ const NadkategorieBar = ({ apiToken, onCategoryClick }) => { // Added onCategory
 };
 
 export default NadkategorieBar;
+
