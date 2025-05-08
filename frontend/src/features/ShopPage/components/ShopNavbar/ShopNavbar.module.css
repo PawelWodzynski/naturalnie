@@ -1,34 +1,48 @@
 .navbar {
   background-color: #F0E68C; /* Ciemniejszy kremowy */
-  padding: 0 20px; /* Adjusted padding to 0 top/bottom if height is fixed */
+  padding: 0 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   color: #333;
-  height: 60px; /* Explicit height for the navbar */
+  height: 60px;
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0; /* Prevent this container from shrinking */
 }
 
 .logoPlaceholder {
   font-size: 1.5em;
   font-weight: bold;
-  flex-shrink: 0; /* Prevent logo from shrinking */
+  /* flex-shrink: 0; Already on navLeft, not strictly needed here but harmless */
 }
 
-/* Wrapper for NadkategorieBar to allow centering */
+/* Style for AddCategoryButton when inside navLeft */
+.navLeft > :global(button) { /* Using :global if AddCategoryButton doesn't use styles.addCategoryButton from this module */
+  margin-left: 10px; /* Space between logo and button */
+}
+
+/* If AddCategoryButton.jsx uses its own CSS module and has a root class like .addCategoryButton */
+/* then you might target it more specifically if needed, or ensure its own styles don't conflict. */
+/* For now, the above :global(button) or a more specific selector if AddCategoryButton has a known class from its own module is fine. */
+
 .nadkategorieBarWrapper {
-  flex-grow: 1; /* Allows this section to take available space */
+  flex-grow: 1;
   display: flex;
-  justify-content: center; /* Center NadkategorieBar within this wrapper */
-  align-items: center; /* Vertically align NadkategorieBar */
-  height: 100%; /* Take full height of navbar */
-  overflow: hidden; /* Hide overflow if NadkategorieBar is too wide, though NadkategorieBar itself has scroll */
-  margin: 0 20px; /* Add some margin to separate from logo and actions */
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  overflow: hidden;
+  margin: 0 20px;
 }
 
 .actionsContainer {
   display: flex;
   align-items: center;
-  flex-shrink: 0; /* Prevent actions container from shrinking */
+  flex-shrink: 0;
 }
 
 .actionsContainer > * {
