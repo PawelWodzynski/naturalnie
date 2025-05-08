@@ -74,67 +74,98 @@ public class ProduktService {
         return produktRepository.findAll();
     }
 
-    public List<ProduktAndZdjeciaDto> getAllProduktyPaginated(Pageable pageable, Integer nadKategoriaId) {
+    public List<ProduktAndZdjeciaDto> getAllProduktyPaginated(Pageable pageable, Integer nadKategoriaId, Integer rodzajProduktuId) {
         try {
-            List<ProduktAndZdjeciaDto> produktAndZdjeciaDtos = new ArrayList<>();
-            if (nadKategoriaId != null) {
-                Optional<NadKategoria> nadKategoriaOpt = nadKategoriaRepository.findById(nadKategoriaId);
-                if (nadKategoriaOpt.isPresent()) {
-                    NadKategoria nadKategoria = nadKategoriaOpt.get();
-                    Page<Produkt> page = produktRepository.findByNadKategoria(nadKategoria, pageable);
-                    List<Produkt> produkty = page.getContent();
+            Page<Produkt> pageResult = Page.empty(pageable);
 
-                    for (Produkt produkt : produkty) {
-                        // 1. Initialize ProduktDTO (basic fields are set by its constructor)
-                        ProduktDTO produktDto = new ProduktDTO(produkt);
+            if (rodzajProduktuId != null) {
+                Optional<RodzajProduktu> rodzajProduktuOpt = rodzajProduktuRepository.findById(rodzajProduktuId);
+                if (!rodzajProduktuOpt.isPresent()) {
+                    log.warn("RodzajProduktu with ID {} not found. Returning empty list.", rodzajProduktuId);
+                    return new ArrayList<>();
+                }
+                RodzajProduktu rodzajProduktu = rodzajProduktuOpt.get();
 
-                        // 2. Fetch and map Skladniki for ProduktDTO
-                        List<Skladnik> currentSkladnikiEntities = new ArrayList<>();
-                        if (produkt.getSkladnikiJson() != null && !produkt.getSkladnikiJson().isEmpty()) {
-                            try {
-                                Integer[] ids = this.objectMapper.readValue(produkt.getSkladnikiJson(), Integer[].class);
-                                for (Integer id : ids) {
-                                    skladnikRepository.findById(id).ifPresent(currentSkladnikiEntities::add);
-                                }
-                            } catch (JsonProcessingException e) {
-                                log.error("Błąd parsowania JSON dla składników produktu o ID: " + produkt.getId(), e);
-                            }
-                        }
-                        List<SkladnikDTO> skladnikiDtoList = currentSkladnikiEntities.stream()
-                                .map(SkladnikDTO::new)
-                                .collect(Collectors.toList());
-                        produktDto.setSkladniki(skladnikiDtoList); // Populate skladniki in ProduktDTO
-
-                        // 3. Fetch and map Zdjecia for ProduktAndZdjeciaDto
-                        List<Zdjecie> currentZdjeciaEntities = new ArrayList<>();
-                        if (produkt.getZdjeciaJson() != null && !produkt.getZdjeciaJson().isEmpty()) {
-                            try {
-                                Integer[] ids = this.objectMapper.readValue(produkt.getZdjeciaJson(), Integer[].class);
-                                for (Integer id : ids) {
-                                    zdjecieRepository.findById(id).ifPresent(currentZdjeciaEntities::add);
-                                }
-                            } catch (JsonProcessingException e) {
-                                log.error("Błąd parsowania JSON dla zdjęć produktu o ID: " + produkt.getId(), e);
-                            }
-                        }
-                        List<ZdjecieDTO> zdjeciaDtoListForOuter = currentZdjeciaEntities.stream()
-                                                                      .map(ZdjecieDTO::new)
-                                                                      .collect(Collectors.toList());
-
-                        // 4. Create and populate ProduktAndZdjeciaDto
-                        ProduktAndZdjeciaDto produktAndZdjeciaDto = new ProduktAndZdjeciaDto();
-                        produktAndZdjeciaDto.setProdukt(produktDto); // Set the ProduktDTO (which now includes skladniki)
-                        produktAndZdjeciaDto.setZdjecia(zdjeciaDtoListForOuter); // Set the list of ZdjecieDTOs
-
-                        produktAndZdjeciaDtos.add(produktAndZdjeciaDto);
+                if (nadKategoriaId != null) {
+                    Optional<NadKategoria> nadKategoriaOpt = nadKategoriaRepository.findById(nadKategoriaId);
+                    if (!nadKategoriaOpt.isPresent()) {
+                        log.warn("NadKategoria with ID {} not found (with RodzajProduktu ID {}). Returning empty list.", nadKategoriaId, rodzajProduktuId);
+                        return new ArrayList<>();
                     }
+                    NadKategoria nadKategoria = nadKategoriaOpt.get();
+                    pageResult = produktRepository.findByNadKategoriaAndRodzajProduktu(nadKategoria, rodzajProduktu, pageable);
+                } else {
+                    // Only rodzajProduktuId is present
+                    pageResult = produktRepository.findByRodzajProduktu(rodzajProduktu, pageable);
+                }
+            } else {
+                // rodzajProduktuId is null
+                if (nadKategoriaId != null) {
+                    Optional<NadKategoria> nadKategoriaOpt = nadKategoriaRepository.findById(nadKategoriaId);
+                    if (!nadKategoriaOpt.isPresent()) {
+                        log.warn("NadKategoria with ID {} not found. Returning empty list.", nadKategoriaId);
+                        return new ArrayList<>();
+                    }
+                    NadKategoria nadKategoria = nadKategoriaOpt.get();
+                    pageResult = produktRepository.findByNadKategoria(nadKategoria, pageable);
+                } else {
+                    // Neither nadKategoriaId nor rodzajProduktuId is provided. Fetch all products paginated.
+                    pageResult = produktRepository.findAll(pageable);
                 }
             }
+
+            List<Produkt> produkty = pageResult.getContent();
+            List<ProduktAndZdjeciaDto> produktAndZdjeciaDtos = new ArrayList<>();
+
+            for (Produkt produkt : produkty) {
+                // 1. Initialize ProduktDTO (basic fields are set by its constructor)
+                ProduktDTO produktDto = new ProduktDTO(produkt);
+
+                // 2. Fetch and map Skladniki for ProduktDTO
+                List<Skladnik> currentSkladnikiEntities = new ArrayList<>();
+                if (produkt.getSkladnikiJson() != null && !produkt.getSkladnikiJson().isEmpty()) {
+                    try {
+                        Integer[] ids = this.objectMapper.readValue(produkt.getSkladnikiJson(), Integer[].class);
+                        for (Integer id : ids) {
+                            skladnikRepository.findById(id).ifPresent(currentSkladnikiEntities::add);
+                        }
+                    } catch (JsonProcessingException e) {
+                        log.error("Błąd parsowania JSON dla składników produktu o ID: " + produkt.getId(), e);
+                    }
+                }
+                List<SkladnikDTO> skladnikiDtoList = currentSkladnikiEntities.stream()
+                        .map(SkladnikDTO::new)
+                        .collect(Collectors.toList());
+                produktDto.setSkladniki(skladnikiDtoList);
+
+                // 3. Fetch and map Zdjecia for ProduktAndZdjeciaDto
+                List<Zdjecie> currentZdjeciaEntitiesForZdjecia = new ArrayList<>();
+                if (produkt.getZdjeciaJson() != null && !produkt.getZdjeciaJson().isEmpty()) {
+                    try {
+                        Integer[] ids = this.objectMapper.readValue(produkt.getZdjeciaJson(), Integer[].class);
+                        for (Integer id : ids) {
+                            zdjecieRepository.findById(id).ifPresent(currentZdjeciaEntitiesForZdjecia::add);
+                        }
+                    } catch (JsonProcessingException e) {
+                        log.error("Błąd parsowania JSON dla zdjęć produktu o ID: " + produkt.getId(), e);
+                    }
+                }
+                List<ZdjecieDTO> zdjeciaDtoListForOuter = currentZdjeciaEntitiesForZdjecia.stream()
+                                                              .map(ZdjecieDTO::new)
+                                                              .collect(Collectors.toList());
+
+                // 4. Create and populate ProduktAndZdjeciaDto
+                ProduktAndZdjeciaDto produktAndZdjeciaDto = new ProduktAndZdjeciaDto();
+                produktAndZdjeciaDto.setProdukt(produktDto);
+                produktAndZdjeciaDto.setZdjecia(zdjeciaDtoListForOuter);
+
+                produktAndZdjeciaDtos.add(produktAndZdjeciaDto);
+            }
             return produktAndZdjeciaDtos;
+
         } catch (Exception e) {
-            // Ulepszone logowanie błędu
             log.error("Błąd podczas pobierania paginowanej listy produktów: {}", e.getMessage(), e);
-            return new ArrayList<>(); // Zwrócenie pustej listy w przypadku błędu
+            return new ArrayList<>();
         }
     }
 

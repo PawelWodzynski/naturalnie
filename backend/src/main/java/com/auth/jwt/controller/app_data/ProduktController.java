@@ -64,6 +64,7 @@ public class ProduktController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
             @RequestParam(required = false) Integer nadKategoriaId,
+            @RequestParam(required = false) Integer rodzajProduktuId, // Added new parameter
             @RequestParam(required = false, defaultValue = "id,asc") String[] sort) {
         try {
             authUtil.getAuthenticatedUserOrThrow();

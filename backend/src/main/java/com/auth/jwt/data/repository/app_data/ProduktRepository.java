@@ -2,6 +2,7 @@ package com.auth.jwt.data.repository.app_data;
 
 import com.auth.jwt.data.entity.app_data.NadKategoria;
 import com.auth.jwt.data.entity.app_data.Produkt;
+import com.auth.jwt.data.entity.app_data.RodzajProduktu; // Added import for RodzajProduktu
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +14,8 @@ import java.util.Optional;
 public interface ProduktRepository extends JpaRepository<Produkt, Integer> {
     Optional<Produkt> findByNazwa(String nazwa);
     Page<Produkt> findByNadKategoria(NadKategoria nadKategoria, Pageable pageable);
+    Page<Produkt> findByRodzajProduktu(RodzajProduktu rodzajProduktu, Pageable pageable); // Added new method
+    Page<Produkt> findByNadKategoriaAndRodzajProduktu(NadKategoria nadKategoria, RodzajProduktu rodzajProduktu, Pageable pageable); // Added new method
 
     // Page<Produkt> findAll(Pageable pageable); is inherited from JpaRepository
 }
