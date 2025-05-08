@@ -1,5 +1,6 @@
 package com.auth.jwt.controller.app_data;
 
+import com.auth.jwt.data.dto.app_data.ProduktAndZdjeciaDto;
 import com.auth.jwt.data.entity.app_data.Produkt;
 import com.auth.jwt.dto.app_data.ProduktDTO; // Response DTO
 import com.auth.jwt.dto.app_data.ProduktRequestDTO; // Request DTO
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -55,6 +57,7 @@ public class ProduktController {
         }
     }
 
+    @Transactional(value = "appDataTransactionManager", readOnly = true)
     @GetMapping("/paginated")
     public ResponseEntity<?> getAllProduktyPaginated(
             @RequestParam(required = true) String token,
@@ -69,13 +72,9 @@ public class ProduktController {
             Sort.Order order = new Sort.Order(direction, sort[0]);
             Pageable pageable = PageRequest.of(page, size, Sort.by(order));
 
-            Page<Produkt> produktyPage = produktService.getAllProduktyPaginated(pageable, nadKategoriaId);
-            Page<ProduktDTO> produktyDTOPage = new PageImpl<>(
-                produktyPage.getContent().stream().map(ProduktDTO::new).collect(Collectors.toList()),
-                pageable,
-                produktyPage.getTotalElements()
-            );
-            return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano paginowaną listę produktów.", produktyDTOPage));
+            List<ProduktAndZdjeciaDto>produktyPage = produktService.getAllProduktyPaginated(pageable, nadKategoriaId);
+
+            return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano paginowaną listę produktów.", produktyPage));
         } catch (UserNotAuthenticatedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(responseUtil.createErrorResponse(e.getMessage()));

@@ -1,5 +1,6 @@
 package com.auth.jwt.service.app_data;
 
+import com.auth.jwt.data.dto.app_data.ProduktAndZdjeciaDto;
 import com.auth.jwt.data.entity.app_data.*;
 import com.auth.jwt.data.repository.app_data.*;
 import com.auth.jwt.dto.app_data.ProduktRequestDTO;
@@ -7,6 +8,7 @@ import com.auth.jwt.dto.app_data.ZdjecieRequestDTO;
 import com.auth.jwt.exception.ResourceNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ProduktService {
 
@@ -68,11 +71,48 @@ public class ProduktService {
         return produktRepository.findAll();
     }
 
-    public Page<Produkt> getAllProduktyPaginated(Pageable pageable, Integer nadKategoriaId) {
-        if (nadKategoriaId != null) {
-            return produktRepository.findByNadKategoria_Id(nadKategoriaId, pageable);
-        } else {
-            return produktRepository.findAll(pageable);
+    public List<ProduktAndZdjeciaDto> getAllProduktyPaginated(Pageable pageable, Integer nadKategoriaId) {
+        try {
+            List<ProduktAndZdjeciaDto> produktAndZdjeciaDtos = new ArrayList<>();
+            if (nadKategoriaId != null) {
+                Optional<NadKategoria> nadKategoria = nadKategoriaRepository.findById(nadKategoriaId);
+                if (nadKategoria.isPresent()) {
+                    Page<Produkt> page = produktRepository.findByNadKategoria(nadKategoria.get(), pageable);
+                    List<Produkt> produkty = page.getContent();
+                    for (Produkt produkt : produkty) {
+                        List<Zdjecie> zdjecia = new ArrayList<>();
+                        try {
+                            ObjectMapper mapper = new ObjectMapper();
+                            // Parsowanie JSON do tablicy liczb
+                            if (produkt.getZdjeciaJson() != null && !produkt.getZdjeciaJson().isEmpty()) {
+                                Integer[] ids = mapper.readValue(produkt.getZdjeciaJson(), Integer[].class);
+
+                                // Iteracja przez identyfikatory
+                                for (Integer id : ids) {
+                                    Optional<Zdjecie> zdjecie = zdjecieRepository.findById(id);
+                                    if (zdjecie.isPresent()) {
+                                        zdjecia.add(zdjecie.get());
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            log.error("Error parsing zdjecia JSON for produkt with ID: " + produkt.getId(), e);
+                            // Kontynuuj mimo błędu, ale zaznacz to w logach
+                        }
+
+                        ProduktAndZdjeciaDto produktAndZdjeciaDto = new ProduktAndZdjeciaDto();
+                        produktAndZdjeciaDto.setProdukt(produkt);
+                        produktAndZdjeciaDto.setZdjecia(zdjecia);
+                        produktAndZdjeciaDtos.add(produktAndZdjeciaDto);
+                    }
+                }
+            }
+
+            return produktAndZdjeciaDtos;  // Ten return był brakujący
+
+        } catch (Exception e) {
+            log.error("Error getting all products", e);
+            return new ArrayList<>();
         }
     }
 
