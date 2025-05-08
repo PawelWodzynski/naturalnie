@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import com.auth.jwt.dto.app_data.ProduktDTO;
 import com.auth.jwt.dto.app_data.ZdjecieDTO;
+import com.auth.jwt.dto.app_data.SkladnikDTO;
 
 @Slf4j
 @Service
@@ -84,29 +85,47 @@ public class ProduktService {
                     List<Produkt> produkty = page.getContent();
 
                     for (Produkt produkt : produkty) {
-                        List<Zdjecie> zdjeciaEntities = new ArrayList<>();
-                        // Pobieranie encji Zdjecie na podstawie JSON z Produkt.getZdjeciaJson()
+                        // 1. Initialize ProduktDTO (basic fields are set by its constructor)
+                        ProduktDTO produktDto = new ProduktDTO(produkt);
+
+                        // 2. Fetch and map Skladniki for ProduktDTO
+                        List<Skladnik> currentSkladnikiEntities = new ArrayList<>();
+                        if (produkt.getSkladnikiJson() != null && !produkt.getSkladnikiJson().isEmpty()) {
+                            try {
+                                Integer[] ids = this.objectMapper.readValue(produkt.getSkladnikiJson(), Integer[].class);
+                                for (Integer id : ids) {
+                                    skladnikRepository.findById(id).ifPresent(currentSkladnikiEntities::add);
+                                }
+                            } catch (JsonProcessingException e) {
+                                log.error("Błąd parsowania JSON dla składników produktu o ID: " + produkt.getId(), e);
+                            }
+                        }
+                        List<SkladnikDTO> skladnikiDtoList = currentSkladnikiEntities.stream()
+                                .map(SkladnikDTO::new)
+                                .collect(Collectors.toList());
+                        produktDto.setSkladniki(skladnikiDtoList); // Populate skladniki in ProduktDTO
+
+                        // 3. Fetch and map Zdjecia for ProduktAndZdjeciaDto
+                        List<Zdjecie> currentZdjeciaEntities = new ArrayList<>();
                         if (produkt.getZdjeciaJson() != null && !produkt.getZdjeciaJson().isEmpty()) {
                             try {
-                                // Użycie wstrzykniętego objectMapper
                                 Integer[] ids = this.objectMapper.readValue(produkt.getZdjeciaJson(), Integer[].class);
                                 for (Integer id : ids) {
-                                    zdjecieRepository.findById(id).ifPresent(zdjeciaEntities::add);
+                                    zdjecieRepository.findById(id).ifPresent(currentZdjeciaEntities::add);
                                 }
                             } catch (JsonProcessingException e) {
                                 log.error("Błąd parsowania JSON dla zdjęć produktu o ID: " + produkt.getId(), e);
                             }
                         }
-
-                        ProduktAndZdjeciaDto produktAndZdjeciaDto = new ProduktAndZdjeciaDto();
-                        // Mapowanie Produkt na ProduktDTO
-                        produktAndZdjeciaDto.setProdukt(new ProduktDTO(produkt));
-
-                        // Mapowanie listy Zdjecie na listę ZdjecieDTO
-                        List<ZdjecieDTO> zdjeciaDtoList = zdjeciaEntities.stream()
+                        List<ZdjecieDTO> zdjeciaDtoListForOuter = currentZdjeciaEntities.stream()
                                                                       .map(ZdjecieDTO::new)
                                                                       .collect(Collectors.toList());
-                        produktAndZdjeciaDto.setZdjecia(zdjeciaDtoList);
+
+                        // 4. Create and populate ProduktAndZdjeciaDto
+                        ProduktAndZdjeciaDto produktAndZdjeciaDto = new ProduktAndZdjeciaDto();
+                        produktAndZdjeciaDto.setProdukt(produktDto); // Set the ProduktDTO (which now includes skladniki)
+                        produktAndZdjeciaDto.setZdjecia(zdjeciaDtoListForOuter); // Set the list of ZdjecieDTOs
+
                         produktAndZdjeciaDtos.add(produktAndZdjeciaDto);
                     }
                 }

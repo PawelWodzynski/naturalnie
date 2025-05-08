@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Data
@@ -54,8 +53,8 @@ public class ProduktDTO {
     private Integer identyfikatorId;
     private String identyfikatorWartosc;
 
-    private List<Integer> skladnikiIds;
-    private List<Integer> zdjeciaIds;
+    private List<SkladnikDTO> skladniki; // List of full Skladnik DTOs
+    private List<Integer> zdjeciaIds; // Keeping this as per previous structure, service handles full ZdjecieDTOs in ProduktAndZdjeciaDto
 
     public ProduktDTO(Produkt produkt) {
         this.id = produkt.getId();
@@ -113,16 +112,14 @@ public class ProduktDTO {
             this.identyfikatorWartosc = produkt.getIdentyfikator().getWartosc();
         }
 
-        if (produkt.getSkladnikiEntities() != null) {
-            this.skladnikiIds = produkt.getSkladnikiEntities().stream()
-                                     .map(Skladnik::getId)
-                                     .collect(Collectors.toList());
-        }
+        // zdjeciaIds are populated from ZdjeciaEntities, similar to how skladnikiIds were previously.
+        // The full ZdjecieDTO list is handled in ProduktAndZdjeciaDto by the service.
         if (produkt.getZdjeciaEntities() != null) {
             this.zdjeciaIds = produkt.getZdjeciaEntities().stream()
                                    .map(Zdjecie::getId)
                                    .collect(Collectors.toList());
         }
+        // The 'skladniki' field (List<SkladnikDTO>) will be populated by the ProduktService.
     }
 }
 
