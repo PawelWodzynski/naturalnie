@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.auth.jwt.dto.app_data.ProduktDTO;
+import com.auth.jwt.dto.app_data.ZdjecieDTO;
 
 @Slf4j
 @Service
@@ -75,44 +77,45 @@ public class ProduktService {
         try {
             List<ProduktAndZdjeciaDto> produktAndZdjeciaDtos = new ArrayList<>();
             if (nadKategoriaId != null) {
-                Optional<NadKategoria> nadKategoria = nadKategoriaRepository.findById(nadKategoriaId);
-                if (nadKategoria.isPresent()) {
-                    Page<Produkt> page = produktRepository.findByNadKategoria(nadKategoria.get(), pageable);
+                Optional<NadKategoria> nadKategoriaOpt = nadKategoriaRepository.findById(nadKategoriaId);
+                if (nadKategoriaOpt.isPresent()) {
+                    NadKategoria nadKategoria = nadKategoriaOpt.get();
+                    Page<Produkt> page = produktRepository.findByNadKategoria(nadKategoria, pageable);
                     List<Produkt> produkty = page.getContent();
-                    for (Produkt produkt : produkty) {
-                        List<Zdjecie> zdjecia = new ArrayList<>();
-                        try {
-                            ObjectMapper mapper = new ObjectMapper();
-                            // Parsowanie JSON do tablicy liczb
-                            if (produkt.getZdjeciaJson() != null && !produkt.getZdjeciaJson().isEmpty()) {
-                                Integer[] ids = mapper.readValue(produkt.getZdjeciaJson(), Integer[].class);
 
-                                // Iteracja przez identyfikatory
+                    for (Produkt produkt : produkty) {
+                        List<Zdjecie> zdjeciaEntities = new ArrayList<>();
+                        // Pobieranie encji Zdjecie na podstawie JSON z Produkt.getZdjeciaJson()
+                        if (produkt.getZdjeciaJson() != null && !produkt.getZdjeciaJson().isEmpty()) {
+                            try {
+                                // Użycie wstrzykniętego objectMapper
+                                Integer[] ids = this.objectMapper.readValue(produkt.getZdjeciaJson(), Integer[].class);
                                 for (Integer id : ids) {
-                                    Optional<Zdjecie> zdjecie = zdjecieRepository.findById(id);
-                                    if (zdjecie.isPresent()) {
-                                        zdjecia.add(zdjecie.get());
-                                    }
+                                    zdjecieRepository.findById(id).ifPresent(zdjeciaEntities::add);
                                 }
+                            } catch (JsonProcessingException e) {
+                                log.error("Błąd parsowania JSON dla zdjęć produktu o ID: " + produkt.getId(), e);
                             }
-                        } catch (Exception e) {
-                            log.error("Error parsing zdjecia JSON for produkt with ID: " + produkt.getId(), e);
-                            // Kontynuuj mimo błędu, ale zaznacz to w logach
                         }
 
                         ProduktAndZdjeciaDto produktAndZdjeciaDto = new ProduktAndZdjeciaDto();
-                        produktAndZdjeciaDto.setProdukt(produkt);
-                        produktAndZdjeciaDto.setZdjecia(zdjecia);
+                        // Mapowanie Produkt na ProduktDTO
+                        produktAndZdjeciaDto.setProdukt(new ProduktDTO(produkt));
+
+                        // Mapowanie listy Zdjecie na listę ZdjecieDTO
+                        List<ZdjecieDTO> zdjeciaDtoList = zdjeciaEntities.stream()
+                                                                      .map(ZdjecieDTO::new)
+                                                                      .collect(Collectors.toList());
+                        produktAndZdjeciaDto.setZdjecia(zdjeciaDtoList);
                         produktAndZdjeciaDtos.add(produktAndZdjeciaDto);
                     }
                 }
             }
-
-            return produktAndZdjeciaDtos;  // Ten return był brakujący
-
+            return produktAndZdjeciaDtos;
         } catch (Exception e) {
-            log.error("Error getting all products", e);
-            return new ArrayList<>();
+            // Ulepszone logowanie błędu
+            log.error("Błąd podczas pobierania paginowanej listy produktów: {}", e.getMessage(), e);
+            return new ArrayList<>(); // Zwrócenie pustej listy w przypadku błędu
         }
     }
 
