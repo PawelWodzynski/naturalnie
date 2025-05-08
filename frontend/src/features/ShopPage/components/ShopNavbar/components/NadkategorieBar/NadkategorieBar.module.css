@@ -13,10 +13,10 @@
   height: calc(100% - 10px); /* Adjust to fit within navbar height with some padding */
   max-height: 40px; /* Example max height, align with navbar visual design */
   padding: 0 15px;
-  border: 1px solid transparent; /* Optional border */
+  border: 1px solid #556B2F; /* Darker olive green border */
   border-radius: 4px;
-  background-color: rgba(255, 255, 255, 0.1); /* Subtle background */
-  color: white; /* Text color, assuming dark navbar */
+  background-color: #6B8E23; /* OliveDrab background */
+  color: #FFFFFF; /* White text color */
   cursor: pointer;
   font-size: 0.9rem; /* Adjust as needed */
   font-weight: 500;
@@ -30,13 +30,13 @@
 }
 
 .nadkategoriaButton:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
+  background-color: #556B2F; /* DarkOliveGreen on hover */
+  border-color: #4A5D23; /* Slightly darker border on hover */
 }
 
 .nadkategoriaButton:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); /* Focus indicator */
+  box-shadow: 0 0 0 2px #8FBC8F; /* DarkSeaGreen focus indicator, contrasts with OliveDrab */
 }
 
 .loadingMessage,
@@ -46,14 +46,14 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #f0f0f0; /* Light color for messages on a dark navbar */
+  color: #555; /* Darker text for messages on a light navbar background */
   font-style: italic;
   font-size: 0.9rem;
   padding: 0 15px;
 }
 
 .errorMessage {
-  color: #ffdddd; /* Lighter red for dark background */
+  color: #A52A2A; /* Brown for errors, better contrast on cream */
   font-weight: bold;
 }
 
