@@ -1,0 +1,14 @@
+.productRow td {
+  vertical-align: middle; /* Align content vertically in the middle */
+}
+
+.productImage {
+  max-width: 80px;
+  max-height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #eee;
+  display: block; /* Helps with centering if needed */
+  margin: 0 auto; /* Centers the image if its container is wider */
+}
+
