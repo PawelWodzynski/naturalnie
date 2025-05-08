@@ -17,9 +17,12 @@ export const NadkategorieProvider = ({ children }) => {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const triggerRefresh = useCallback(() => {
-    setRefreshKey(prevKey => prevKey + 1);
-    console.log("Nadkategorie refresh triggered. New key:", refreshKey + 1);
-  }, [refreshKey]); // Include refreshKey in dependency array to ensure latest value is used if triggerRefresh is called rapidly, though not strictly necessary for simple increment.
+    setRefreshKey(prevKey => {
+      const nextKey = prevKey + 1;
+      console.log(`NadkategorieContext: triggerRefresh called. Old key: ${prevKey}, New key: ${nextKey}`);
+      return nextKey;
+    });
+  }, []); // Empty dependency array for stable function reference
 
   return (
     <NadkategorieContext.Provider value={{ refreshKey, triggerRefresh }}>
@@ -28,5 +31,5 @@ export const NadkategorieProvider = ({ children }) => {
   );
 };
 
-export default NadkategorieContext; // Exporting context itself can be useful for direct consumption in class components or specific scenarios
+export default NadkategorieContext;
 
