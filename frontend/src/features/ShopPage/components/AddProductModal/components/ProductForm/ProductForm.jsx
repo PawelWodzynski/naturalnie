@@ -1,8 +1,7 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useRef } from 'react'; // Removed useState, useCallback, useEffect as they are in hooks
 import styles from './ProductForm.module.css';
 import ImageUploadManager from './components/ImageUploadManager';
 import DropdownField from '../../../../../../shared/components/DropdownField/DropdownField';
-// Removed SkladnikiDropdownField import as it's now part of IngredientsSection
 import InfoModal from '../../../../../../shared/components/InfoModal';
 import {
   fetchRodzajeProduktu,
@@ -32,64 +31,26 @@ import ProductCodesSection from './components/ProductCodesSection';
 import IngredientsSection from './components/IngredientsSection';
 import FormActionsSection from './components/FormActionsSection';
 
+// Import Custom Hooks
+import { useProductForm, useProductModals, useProductSubmit } from './hooks';
+
 const ProductForm = ({ onClose }) => {
-  const initialFormData = {
-    nazwa: '',
-    waga: 0,
-    cena: 0,
-    superProdukt: false,
-    towarPolecany: false,
-    rekomendacjaSprzedawcy: false,
-    superCena: false,
-    nowosc: false,
-    superjakosc: false,
-    rabat: false,
-    dostepny: true,
-    dostepneOdReki: true,
-    dostepneDo7Dni: false,
-    dostepneNaZamowienie: false,
-    wartoKupic: false,
-    bezglutenowy: false,
-    opis: '',
-    rodzajProduktuId: '', 
-    jednostkaId: '',
-    nadKategoriaId: '',
-    opakowanieId: '',
-    stawkaVatId: '',
-    rodzajProduktuNazwa: '',
-    rodzajProduktuOpis: '',
-    jednostkaNazwa: '',
-    jednostkaSkrot: '',
-    nadKategoriaNazwa: '',
-    nadKategoriaOpis: '',
-    nadKategoriaKolejnosc: 0,
-    opakowanieNazwa: '',
-    opakowanieSkrot: '',
-    opakowanieOpis: '',
-    stawkaVatWartosc: 0,
-    kodTowaruKod: '',
-    kodEanKod: '',
-    identyfikatorWartosc: '',
-    skladniki: [],
-    zdjecia: []
-  };
-  const [formData, setFormData] = useState(initialFormData);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
-  const [apiToken, setApiToken] = useState(null);
+  const {
+    formData,
+    setFormData, // Keep for handleItemDeletedFromDropdown
+    apiToken,
+    isDuplicateModalOpen,
+    setIsDuplicateModalOpen,
+    duplicateModalMessage,
+    handleInputChange,
+    handleDropdownChange,
+    handleImagesChange,
+    handleSkladnikSelectedFromDropdown,
+    handleAddNewSkladnikManual,
+    handleRemoveSkladnik
+  } = useProductForm();
 
-  const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
-  const [duplicateModalMessage, setDuplicateModalMessage] = useState('Składnik już istnieje na liście. Nie można dodać duplikatów.');
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      setApiToken(token);
-    }
-  }, []);
-
-  const [activeAddOptionModal, setActiveAddOptionModal] = useState({ type: null, isOpen: false });
-
+  // Dropdown refs remain in the main component as they are tied to UI elements here
   const rodzajProduktuDropdownRef = useRef(null);
   const jednostkaDropdownRef = useRef(null);
   const nadKategoriaDropdownRef = useRef(null);
@@ -104,93 +65,23 @@ const ProductForm = ({ onClose }) => {
     stawkaVat: stawkaVatDropdownRef
   };
 
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : (type === 'number' && name !== 'stawkaVatWartosc') ? parseFloat(value) : value
-    }));
-  };
+  const {
+    activeAddOptionModal,
+    handleOpenAddOptionModal,
+    handleCloseAddOptionModal,
+    handleOptionSuccessfullyAdded,
+  } = useProductModals(handleDropdownChange, dropdownRefs);
 
-  const handleDropdownChange = (dropdownName, selectedOption) => {
-    setFormData(prev => {
-      let updatedFields = {};
-      if (selectedOption) {
-        switch (dropdownName) {
-          case 'rodzajProduktu':
-            updatedFields = {
-              rodzajProduktuId: selectedOption.id,
-              rodzajProduktuNazwa: selectedOption.nazwa,
-              rodzajProduktuOpis: selectedOption.opis
-            };
-            break;
-          case 'jednostka':
-            updatedFields = {
-              jednostkaId: selectedOption.id,
-              jednostkaNazwa: selectedOption.nazwa,
-              jednostkaSkrot: selectedOption.skrot
-            };
-            break;
-          case 'nadKategoria':
-            updatedFields = {
-              nadKategoriaId: selectedOption.id,
-              nadKategoriaNazwa: selectedOption.nazwa,
-              nadKategoriaOpis: selectedOption.opis,
-              nadKategoriaKolejnosc: selectedOption.kolejnosc
-            };
-            break;
-          case 'opakowanie':
-            updatedFields = {
-              opakowanieId: selectedOption.id,
-              opakowanieNazwa: selectedOption.nazwa,
-              opakowanieSkrot: selectedOption.skrot,
-              opakowanieOpis: selectedOption.opis
-            };
-            break;
-          case 'stawkaVat':
-            updatedFields = {
-              stawkaVatId: selectedOption.id,
-              stawkaVatWartosc: parseFloat(selectedOption.wartosc)
-            };
-            break;
-          default:
-            break;
-        }
-      } else { 
-        switch (dropdownName) {
-            case 'rodzajProduktu': updatedFields = { rodzajProduktuId: '', rodzajProduktuNazwa: '', rodzajProduktuOpis: '' }; break;
-            case 'jednostka': updatedFields = { jednostkaId: '', jednostkaNazwa: '', jednostkaSkrot: '' }; break;
-            case 'nadKategoria': updatedFields = { nadKategoriaId: '', nadKategoriaNazwa: '', nadKategoriaOpis: '', nadKategoriaKolejnosc: 0 }; break;
-            case 'opakowanie': updatedFields = { opakowanieId: '', opakowanieNazwa: '', opakowanieSkrot: '', opakowanieOpis: '' }; break;
-            case 'stawkaVat': updatedFields = { stawkaVatId: '', stawkaVatWartosc: 0 }; break;
-            default: break;
-        }
-      }
-      return { ...prev, ...updatedFields };
-    });
-  };
+  const {
+    isSubmitting,
+    submitError,
+    handleSubmit,
+  } = useProductSubmit(formData, apiToken, onClose);
 
-  const handleOpenAddOptionModal = (entityType) => {
-    setActiveAddOptionModal({ type: entityType, isOpen: true });
-  };
-
-  const handleCloseAddOptionModal = () => {
-    setActiveAddOptionModal({ type: null, isOpen: false });
-  };
-
-  const handleOptionSuccessfullyAdded = (newlyAddedOption, entityType) => {
-    if (newlyAddedOption && entityType) {
-      handleDropdownChange(entityType, newlyAddedOption);
-      const dropdownRef = dropdownRefs[entityType];
-      if (dropdownRef && dropdownRef.current && typeof dropdownRef.current.refreshAndSelect === 'function') {
-        dropdownRef.current.refreshAndSelect(newlyAddedOption);
-      } else {
-        console.warn(`Dropdown ref or refreshAndSelect method not found for ${entityType}`);
-      }
-    }
-    handleCloseAddOptionModal();
-  };
-
+  // This handler interacts with formData directly, so it's kept here
+  // or could be moved to useProductForm if setFormData is passed to it.
+  // For now, useProductForm exposes setFormData, so this can stay or be moved.
+  // Let's keep it here for clarity as it uses handleDropdownChange from useProductForm.
   const handleItemDeletedFromDropdown = (deletedItemId, entityType) => {
     console.log(`Item ${deletedItemId} deleted from ${entityType}`);
     let fieldToClear = '';
@@ -204,115 +95,7 @@ const ProductForm = ({ onClose }) => {
     }
 
     if (fieldToClear && String(formData[fieldToClear]) === String(deletedItemId)) {
-      handleDropdownChange(entityType, null);
-    }
-  };
-
-  const handleSkladnikSelectedFromDropdown = (selectedSkladnik) => {
-    if (selectedSkladnik && selectedSkladnik.nazwa) {
-      const normalizedNewSkladnik = selectedSkladnik.nazwa.trim().toLowerCase();
-      const isDuplicate = formData.skladniki.some(s => s.trim().toLowerCase() === normalizedNewSkladnik);
-      if (isDuplicate) {
-        setDuplicateModalMessage('Składnik już istnieje na liście. Nie można dodać duplikatów.');
-        setIsDuplicateModalOpen(true);
-      } else {
-        setFormData(prev => ({
-          ...prev,
-          skladniki: [...prev.skladniki, selectedSkladnik.nazwa.trim()]
-        }));
-        setIsDuplicateModalOpen(false);
-      }
-    }
-  };
-
-  const handleAddNewSkladnikManual = (newSkladnikName) => {
-    const trimmedSkladnikName = newSkladnikName.trim();
-    if (trimmedSkladnikName !== '') {
-      const normalizedNewSkladnik = trimmedSkladnikName.toLowerCase();
-      const isDuplicate = formData.skladniki.some(s => s.trim().toLowerCase() === normalizedNewSkladnik);
-      if (isDuplicate) {
-        setDuplicateModalMessage('Wprowadzony składnik już istnieje na liście.');
-        setIsDuplicateModalOpen(true);
-      } else {
-        setFormData(prev => ({
-          ...prev,
-          skladniki: [...prev.skladniki, trimmedSkladnikName]
-        }));
-        setIsDuplicateModalOpen(false);
-      }
-    }
-  };
-
-  const handleRemoveSkladnik = (indexToRemove) => {
-    setFormData(prev => ({ ...prev, skladniki: prev.skladniki.filter((_, index) => index !== indexToRemove) }));
-  };
-
-  const handleImagesChange = useCallback((newImages) => {
-    setFormData(prev => ({ ...prev, zdjecia: newImages }));
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitError(null);
-    if (!apiToken) {
-      setSubmitError("Brak tokenu autoryzacyjnego. Zaloguj się ponownie.");
-      setIsSubmitting(false);
-      return;
-    }
-    try {
-      const encodedToken = encodeURIComponent(apiToken);
-      const url = `http://localhost:8080/api/app-data/produkt?token=${encodedToken}`;
-      const payload = {
-        nazwa: formData.nazwa,
-        waga: parseFloat(formData.waga) || 0,
-        cena: parseFloat(formData.cena) || 0,
-        superProdukt: formData.superProdukt,
-        towarPolecany: formData.towarPolecany,
-        rekomendacjaSprzedawcy: formData.rekomendacjaSprzedawcy,
-        superCena: formData.superCena,
-        nowosc: formData.nowosc,
-        superjakosc: formData.superjakosc,
-        rabat: formData.rabat,
-        dostepny: formData.dostepny,
-        dostepneOdReki: formData.dostepneOdReki,
-        dostepneDo7Dni: formData.dostepneDo7Dni,
-        dostepneNaZamowienie: formData.dostepneNaZamowienie,
-        wartoKupic: formData.wartoKupic,
-        bezglutenowy: formData.bezglutenowy,
-        opis: formData.opis,
-        rodzajProduktuNazwa: formData.rodzajProduktuNazwa,
-        rodzajProduktuOpis: formData.rodzajProduktuOpis,
-        jednostkaNazwa: formData.jednostkaNazwa,
-        jednostkaSkrot: formData.jednostkaSkrot,
-        nadKategoriaNazwa: formData.nadKategoriaNazwa,
-        nadKategoriaOpis: formData.nadKategoriaOpis,
-        nadKategoriaKolejnosc: parseInt(formData.nadKategoriaKolejnosc, 10) || 0,
-        opakowanieNazwa: formData.opakowanieNazwa,
-        opakowanieSkrot: formData.opakowanieSkrot,
-        opakowanieOpis: formData.opakowanieOpis,
-        stawkaVatWartosc: parseFloat(formData.stawkaVatWartosc) || 0,
-        kodTowaruKod: formData.kodTowaruKod,
-        kodEanKod: formData.kodEanKod,
-        identyfikatorWartosc: formData.identyfikatorWartosc,
-        skladniki: formData.skladniki,
-        zdjecia: formData.zdjecia.map(img => ({ daneZdjecia: img.daneZdjecia, opis: img.opis, kolejnosc: img.kolejnosc }))
-      };
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Nie udało się przetworzyć odpowiedzi błędu serwera.' }));
-        throw new Error(`Błąd serwera: ${response.status} - ${errorData.message || 'Nieznany błąd'}`);
-      }
-      alert('Produkt dodany pomyślnie!');
-      onClose();
-    } catch (error) {
-      setSubmitError(error.message || "Wystąpił nieoczekiwany błąd.");
-    } finally {
-      setIsSubmitting(false);
+      handleDropdownChange(entityType, null); // Uses handleDropdownChange from useProductForm
     }
   };
 
@@ -333,7 +116,7 @@ const ProductForm = ({ onClose }) => {
             optionLabelKey="nazwa"
             required
             entityType="rodzajProduktu"
-            onOpenAddModal={handleOpenAddOptionModal}
+            onOpenAddModal={() => handleOpenAddOptionModal('rodzajProduktu')}
             onOptionAdded={(refMethods) => { rodzajProduktuDropdownRef.current = refMethods; }}
             enableDelete={true}
             deleteApiEndpoint="/api/app-data/rodzaj-produktu"
@@ -351,7 +134,7 @@ const ProductForm = ({ onClose }) => {
             optionLabelKey="nazwa"
             required
             entityType="jednostka"
-            onOpenAddModal={handleOpenAddOptionModal}
+            onOpenAddModal={() => handleOpenAddOptionModal('jednostka')}
             onOptionAdded={(refMethods) => { jednostkaDropdownRef.current = refMethods; }}
             enableDelete={true}
             deleteApiEndpoint="/api/app-data/jednostka"
@@ -369,7 +152,7 @@ const ProductForm = ({ onClose }) => {
             optionLabelKey="nazwa"
             required
             entityType="nadKategoria"
-            onOpenAddModal={handleOpenAddOptionModal}
+            onOpenAddModal={() => handleOpenAddOptionModal('nadKategoria')}
             onOptionAdded={(refMethods) => { nadKategoriaDropdownRef.current = refMethods; }}
             enableDelete={true}
             deleteApiEndpoint="/api/app-data/nad-kategoria"
@@ -387,7 +170,7 @@ const ProductForm = ({ onClose }) => {
             optionLabelKey="nazwa"
             required
             entityType="opakowanie"
-            onOpenAddModal={handleOpenAddOptionModal}
+            onOpenAddModal={() => handleOpenAddOptionModal('opakowanie')}
             onOptionAdded={(refMethods) => { opakowanieDropdownRef.current = refMethods; }}
             enableDelete={true}
             deleteApiEndpoint="/api/app-data/opakowanie"
@@ -405,7 +188,7 @@ const ProductForm = ({ onClose }) => {
             optionLabelKey="wartosc"
             required
             entityType="stawkaVat"
-            onOpenAddModal={handleOpenAddOptionModal}
+            onOpenAddModal={() => handleOpenAddOptionModal('stawkaVat')}
             onOptionAdded={(refMethods) => { stawkaVatDropdownRef.current = refMethods; }}
             enableDelete={true}
             deleteApiEndpoint="/api/app-data/stawka-vat"
@@ -419,7 +202,7 @@ const ProductForm = ({ onClose }) => {
 
           <IngredientsSection 
             skladniki={formData.skladniki}
-            apiToken={apiToken}
+            apiToken={apiToken} // Pass apiToken if IngredientsSection needs it for SkladnikiDropdownField
             handleSkladnikSelectedFromDropdown={handleSkladnikSelectedFromDropdown}
             handleAddNewSkladnikManual={handleAddNewSkladnikManual}
             handleRemoveSkladnik={handleRemoveSkladnik}
@@ -435,9 +218,9 @@ const ProductForm = ({ onClose }) => {
 
       <InfoModal
         isOpen={isDuplicateModalOpen}
-        onClose={() => setIsDuplicateModalOpen(false)}
+        onClose={() => setIsDuplicateModalOpen(false)} // This setter comes from useProductForm
         title="Błąd Walidacji"
-        message={duplicateModalMessage}
+        message={duplicateModalMessage} // This state comes from useProductForm
         buttonText="OK"
       />
 
@@ -445,7 +228,7 @@ const ProductForm = ({ onClose }) => {
         <AddRodzajProduktuModal 
           isOpen={true} 
           onClose={handleCloseAddOptionModal} 
-          onOptionSuccessfullyAdded={handleOptionSuccessfullyAdded}
+          onOptionSuccessfullyAdded={(newOpt) => handleOptionSuccessfullyAdded(newOpt, 'rodzajProduktu')}
           apiAddFunction={addRodzajProduktu}
         />
       )}
@@ -453,7 +236,7 @@ const ProductForm = ({ onClose }) => {
         <AddJednostkaModal 
           isOpen={true} 
           onClose={handleCloseAddOptionModal} 
-          onOptionSuccessfullyAdded={handleOptionSuccessfullyAdded}
+          onOptionSuccessfullyAdded={(newOpt) => handleOptionSuccessfullyAdded(newOpt, 'jednostka')}
           apiAddFunction={addJednostka}
         />
       )}
@@ -461,7 +244,7 @@ const ProductForm = ({ onClose }) => {
         <AddNadKategoriaModal 
           isOpen={true} 
           onClose={handleCloseAddOptionModal} 
-          onOptionSuccessfullyAdded={handleOptionSuccessfullyAdded}
+          onOptionSuccessfullyAdded={(newOpt) => handleOptionSuccessfullyAdded(newOpt, 'nadKategoria')}
           apiAddFunction={addNadKategoria}
         />
       )}
@@ -469,7 +252,7 @@ const ProductForm = ({ onClose }) => {
         <AddOpakowanieModal 
           isOpen={true} 
           onClose={handleCloseAddOptionModal} 
-          onOptionSuccessfullyAdded={handleOptionSuccessfullyAdded}
+          onOptionSuccessfullyAdded={(newOpt) => handleOptionSuccessfullyAdded(newOpt, 'opakowanie')}
           apiAddFunction={addOpakowanie}
         />
       )}
@@ -477,7 +260,7 @@ const ProductForm = ({ onClose }) => {
         <AddStawkaVatModal 
           isOpen={true} 
           onClose={handleCloseAddOptionModal} 
-          onOptionSuccessfullyAdded={handleOptionSuccessfullyAdded}
+          onOptionSuccessfullyAdded={(newOpt) => handleOptionSuccessfullyAdded(newOpt, 'stawkaVat')}
           apiAddFunction={addStawkaVat}
         />
       )}
