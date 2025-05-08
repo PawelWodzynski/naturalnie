@@ -9,9 +9,10 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
   }
 
   const { produkt, zdjecia } = productItem;
+  const p = produkt || {}; // Fallback for produkt if it's null or undefined
 
-  // Fallback for produkt if it's null or undefined
-  const p = produkt || {};
+  // Helper to display boolean values as 'Tak'/'Nie'
+  const formatBoolean = (value) => (value === true ? 'Tak' : value === false ? 'Nie' : '-');
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -26,16 +27,43 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
           </div>
           <div className={styles.detailsSection}>
             <h3>Informacje o produkcie:</h3>
+            <ProductDetailItem label="Nazwa" value={p.nazwa} />
             <ProductDetailItem label="Kod EAN" value={p.kodEanKod} />
-            <ProductDetailItem label="Rodzaj produktu" value={p.rodzajProduktuNazwa} />
-            <ProductDetailItem label="Dostępność" value={p.dostepny ? 'Tak' : 'Nie'} />
+            <ProductDetailItem label="Kod towaru" value={p.kodTowaruKod} />
+            <ProductDetailItem label="Identyfikator" value={p.identyfikatorWartosc} />
             <ProductDetailItem label="Cena" value={p.cena ? `${(p.cena / 100).toFixed(2)} zł` : '-'} />
+            <ProductDetailItem label="Waga" value={p.waga ? `${p.waga} kg` : '-'} /> {/* Assuming waga is in kg, adjust if needed */}
             <ProductDetailItem label="Jednostka" value={p.jednostkaNazwa} />
+            <ProductDetailItem label="Skrót jednostki" value={p.jednostkaSkrot} />
             <ProductDetailItem label="Opakowanie" value={p.opakowanieNazwa} />
-            <ProductDetailItem label="Stawka VAT" value={p.stawkaVatNazwa ? `${p.stawkaVatNazwa}%` : '-'} />
-            <ProductDetailItem label="PKWiU" value={p.pkwiU} />
+            <ProductDetailItem label="Skrót opakowania" value={p.opakowanieSkrot} />
+            <ProductDetailItem label="Opis opakowania" value={p.opakowanieOpis} />
+            <ProductDetailItem label="Rodzaj produktu" value={p.rodzajProduktuNazwa} />
+            <ProductDetailItem label="Opis rodzaju produktu" value={p.rodzajProduktuOpis} />
+            <ProductDetailItem label="Nadkategoria" value={p.nadKategoriaNazwa} />
+            <ProductDetailItem label="Opis nadkategorii" value={p.nadKategoriaOpis} />
+            <ProductDetailItem label="Kolejność nadkategorii" value={p.nadKategoriaKolejnosc} />
+            <ProductDetailItem label="Stawka VAT" value={p.stawkaVatNazwa ? `${p.stawkaVatNazwa}` : (p.stawkaVatWartosc ? `${p.stawkaVatWartosc}%` : '-')} />
+            {p.pkwiU && <ProductDetailItem label="PKWiU" value={p.pkwiU} />}
             <ProductDetailItem label="Opis" value={p.opis} />
-            {/* Add more details as needed using ProductDetailItem */}
+            {p.skladniki && p.skladniki.length > 0 && (
+              <ProductDetailItem label="Składniki" value={p.skladniki.join(', ')} />
+            )}
+
+            <h4 className={styles.subHeader}>Statusy i oznaczenia:</h4>
+            <ProductDetailItem label="Dostępny" value={formatBoolean(p.dostepny)} />
+            <ProductDetailItem label="Dostępny od ręki" value={formatBoolean(p.dostepneOdReki)} />
+            <ProductDetailItem label="Dostępny do 7 dni" value={formatBoolean(p.dostepneDo7Dni)} />
+            <ProductDetailItem label="Dostępny na zamówienie" value={formatBoolean(p.dostepneNaZamowienie)} />
+            <ProductDetailItem label="Super produkt" value={formatBoolean(p.superProdukt)} />
+            <ProductDetailItem label="Towar polecany" value={formatBoolean(p.towarPolecany)} />
+            <ProductDetailItem label="Rekomendacja sprzedawcy" value={formatBoolean(p.rekomendacjaSprzedawcy)} />
+            <ProductDetailItem label="Super cena" value={formatBoolean(p.superCena)} />
+            <ProductDetailItem label="Nowość" value={formatBoolean(p.nowosc)} />
+            <ProductDetailItem label="Super jakość" value={formatBoolean(p.superjakosc)} />
+            <ProductDetailItem label="Rabat" value={formatBoolean(p.rabat)} />
+            <ProductDetailItem label="Warto kupić" value={formatBoolean(p.wartoKupic)} />
+            <ProductDetailItem label="Bezglutenowy" value={formatBoolean(p.bezglutenowy)} />
           </div>
         </div>
         <div className={styles.modalFooter}>
