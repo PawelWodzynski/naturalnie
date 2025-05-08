@@ -1,0 +1,17 @@
+.detailItem {
+  display: flex;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.detailLabel {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #555;
+}
+
+.detailValue {
+  color: #333;
+  word-break: break-word; /* In case of long values without spaces */
+}
+

@@ -1,22 +1,28 @@
 import React from 'react';
 import styles from './ProductRow.module.css';
-import QuantityControl from './components/QuantityControl'; // Will create this next
+import QuantityControl from './components/QuantityControl';
 
-const ProductRow = ({ productItem }) => {
+// Accept onRowClick prop
+const ProductRow = ({ productItem, onRowClick }) => {
   const { produkt, zdjecia } = productItem;
 
-  // Display only the first image, if available
   const firstImage = zdjecia && zdjecia.length > 0 ? zdjecia[0] : null;
   const imageUrl = firstImage && firstImage.daneZdjecia 
     ? `data:image/jpeg;base64,${firstImage.daneZdjecia}` 
-    : 'https://via.placeholder.com/80'; // Placeholder if no image
+    : 'https://via.placeholder.com/80';
 
   const displayPrice = produkt.jednostkaNazwa 
     ? `${(produkt.cena / 100).toFixed(2)} / ${produkt.jednostkaNazwa}` 
     : `${(produkt.cena / 100).toFixed(2)}`;
 
+  const handleRowClick = () => {
+    if (onRowClick) {
+      onRowClick(productItem);
+    }
+  };
+
   return (
-    <tr className={styles.productRow}>
+    <tr className={styles.productRow} onClick={handleRowClick}> {/* Add onClick handler to the row */}
       <td>{produkt.kodEanKod || '-'}</td>
       <td>
         <img 

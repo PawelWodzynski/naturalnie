@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ProductsTable.module.css';
 import ProductRow from './components/ProductRow';
+import ProductDetailModal from '../ProductDetailModal'; // Import the modal
 
-// Accept selectedNadKategoriaId as a prop
 const ProductsTable = ({ selectedNadKategoriaId }) => {
   const [productsData, setProductsData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Add selectedNadKategoriaId to the dependency array of useEffect
+  // State for ProductDetailModal
+  const [isProductDetailModalOpen, setIsProductDetailModalOpen] = useState(false);
+  const [selectedProductItem, setSelectedProductItem] = useState(null);
+
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
       setError(null);
-      setProductsData([]); // Clear previous data on new fetch
+      setProductsData([]);
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -24,19 +27,17 @@ const ProductsTable = ({ selectedNadKategoriaId }) => {
 
       try {
         const encodedToken = encodeURIComponent(token);
-        const page = 0; // Can be made dynamic later
-        const size = 12; // Can be made dynamic later
-        const sort = "nazwa,asc"; // Can be made dynamic later
+        const page = 0;
+        const size = 12;
+        const sort = "nazwa,asc";
         
         let url = `http://localhost:8080/api/app-data/produkt/paginated?token=${encodedToken}&page=${page}&size=${size}&sort=${sort}`;
         
-        // Use the selectedNadKategoriaId prop to filter
         if (selectedNadKategoriaId !== null && selectedNadKategoriaId !== undefined) {
           url += `&nadKategoriaId=${selectedNadKategoriaId}`;
         }
-        // If selectedNadKategoriaId is null, the parameter is not added, fetching all (or default) products as per API design
 
-        console.log(`Fetching products with URL: ${url}`); // For debugging
+        console.log(`Fetching products with URL: ${url}`);
 
         const response = await fetch(url, {
           method: 'GET',
@@ -54,7 +55,6 @@ const ProductsTable = ({ selectedNadKategoriaId }) => {
         if (result.success && result.data) {
           setProductsData(result.data);
         } else {
-          // If result.data is empty but success is true, it means no products for that category
           if (result.success && Array.isArray(result.data) && result.data.length === 0) {
             setProductsData([]);
           } else {
@@ -69,7 +69,18 @@ const ProductsTable = ({ selectedNadKategoriaId }) => {
     };
 
     fetchProducts();
-  }, [selectedNadKategoriaId]); // Re-fetch when selectedNadKategoriaId changes
+  }, [selectedNadKategoriaId]);
+
+  const handleProductRowClick = (productItem) => {
+    setSelectedProductItem(productItem);
+    setIsProductDetailModalOpen(true);
+    console.log("Product row clicked, opening modal for:", productItem);
+  };
+
+  const handleCloseProductDetailModal = () => {
+    setIsProductDetailModalOpen(false);
+    setSelectedProductItem(null);
+  };
 
   if (isLoading) {
     return <div className={styles.productsTableContainer}><p>Ładowanie produktów...</p></div>;
@@ -80,33 +91,45 @@ const ProductsTable = ({ selectedNadKategoriaId }) => {
   }
 
   return (
-    <div className={styles.productsTableContainer}>
-      <h2>Tabela Produktów</h2>
-      {productsData.length === 0 && !isLoading && (
-        <p>Brak produktów do wyświetlenia dla wybranej kategorii.</p>
-      )}
-      {productsData.length > 0 && (
-        <table className={styles.productsTable}>
-          <thead>
-            <tr>
-              <th>Kod EAN</th>
-              <th>Zdjęcie</th>
-              <th>Nazwa produktu</th>
-              <th>Rodzaj Produktu</th>
-              <th>Dostępność</th>
-              <th>Cena (zł)</th>
-              <th>Ilość</th>
-            </tr>
-          </thead>
-          <tbody>
-            {productsData.map(item => (
-              <ProductRow key={item.produkt.id} productItem={item} />
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+    <>
+      <div className={styles.productsTableContainer}>
+        <h2>Tabela Produktów</h2>
+        {productsData.length === 0 && !isLoading && (
+          <p>Brak produktów do wyświetlenia dla wybranej kategorii.</p>
+        )}
+        {productsData.length > 0 && (
+          <table className={styles.productsTable}>
+            <thead>
+              <tr>
+                <th>Kod EAN</th>
+                <th>Zdjęcie</th>
+                <th>Nazwa produktu</th>
+                <th>Rodzaj Produktu</th>
+                <th>Dostępność</th>
+                <th>Cena (zł)</th>
+                <th>Ilość</th>
+              </tr>
+            </thead>
+            <tbody>
+              {productsData.map(item => (
+                <ProductRow 
+                  key={item.produkt.id} 
+                  productItem={item} 
+                  onRowClick={handleProductRowClick} // Pass the click handler
+                />
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+      <ProductDetailModal 
+        isOpen={isProductDetailModalOpen} 
+        onClose={handleCloseProductDetailModal} 
+        productItem={selectedProductItem} 
+      />
+    </>
   );
 };
 
 export default ProductsTable;
+
