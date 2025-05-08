@@ -1,6 +1,6 @@
 package com.auth.jwt.service;
 
-import com.auth.jwt.data.entity.Produkt;
+import com.auth.jwt.data.entity.app_data.Produkt;
 import com.auth.jwt.data.repository.ProduktRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

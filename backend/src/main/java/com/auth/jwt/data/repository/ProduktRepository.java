@@ -1,6 +1,6 @@
 package com.auth.jwt.data.repository;
 
-import com.auth.jwt.data.entity.Produkt;
+import com.auth.jwt.data.entity.app_data.Produkt;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
