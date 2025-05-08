@@ -1,23 +1,36 @@
 .navbar {
   background-color: #F0E68C; /* Ciemniejszy kremowy */
-  padding: 10px 20px;
+  padding: 0 20px; /* Adjusted padding to 0 top/bottom if height is fixed */
   display: flex;
   justify-content: space-between;
   align-items: center;
   color: #333;
+  height: 60px; /* Explicit height for the navbar */
 }
 
 .logoPlaceholder {
   font-size: 1.5em;
   font-weight: bold;
+  flex-shrink: 0; /* Prevent logo from shrinking */
+}
+
+/* Wrapper for NadkategorieBar to allow centering */
+.nadkategorieBarWrapper {
+  flex-grow: 1; /* Allows this section to take available space */
+  display: flex;
+  justify-content: center; /* Center NadkategorieBar within this wrapper */
+  align-items: center; /* Vertically align NadkategorieBar */
+  height: 100%; /* Take full height of navbar */
+  overflow: hidden; /* Hide overflow if NadkategorieBar is too wide, though NadkategorieBar itself has scroll */
+  margin: 0 20px; /* Add some margin to separate from logo and actions */
 }
 
 .actionsContainer {
   display: flex;
   align-items: center;
+  flex-shrink: 0; /* Prevent actions container from shrinking */
 }
 
-/* Dodatkowe style dla przycisków w actionsContainer, jeśli potrzebne */
 .actionsContainer > * {
   margin-left: 15px;
 }

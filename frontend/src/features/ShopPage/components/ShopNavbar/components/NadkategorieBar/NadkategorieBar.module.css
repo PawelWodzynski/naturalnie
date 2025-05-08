@@ -1,0 +1,59 @@
+.nadkategorieContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; /* Should match navbar height */
+  gap: 10px; /* Spacing between buttons */
+  overflow-x: auto; /* Allows horizontal scrolling if buttons overflow */
+  overflow-y: hidden;
+  padding: 0 5px; /* Some padding so buttons don't touch edges if scrolling */
+}
+
+.nadkategoriaButton {
+  height: calc(100% - 10px); /* Adjust to fit within navbar height with some padding */
+  max-height: 40px; /* Example max height, align with navbar visual design */
+  padding: 0 15px;
+  border: 1px solid transparent; /* Optional border */
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.1); /* Subtle background */
+  color: white; /* Text color, assuming dark navbar */
+  cursor: pointer;
+  font-size: 0.9rem; /* Adjust as needed */
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap; /* Prevent button text from wrapping */
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nadkategoriaButton:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.nadkategoriaButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); /* Focus indicator */
+}
+
+.loadingMessage,
+.errorMessage,
+.noDataMessage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #f0f0f0; /* Light color for messages on a dark navbar */
+  font-style: italic;
+  font-size: 0.9rem;
+  padding: 0 15px;
+}
+
+.errorMessage {
+  color: #ffdddd; /* Lighter red for dark background */
+  font-weight: bold;
+}
+
