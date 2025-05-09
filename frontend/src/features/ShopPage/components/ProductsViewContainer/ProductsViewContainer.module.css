@@ -1,18 +1,41 @@
 .productsViewContainer {
-  background-color: #f4f6f8;
-  padding: 20px;
-  border-radius: 8px;
-  margin: 20px auto; /* Center the container with top/bottom margin */
-  max-width: 1200px; /* Max width for larger screens */
-  width: 90%; /* Responsive width for smaller screens, adjust as needed */
-  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin: 20px 0;
 }
 
-/* Ensure FilterPanel and ProductsTable (if they have their own container divs) take full width of this parent */
-/* This might be better handled by ensuring their direct child containers are 100% width */
+.filterContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px; /* Add some space below the filter */
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #f8f9fa; /* Light background for the filter area */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: fit-content; /* Adjust width to content */
+}
 
-.filterPanelPlaceholder {
-  /* This class was for placeholder, actual FilterPanel will be used */
-  /* Remove or update if FilterPanel is now implemented */
+.filterLabel {
+  margin-right: 10px;
+  font-weight: bold;
+  color: #333;
+}
+
+.filterSelect {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  background-color: #fff;
+  min-width: 200px; /* Ensure select is not too small */
+  cursor: pointer;
+}
+
+.filterSelect:focus {
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
 }
 
