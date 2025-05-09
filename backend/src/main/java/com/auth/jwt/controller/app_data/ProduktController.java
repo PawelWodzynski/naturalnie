@@ -1,6 +1,7 @@
 package com.auth.jwt.controller.app_data;
 
 import com.auth.jwt.data.dto.app_data.ProduktAndZdjeciaDto;
+import com.auth.jwt.data.dto.app_data.ProduktAndZdjeciaPaginatedDto;
 import com.auth.jwt.data.entity.app_data.Produkt;
 import com.auth.jwt.dto.app_data.ProduktDTO; // Response DTO
 import com.auth.jwt.dto.app_data.ProduktRequestDTO; // Request DTO
@@ -73,7 +74,7 @@ public class ProduktController {
             Sort.Order order = new Sort.Order(direction, sort[0]);
             Pageable pageable = PageRequest.of(page, size, Sort.by(order));
 
-            List<ProduktAndZdjeciaDto>produktyPage = produktService.getAllProduktyPaginated(pageable, nadKategoriaId, rodzajProduktuId);
+            ProduktAndZdjeciaPaginatedDto produktyPage = produktService.getAllProduktyPaginated(pageable, nadKategoriaId, rodzajProduktuId);
 
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano paginowaną listę produktów.", produktyPage));
         } catch (UserNotAuthenticatedException e) {

@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import com.auth.jwt.dto.app_data.ProduktDTO;
 import com.auth.jwt.dto.app_data.ZdjecieDTO;
 import com.auth.jwt.dto.app_data.SkladnikDTO;
+import com.auth.jwt.data.dto.app_data.ProduktAndZdjeciaPaginatedDto;
 
 @Slf4j
 @Service
@@ -74,7 +75,7 @@ public class ProduktService {
         return produktRepository.findAll();
     }
 
-    public List<ProduktAndZdjeciaDto> getAllProduktyPaginated(Pageable pageable, Integer nadKategoriaId, Integer rodzajProduktuId) {
+    public ProduktAndZdjeciaPaginatedDto getAllProduktyPaginated(Pageable pageable, Integer nadKategoriaId, Integer rodzajProduktuId) {
         try {
             Page<Produkt> pageResult = Page.empty(pageable);
 
@@ -82,7 +83,7 @@ public class ProduktService {
                 Optional<RodzajProduktu> rodzajProduktuOpt = rodzajProduktuRepository.findById(rodzajProduktuId);
                 if (!rodzajProduktuOpt.isPresent()) {
                     log.warn("RodzajProduktu with ID {} not found. Returning empty list.", rodzajProduktuId);
-                    return new ArrayList<>();
+                    return new ProduktAndZdjeciaPaginatedDto(new ArrayList<>(), 0);
                 }
                 RodzajProduktu rodzajProduktu = rodzajProduktuOpt.get();
 
@@ -90,7 +91,7 @@ public class ProduktService {
                     Optional<NadKategoria> nadKategoriaOpt = nadKategoriaRepository.findById(nadKategoriaId);
                     if (!nadKategoriaOpt.isPresent()) {
                         log.warn("NadKategoria with ID {} not found (with RodzajProduktu ID {}). Returning empty list.", nadKategoriaId, rodzajProduktuId);
-                        return new ArrayList<>();
+                        return new ProduktAndZdjeciaPaginatedDto(new ArrayList<>(), 0);
                     }
                     NadKategoria nadKategoria = nadKategoriaOpt.get();
                     pageResult = produktRepository.findByNadKategoriaAndRodzajProduktu(nadKategoria, rodzajProduktu, pageable);
@@ -104,7 +105,7 @@ public class ProduktService {
                     Optional<NadKategoria> nadKategoriaOpt = nadKategoriaRepository.findById(nadKategoriaId);
                     if (!nadKategoriaOpt.isPresent()) {
                         log.warn("NadKategoria with ID {} not found. Returning empty list.", nadKategoriaId);
-                        return new ArrayList<>();
+                        return new ProduktAndZdjeciaPaginatedDto(new ArrayList<>(), 0);
                     }
                     NadKategoria nadKategoria = nadKategoriaOpt.get();
                     pageResult = produktRepository.findByNadKategoria(nadKategoria, pageable);
@@ -161,11 +162,11 @@ public class ProduktService {
 
                 produktAndZdjeciaDtos.add(produktAndZdjeciaDto);
             }
-            return produktAndZdjeciaDtos;
+            return new ProduktAndZdjeciaPaginatedDto(produktAndZdjeciaDtos, pageResult.getTotalPages());
 
         } catch (Exception e) {
             log.error("Błąd podczas pobierania paginowanej listy produktów: {}", e.getMessage(), e);
-            return new ArrayList<>();
+            return new ProduktAndZdjeciaPaginatedDto(new ArrayList<>(), 0);
         }
     }
 
