@@ -77,5 +77,12 @@ public class RodzajProduktuService {
         }
         rodzajProduktuRepository.deleteById(id);
     }
+
+    public List<RodzajProduktu> getRodzajeProduktowByNadKategoriaId(Integer nadKategoriaId) {
+        // Optional: Add a check to see if NadKategoria with nadKategoriaId exists if necessary,
+        // or rely on the database to return an empty list if no RodzajProduktu are linked.
+        // For now, directly call the repository method.
+        return rodzajProduktuRepository.findByNadKategoria_Id(nadKategoriaId);
+    }
 }
 

@@ -124,5 +124,27 @@ public class RodzajProduktuController {
                     .body(responseUtil.createErrorResponse("Wystąpił wewnętrzny błąd serwera przy usuwaniu rodzaju produktu."));
         }
     }
+
+    @GetMapping("/byNadKategoria/{nadKategoriaId}")
+    public ResponseEntity<?> getRodzajeProduktowByNadKategoriaId(@PathVariable Integer nadKategoriaId, @RequestParam(required = true) String token) {
+        try {
+            authUtil.getAuthenticatedUserOrThrow();
+            List<RodzajProduktu> rodzajeProduktow = rodzajProduktuService.getRodzajeProduktowByNadKategoriaId(nadKategoriaId);
+            if (rodzajeProduktow.isEmpty()) {
+                return ResponseEntity.ok(responseUtil.createSuccessResponse("Nie znaleziono rodzajów produktów dla podanej nadkategorii.", rodzajeProduktow));
+            }
+            return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano rodzaje produktów dla nadkategorii.", rodzajeProduktow));
+        } catch (UserNotAuthenticatedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(responseUtil.createErrorResponse(e.getMessage()));
+        } catch (ResourceNotFoundException e) { // If NadKategoria itself is not found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(responseUtil.createErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            System.err.println("Błąd w endpoincie /api/app-data/rodzaj-produktu/byNadKategoria/" + nadKategoriaId + " (GET): " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(responseUtil.createErrorResponse("Wystąpił wewnętrzny błąd serwera przy pobieraniu rodzajów produktów wg nadkategorii."));
+        }
+    }
 }
 
