@@ -1,8 +1,8 @@
-import React, { useState } from 'react'; // Added useState
+import React, { useState } from 'react';
 import styles from './ProductDetailModal.module.css';
 import ImageCarousel from './components/ImageCarousel';
 import ProductDetailItem from './components/ProductDetailItem';
-import QuantityControlModal from './components/QuantityControlModal'; // Import QuantityControlModal
+import QuantityControlModal from './components/QuantityControlModal';
 
 const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
   const [currentQuantity, setCurrentQuantity] = useState(1); // State for quantity
@@ -31,7 +31,7 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
-          <h2>{p.nazwa || 'Szczegóły produktu'}</h2>
+          <h2 className={styles.modalTitle}>{p.nazwa || 'Szczegóły produktu'}</h2>
           <button onClick={onClose} className={styles.closeButton}>&times;</button>
         </div>
         <div className={styles.modalBody}>
@@ -39,7 +39,6 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
             <ImageCarousel images={zdjecia || []} />
           </div>
           <div className={styles.detailsSection}>
-            <h3>Informacje o produkcie:</h3>
             <ProductDetailItem label="Nazwa" value={p.nazwa} />
             <ProductDetailItem label="Kod EAN" value={p.kodEanKod} />
             <ProductDetailItem label="Kod towaru" value={p.kodTowaruKod} />
@@ -58,11 +57,9 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
             <ProductDetailItem label="Kolejność nadkategorii" value={p.nadKategoriaKolejnosc} />
             <ProductDetailItem label="Stawka VAT" value={p.stawkaVatNazwa ? `${p.stawkaVatNazwa}` : (p.stawkaVatWartosc ? `${p.stawkaVatWartosc}%` : '-')} />
             {p.pkwiU && <ProductDetailItem label="PKWiU" value={p.pkwiU} />}
-            <ProductDetailItem label="Opis" value={p.opis} />
             {p.skladniki && p.skladniki.length > 0 && (
-              <ProductDetailItem label="Składniki" value={p.skladniki.join(', ')} />
+              <ProductDetailItem label="Składniki" value={p.skladniki.map(s => s.nazwa).join(', ')} />
             )}
-
             <h4 className={styles.subHeader}>Statusy i oznaczenia:</h4>
             <ProductDetailItem label="Dostępny" value={formatBoolean(p.dostepny)} />
             <ProductDetailItem label="Dostępny od ręki" value={formatBoolean(p.dostepneOdReki)} />
@@ -74,20 +71,16 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
             <ProductDetailItem label="Super cena" value={formatBoolean(p.superCena)} />
             <ProductDetailItem label="Nowość" value={formatBoolean(p.nowosc)} />
             <ProductDetailItem label="Super jakość" value={formatBoolean(p.superjakosc)} />
-            <ProductDetailItem label="Rabat" value={formatBoolean(p.rabat)} />
-            <ProductDetailItem label="Warto kupić" value={formatBoolean(p.wartoKupic)} />
             <ProductDetailItem label="Bezglutenowy" value={formatBoolean(p.bezglutenowy)} />
           </div>
         </div>
         <div className={styles.modalFooter}>
-          <div className={styles.cartControlsContainer}> {/* New container for centering */}
+          <div className={styles.cartControlsContainer}>
             <QuantityControlModal 
               initialQuantity={currentQuantity} 
               onQuantityChange={handleQuantityChange} 
             />
-            <button onClick={handleAddToCart} className={styles.addToCartButton}>
-              Dodaj do koszyka
-            </button>
+            <button onClick={handleAddToCart} className={styles.addToCartButton}>Dodaj do koszyka</button>
           </div>
           <button onClick={onClose} className={styles.footerCloseButton}>Zamknij</button>
         </div>
