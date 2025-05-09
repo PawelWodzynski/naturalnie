@@ -5,7 +5,8 @@ import ProductsTable from '../../components/ProductsTable';
 const ProductsViewContainer = ({ selectedNadKategoriaId }) => {
   const [rodzajeProduktow, setRodzajeProduktow] = useState([{ id: 0, nazwa: "Wszystko" }]);
   const [selectedRodzajProduktuId, setSelectedRodzajProduktuId] = useState(0); // Default to 'Wszystko'
-  const [filters, setFilters] = useState({ rodzajProduktuId: 0 });
+  const [searchTerm, setSearchTerm] = useState(''); // Added for search input
+  const [filters, setFilters] = useState({ rodzajProduktuId: 0, searchTerm: '' });
 
   useEffect(() => {
     const fetchRodzajeProduktow = async () => {
@@ -37,38 +38,56 @@ const ProductsViewContainer = ({ selectedNadKategoriaId }) => {
         console.error("Błąd podczas pobierania rodzajów produktów:", error);
         setRodzajeProduktow([{ id: 0, nazwa: "Wszystko" }]);
       }
-      // Reset selectedRodzajProduktuId to 'Wszystko' when nadKategoria changes
       setSelectedRodzajProduktuId(0);
+      setSearchTerm(''); // Reset search term when category changes
     };
 
     fetchRodzajeProduktow();
   }, [selectedNadKategoriaId]);
 
   useEffect(() => {
-    setFilters(prevFilters => ({ ...prevFilters, rodzajProduktuId: selectedRodzajProduktuId }));
-  }, [selectedRodzajProduktuId]);
+    // Update filters when selectedRodzajProduktuId or searchTerm changes
+    setFilters({ rodzajProduktuId: selectedRodzajProduktuId, searchTerm: searchTerm });
+  }, [selectedRodzajProduktuId, searchTerm]);
 
   const handleRodzajProduktuChange = (event) => {
     const newRodzajId = parseInt(event.target.value, 10);
     setSelectedRodzajProduktuId(newRodzajId);
   };
 
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
   return (
     <div className={styles.productsViewContainer}>
-      <div className={styles.filterContainer}>
-        <label htmlFor="rodzajProduktuSelect" className={styles.filterLabel}>Rodzaj produktu: </label>
-        <select 
-          id="rodzajProduktuSelect" 
-          value={selectedRodzajProduktuId} 
-          onChange={handleRodzajProduktuChange}
-          className={styles.filterSelect}
-        >
-          {rodzajeProduktow.map(typ => (
-            <option key={typ.id} value={typ.id}>
-              {typ.nazwa}
-            </option>
-          ))}
-        </select>
+      <div className={styles.filterControlsContainer}> {/* New container for all filters */}
+        <div className={styles.filterItemContainer}> {/* Container for product type filter */}
+          <label htmlFor="rodzajProduktuSelect" className={styles.filterLabel}>Rodzaj produktu: </label>
+          <select 
+            id="rodzajProduktuSelect" 
+            value={selectedRodzajProduktuId} 
+            onChange={handleRodzajProduktuChange}
+            className={styles.filterSelect}
+          >
+            {rodzajeProduktow.map(typ => (
+              <option key={typ.id} value={typ.id}>
+                {typ.nazwa}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className={styles.filterItemContainer}> {/* Container for search input */}
+          <label htmlFor="searchInput" className={styles.filterLabel}>Wyszukaj: </label>
+          <input 
+            type="text" 
+            id="searchInput" 
+            value={searchTerm} 
+            onChange={handleSearchChange} 
+            placeholder="Wpisz nazwę produktu..." 
+            className={styles.filterInput}
+          />
+        </div>
       </div>
       <ProductsTable 
         selectedNadKategoriaId={selectedNadKategoriaId} 
