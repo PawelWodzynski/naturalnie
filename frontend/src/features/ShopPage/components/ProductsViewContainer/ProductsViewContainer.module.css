@@ -1,17 +1,18 @@
 .productsViewContainer {
-  /* Add styles for the container, e.g., background, padding */
-  background-color: #f4f6f8; /* Example background color */
+  background-color: #f4f6f8;
   padding: 20px;
   border-radius: 8px;
+  margin: 20px auto; /* Center the container with top/bottom margin */
+  max-width: 1200px; /* Max width for larger screens */
+  width: 90%; /* Responsive width for smaller screens, adjust as needed */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
+/* Ensure FilterPanel and ProductsTable (if they have their own container divs) take full width of this parent */
+/* This might be better handled by ensuring their direct child containers are 100% width */
+
 .filterPanelPlaceholder {
-  margin-bottom: 20px;
-  padding: 15px;
-  background-color: #e9ecef;
-  border: 1px dashed #ced4da;
-  border-radius: 4px;
-  text-align: center;
-  color: #6c757d;
+  /* This class was for placeholder, actual FilterPanel will be used */
+  /* Remove or update if FilterPanel is now implemented */
 }
 

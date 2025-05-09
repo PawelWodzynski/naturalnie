@@ -7,6 +7,8 @@
   border-radius: 8px;
   margin-bottom: 20px; /* Space between filter panel and table */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  width: 100%; /* Make FilterPanel take full width of its parent (ProductsViewContainer) */
+  box-sizing: border-box; /* Ensure padding and border don't add to the width */
 }
 
 .filterItemPlaceholder {
@@ -18,4 +20,13 @@
   flex-grow: 1; /* Allow items to grow and fill space if needed */
   text-align: center;
 }
+
+/* Styling for actual filter items if they are direct children and need specific sizing */
+.filterItem {
+  flex: 1; /* Distribute space among filter items, adjust as needed */
+  /* Add min-width if necessary to prevent items from becoming too small */
+}
+
+/* If SearchInput, ProductTypeDropdown, AvailabilityFilter are wrapped in a div with .filterItem */
+/* Ensure their internal inputs/selects take full width of that .filterItem wrapper */
 
