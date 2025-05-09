@@ -3,7 +3,7 @@ import styles from './ProductsTable.module.css';
 import ProductRow from './components/ProductRow';
 import ProductDetailModal from '../ProductDetailModal'; // Import the modal
 
-const ProductsTable = ({ selectedNadKategoriaId }) => {
+const ProductsTable = ({ selectedNadKategoriaId, filters }) => { // Added filters prop
   const [productsData, setProductsData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,13 +28,26 @@ const ProductsTable = ({ selectedNadKategoriaId }) => {
       try {
         const encodedToken = encodeURIComponent(token);
         const page = 0;
-        const size = 12;
+        const size = 12; // Consider making size configurable or larger
         const sort = "nazwa,asc";
         
         let url = `http://localhost:8080/api/app-data/produkt/paginated?token=${encodedToken}&page=${page}&size=${size}&sort=${sort}`;
         
         if (selectedNadKategoriaId !== null && selectedNadKategoriaId !== undefined) {
           url += `&nadKategoriaId=${selectedNadKategoriaId}`;
+        }
+
+        // Apply filters if they exist
+        if (filters) {
+          if (filters.searchTerm) {
+            url += `&search=${encodeURIComponent(filters.searchTerm)}`;
+          }
+          if (filters.productType) {
+            url += `&rodzajProduktuId=${filters.productType}`;
+          }
+          if (filters.availability !== undefined) { // Assuming availability is boolean or specific values
+            url += `&dostepny=${filters.availability}`;
+          }
         }
 
         console.log(`Fetching products with URL: ${url}`);
@@ -56,7 +69,7 @@ const ProductsTable = ({ selectedNadKategoriaId }) => {
           setProductsData(result.data);
         } else {
           if (result.success && Array.isArray(result.data) && result.data.length === 0) {
-            setProductsData([]);
+            setProductsData([]); // No data found
           } else {
             throw new Error(result.message || 'Nie udało się pobrać danych produktów.');
           }
@@ -69,7 +82,7 @@ const ProductsTable = ({ selectedNadKategoriaId }) => {
     };
 
     fetchProducts();
-  }, [selectedNadKategoriaId]);
+  }, [selectedNadKategoriaId, filters]); // Added filters to dependency array
 
   const handleProductRowClick = (productItem) => {
     setSelectedProductItem(productItem);
@@ -83,45 +96,44 @@ const ProductsTable = ({ selectedNadKategoriaId }) => {
   };
 
   if (isLoading) {
-    return <div className={styles.productsTableContainer}><p>Ładowanie produktów...</p></div>;
+    // Changed to a simpler loading message, container style is now in ProductsViewContainer
+    return <p>Ładowanie produktów...</p>; 
   }
 
   if (error) {
-    return <div className={styles.productsTableContainer}><p style={{ color: 'red' }}>Błąd: {error}</p></div>;
+    return <p style={{ color: 'red' }}>Błąd: {error}</p>;
   }
 
   return (
     <>
-      <div className={styles.productsTableContainer}>
-        <h2>Tabela Produktów</h2>
-        {productsData.length === 0 && !isLoading && (
-          <p>Brak produktów do wyświetlenia dla wybranej kategorii.</p>
-        )}
-        {productsData.length > 0 && (
-          <table className={styles.productsTable}>
-            <thead>
-              <tr>
-                <th>Kod EAN</th>
-                <th>Zdjęcie</th>
-                <th>Nazwa produktu</th>
-                <th>Rodzaj Produktu</th>
-                <th>Dostępność</th>
-                <th>Cena (zł)</th>
-                <th>Ilość</th>
-              </tr>
-            </thead>
-            <tbody>
-              {productsData.map(item => (
-                <ProductRow 
-                  key={item.produkt.id} 
-                  productItem={item} 
-                  onRowClick={handleProductRowClick} // Pass the click handler
-                />
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      {/* Removed the h2 header and the outer productsTableContainer div, as styling will be handled by ProductsViewContainer */}
+      {productsData.length === 0 && !isLoading && (
+        <p>Brak produktów do wyświetlenia dla wybranych kryteriów.</p>
+      )}
+      {productsData.length > 0 && (
+        <table className={styles.productsTable}>
+          <thead>
+            <tr>
+              <th>Kod EAN</th>
+              <th>Zdjęcie</th>
+              <th>Nazwa produktu</th>
+              <th>Rodzaj Produktu</th>
+              <th>Dostępność</th>
+              <th>Cena (zł)</th>
+              <th>Ilość</th>
+            </tr>
+          </thead>
+          <tbody>
+            {productsData.map(item => (
+              <ProductRow 
+                key={item.produkt.id} 
+                productItem={item} 
+                onRowClick={handleProductRowClick}
+              />
+            ))}
+          </tbody>
+        </table>
+      )}
       <ProductDetailModal 
         isOpen={isProductDetailModalOpen} 
         onClose={handleCloseProductDetailModal} 

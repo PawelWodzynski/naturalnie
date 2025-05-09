@@ -1,0 +1,17 @@
+.productsViewContainer {
+  /* Add styles for the container, e.g., background, padding */
+  background-color: #f4f6f8; /* Example background color */
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.filterPanelPlaceholder {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #e9ecef;
+  border: 1px dashed #ced4da;
+  border-radius: 4px;
+  text-align: center;
+  color: #6c757d;
+}
+

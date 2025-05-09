@@ -1,0 +1,27 @@
+.availabilityFilterContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filterLabel {
+  font-size: 14px;
+  color: #333;
+  margin-right: 5px; /* Spacing between label and select */
+}
+
+.availabilitySelect {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  min-width: 150px; /* Adjust as needed */
+}
+
+.availabilitySelect:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+

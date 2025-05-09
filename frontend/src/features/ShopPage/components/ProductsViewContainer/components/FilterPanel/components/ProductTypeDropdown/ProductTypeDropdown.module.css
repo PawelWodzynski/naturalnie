@@ -1,0 +1,16 @@
+.productTypeDropdown {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 100%; /* Or a specific width if preferred */
+  box-sizing: border-box;
+  background-color: white;
+}
+
+.productTypeDropdown:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+

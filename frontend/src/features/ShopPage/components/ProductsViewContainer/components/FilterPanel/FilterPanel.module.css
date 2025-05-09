@@ -1,0 +1,21 @@
+.filterPanelContainer {
+  display: flex;
+  gap: 15px; /* Space between filter items */
+  align-items: center;
+  padding: 15px;
+  background-color: #ffffff; /* White background for the filter panel itself */
+  border-radius: 8px;
+  margin-bottom: 20px; /* Space between filter panel and table */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.filterItemPlaceholder {
+  padding: 10px;
+  background-color: #e9ecef;
+  border: 1px dashed #ced4da;
+  border-radius: 4px;
+  color: #6c757d;
+  flex-grow: 1; /* Allow items to grow and fill space if needed */
+  text-align: center;
+}
+
