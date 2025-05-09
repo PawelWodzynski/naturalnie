@@ -2,7 +2,6 @@ import React from 'react';
 import styles from './ProductRow.module.css';
 import QuantityControl from './components/QuantityControl';
 
-// Accept onRowClick prop
 const ProductRow = ({ productItem, onRowClick }) => {
   const { produkt, zdjecia } = productItem;
 
@@ -11,7 +10,6 @@ const ProductRow = ({ productItem, onRowClick }) => {
     ? `data:image/jpeg;base64,${firstImage.daneZdjecia}` 
     : 'https://via.placeholder.com/80';
 
-  // Display raw price from the database
   const rawPrice = produkt.cena;
 
   const handleRowClick = () => {
@@ -20,8 +18,16 @@ const ProductRow = ({ productItem, onRowClick }) => {
     }
   };
 
+  // Prepare product details for CartContext
+  const productDetailsForCart = {
+    id: produkt.id,
+    nazwa: produkt.nazwa,
+    cena: produkt.cena, // Ensure this is the unit price
+    // zdjecieUrl: imageUrl // Optional, as per cart_design.md
+  };
+
   return (
-    <tr className={styles.productRow} onClick={handleRowClick}> {/* Add onClick handler to the row */}
+    <tr className={styles.productRow} onClick={handleRowClick}>
       <td>{produkt.kodEanKod || '-'}</td>
       <td>
         <img 
@@ -33,14 +39,13 @@ const ProductRow = ({ productItem, onRowClick }) => {
       <td>{produkt.nazwa || '-'}</td>
       <td>{produkt.rodzajProduktuNazwa || '-'}</td>
       <td>{produkt.dostepny ? 'Tak' : 'Nie'}</td>
-      {/* Display rawPrice here */}
-      <td>{rawPrice !== null && rawPrice !== undefined ? rawPrice : '-'}</td>
+      <td>{rawPrice !== null && rawPrice !== undefined ? rawPrice.toFixed(2) : '-'}</td> {/* Ensure price is formatted */} 
       <td>
-        <QuantityControl productId={produkt.id} />
+        {/* Pass productDetailsForCart to QuantityControl */}
+        <QuantityControl product={productDetailsForCart} />
       </td>
     </tr>
   );
 };
 
 export default ProductRow;
-

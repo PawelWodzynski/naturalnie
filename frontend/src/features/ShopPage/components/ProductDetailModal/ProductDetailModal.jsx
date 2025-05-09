@@ -1,30 +1,40 @@
-import React from 'react'; // Removed useState as it's no longer needed for quantity
+import React from 'react';
 import styles from './ProductDetailModal.module.css';
 import ImageCarousel from './components/ImageCarousel';
 import ProductDetailItem from './components/ProductDetailItem';
 import QuantityControlModal from './components/QuantityControlModal';
-import { useProductQuantity } from '../../../../context/ProductQuantityContext'; // Import the context hook
+import { useProductQuantity } from '../../../../context/ProductQuantityContext';
+import { useCart } from '../../../../context/CartContext'; // Import useCart
 
 const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
-  const { getQuantity } = useProductQuantity(); // Get the getQuantity function from context
+  const { getQuantity } = useProductQuantity(); 
+  const { addToCart } = useCart(); // Get addToCart from CartContext
 
   if (!isOpen || !productItem || !productItem.produkt) {
     return null;
   }
 
   const { produkt, zdjecia } = productItem;
-  const p = produkt; // No need for fallback if productItem.produkt is checked
-  const productId = p.id; // Get product ID
+  const p = produkt;
+  const productId = p.id;
 
   const formatBoolean = (value) => (value === true ? 'Tak' : value === false ? 'Nie' : '-');
 
-  // Removed handleQuantityChange as QuantityControlModal now handles its own state via context
-
   const handleAddToCart = () => {
-    const currentQuantity = getQuantity(productId); // Get current quantity from context
-    console.log(`Adding ${currentQuantity} of ${p.nazwa} to cart. Product ID: ${productId}`); // Placeholder
-    // Here you would typically dispatch an action to add to cart
-    // onClose(); // Optionally close modal after adding to cart
+    const currentQuantity = getQuantity(productId);
+    if (currentQuantity > 0) {
+      const productForCart = {
+        id: p.id,
+        nazwa: p.nazwa,
+        cena: p.cena, // Assuming p.cena is the unit price
+        // zdjecieUrl: (zdjecia && zdjecia.length > 0 && zdjecia[0].daneZdjecia) ? `data:image/jpeg;base64,${zdjecia[0].daneZdjecia}` : undefined // Optional
+      };
+      addToCart(productForCart, currentQuantity);
+      console.log(`Dodano do koszyka z modala: Produkt ID ${p.id} (${p.nazwa}), Cena: ${p.cena}, Ilość: ${currentQuantity}`);
+      // onClose(); // Optionally close modal after adding to cart
+    } else {
+      console.log(`Nie dodano do koszyka z modala: Produkt ID ${p.id}, Ilość musi być większa od 0.`);
+    }
   };
 
   return (
@@ -43,7 +53,8 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
             <ProductDetailItem label="Kod EAN" value={p.kodEanKod} />
             <ProductDetailItem label="Kod towaru" value={p.kodTowaruKod} />
             <ProductDetailItem label="Identyfikator" value={p.identyfikatorWartosc} />
-            <ProductDetailItem label="Cena" value={p.cena ? `${(p.cena / 100).toFixed(2)} zł` : '-'} />
+            {/* Ensure price is displayed correctly, assuming p.cena is in the smallest unit (e.g., groszy) if it was /100 before */}
+            <ProductDetailItem label="Cena" value={p.cena ? `${p.cena.toFixed(2)} zł` : '-'} />
             <ProductDetailItem label="Waga" value={p.waga ? `${p.waga} kg` : '-'} />
             <ProductDetailItem label="Jednostka" value={p.jednostkaNazwa} />
             <ProductDetailItem label="Skrót jednostki" value={p.jednostkaSkrot} />
@@ -76,7 +87,6 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
         </div>
         <div className={styles.modalFooter}>
           <div className={styles.cartControlsContainer}>
-            {/* Pass productId to QuantityControlModal */}
             <QuantityControlModal productId={productId} /> 
             <button onClick={handleAddToCart} className={styles.addToCartButton}>Dodaj do koszyka</button>
           </div>
@@ -88,4 +98,3 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
 };
 
 export default ProductDetailModal;
-
