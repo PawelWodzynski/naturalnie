@@ -5,6 +5,7 @@ import ProductDetailModal from '../ProductDetailModal'; // Import the modal
 
 const ProductsTable = ({ selectedNadKategoriaId, filters }) => { // Added filters prop
   const [productsData, setProductsData] = useState([]);
+  const [pageQuantity, setPageQuantity] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -17,6 +18,7 @@ const ProductsTable = ({ selectedNadKategoriaId, filters }) => { // Added filter
       setIsLoading(true);
       setError(null);
       setProductsData([]);
+      setPageQuantity(0);
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -65,11 +67,13 @@ const ProductsTable = ({ selectedNadKategoriaId, filters }) => { // Added filter
         }
 
         const result = await response.json();
-        if (result.success && result.data) {
-          setProductsData(result.data);
+        if (result.success && result.data && result.data.produkty) {
+          setProductsData(result.data.produkty);
+          setPageQuantity(result.data.pageQuantity);
         } else {
-          if (result.success && Array.isArray(result.data) && result.data.length === 0) {
+          if (result.success && Array.isArray(result.data.produkty) && result.data.produkty.length === 0) {
             setProductsData([]); // No data found
+            setPageQuantity(0);
           } else {
             throw new Error(result.message || 'Nie udało się pobrać danych produktów.');
           }
