@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import styles from './ShopPage.module.css';
 import ShopNavbar from './components/ShopNavbar';
 import AddProductModal from './components/AddProductModal';
-import TopNavigationPanel from './components/TopNavigationPanel'; // Import the new panel
+import TopNavigationPanel from './components/TopNavigationPanel';
 import ProductsViewContainer from './components/ProductsViewContainer';
 import { NadkategorieProvider } from '../../context/NadkategorieContext';
 import { ProductQuantityProvider } from '../../context/ProductQuantityContext';
+import { CartProvider } from '../../context/CartContext'; // Import CartProvider
 
 const ShopPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,21 +28,22 @@ const ShopPage = () => {
   return (
     <NadkategorieProvider>
       <ProductQuantityProvider>
-        <div className={styles.shopPageContainer}>
-          <ShopNavbar 
-            onAddProductClick={handleOpenModal} 
-            onCategoryClick={handleCategoryChange} 
-          />
-          <main className={styles.shopContent}>
-            <TopNavigationPanel /> {/* Add the new navigation panel here */}
-            <ProductsViewContainer selectedNadKategoriaId={selectedNadKategoriaId} />
-          </main>
-          <AddProductModal isOpen={isModalOpen} onClose={handleCloseModal} />
-        </div>
+        <CartProvider> {/* Wrap with CartProvider */}
+          <div className={styles.shopPageContainer}>
+            <ShopNavbar 
+              onAddProductClick={handleOpenModal} 
+              onCategoryClick={handleCategoryChange} 
+            />
+            <main className={styles.shopContent}>
+              <TopNavigationPanel />
+              <ProductsViewContainer selectedNadKategoriaId={selectedNadKategoriaId} />
+            </main>
+            <AddProductModal isOpen={isModalOpen} onClose={handleCloseModal} />
+          </div>
+        </CartProvider>
       </ProductQuantityProvider>
     </NadkategorieProvider>
   );
 };
 
 export default ShopPage;
-

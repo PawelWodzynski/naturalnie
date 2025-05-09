@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ProductsViewContainer.module.css';
 import ProductsTable from '../../components/ProductsTable';
+import CartButton from '../CartButton/CartButton'; // Import CartButton
 
 const ProductsViewContainer = ({ selectedNadKategoriaId }) => {
   const [rodzajeProduktow, setRodzajeProduktow] = useState([{ id: 0, nazwa: "Wszystko" }]);
@@ -61,33 +62,36 @@ const ProductsViewContainer = ({ selectedNadKategoriaId }) => {
 
   return (
     <div className={styles.productsViewContainer}>
-      <div className={styles.filterControlsContainer}> {/* New container for all filters */}
-        <div className={styles.filterItemContainer}> {/* Container for product type filter */}
-          <label htmlFor="rodzajProduktuSelect" className={styles.filterLabel}>Rodzaj produktu: </label>
-          <select 
-            id="rodzajProduktuSelect" 
-            value={selectedRodzajProduktuId} 
-            onChange={handleRodzajProduktuChange}
-            className={styles.filterSelect}
-          >
-            {rodzajeProduktow.map(typ => (
-              <option key={typ.id} value={typ.id}>
-                {typ.nazwa}
-              </option>
-            ))}
-          </select>
+      <div className={styles.topControlsContainer}> {/* Container for filters and cart button */}
+        <div className={styles.filterControlsContainer}>
+          <div className={styles.filterItemContainer}>
+            <label htmlFor="rodzajProduktuSelect" className={styles.filterLabel}>Rodzaj produktu: </label>
+            <select 
+              id="rodzajProduktuSelect" 
+              value={selectedRodzajProduktuId} 
+              onChange={handleRodzajProduktuChange}
+              className={styles.filterSelect}
+            >
+              {rodzajeProduktow.map(typ => (
+                <option key={typ.id} value={typ.id}>
+                  {typ.nazwa}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.filterItemContainer}>
+            <label htmlFor="searchInput" className={styles.filterLabel}>Wyszukaj: </label>
+            <input 
+              type="text" 
+              id="searchInput" 
+              value={searchTerm} 
+              onChange={handleSearchChange} 
+              placeholder="Wpisz nazwę produktu..." 
+              className={styles.filterInput}
+            />
+          </div>
         </div>
-        <div className={styles.filterItemContainer}> {/* Container for search input */}
-          <label htmlFor="searchInput" className={styles.filterLabel}>Wyszukaj: </label>
-          <input 
-            type="text" 
-            id="searchInput" 
-            value={searchTerm} 
-            onChange={handleSearchChange} 
-            placeholder="Wpisz nazwę produktu..." 
-            className={styles.filterInput}
-          />
-        </div>
+        <CartButton /> {/* Add CartButton here */}
       </div>
       <ProductsTable 
         selectedNadKategoriaId={selectedNadKategoriaId} 
@@ -98,4 +102,3 @@ const ProductsViewContainer = ({ selectedNadKategoriaId }) => {
 };
 
 export default ProductsViewContainer;
-
