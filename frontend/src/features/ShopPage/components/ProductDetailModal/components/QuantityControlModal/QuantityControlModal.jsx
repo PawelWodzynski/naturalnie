@@ -1,43 +1,45 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import styles from './QuantityControlModal.module.css';
+import { useProductQuantity } from '../../../../../../../context/ProductQuantityContext'; // Adjusted path
 
-const QuantityControlModal = ({ initialQuantity = 1, onQuantityChange }) => {
-  const [currentQuantity, setCurrentQuantity] = useState(initialQuantity);
+const QuantityControlModal = ({ productId }) => {
+  // Ensure productId is available before using the context
+  if (!productId) {
+    // Optionally, render nothing or a placeholder if productId is not yet available
+    // This depends on how ProductDetailModal handles product loading
+    console.warn("QuantityControlModal: productId is undefined. Cannot initialize quantity.");
+    return (
+      <div className={styles.quantityControlContainer}>
+        <button className={styles.quantityButton} disabled>-</button>
+        <input 
+          type="number" 
+          value="1" 
+          className={styles.quantityInput} 
+          min="1"
+          disabled
+        />
+        <button className={styles.quantityButton} disabled>+</button>
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    setCurrentQuantity(initialQuantity);
-  }, [initialQuantity]);
+  const { getQuantity, incrementQuantity, decrementQuantity, updateQuantity } = useProductQuantity();
+  const currentQuantity = getQuantity(productId);
 
   const handleDecrement = () => {
-    const newQuantity = Math.max(1, currentQuantity - 1);
-    setCurrentQuantity(newQuantity);
-    if (onQuantityChange) {
-      onQuantityChange(newQuantity);
-    }
+    decrementQuantity(productId);
   };
 
   const handleIncrement = () => {
-    const newQuantity = currentQuantity + 1;
-    setCurrentQuantity(newQuantity);
-    if (onQuantityChange) {
-      onQuantityChange(newQuantity);
-    }
+    incrementQuantity(productId);
   };
 
-  // Optional: Allow direct input
   const handleInputChange = (event) => {
     const value = parseInt(event.target.value, 10);
     if (!isNaN(value) && value >= 1) {
-      setCurrentQuantity(value);
-      if (onQuantityChange) {
-        onQuantityChange(value);
-      }
+      updateQuantity(productId, value);
     } else if (event.target.value === '') {
-        // Allow clearing the input, treat as 1 or handle as needed
-        setCurrentQuantity(1); // Or some other default/validation
-         if (onQuantityChange) {
-            onQuantityChange(1);
-        }
+      updateQuantity(productId, 1); // Reset to 1 if input is cleared
     }
   };
 

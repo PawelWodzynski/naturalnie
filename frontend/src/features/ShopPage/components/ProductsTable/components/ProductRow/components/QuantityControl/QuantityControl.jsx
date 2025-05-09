@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styles from './QuantityControl.module.css';
+import { useProductQuantity } from '../../../../../../../context/ProductQuantityContext'; // Adjusted path
 
 const QuantityControl = ({ productId }) => {
-  const [quantity, setQuantity] = useState(1);
+  const { getQuantity, incrementQuantity, decrementQuantity } = useProductQuantity();
+  const quantity = getQuantity(productId);
 
   const handleDecrement = () => {
-    setQuantity(prevQuantity => Math.max(1, prevQuantity - 1)); // Quantity cannot be less than 1
+    decrementQuantity(productId);
   };
 
   const handleIncrement = () => {
-    setQuantity(prevQuantity => prevQuantity + 1);
+    incrementQuantity(productId);
   };
 
   const handleAddToCart = () => {

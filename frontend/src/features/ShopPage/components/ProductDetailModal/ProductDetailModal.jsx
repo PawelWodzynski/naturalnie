@@ -1,28 +1,28 @@
-import React, { useState } from 'react';
+import React from 'react'; // Removed useState as it's no longer needed for quantity
 import styles from './ProductDetailModal.module.css';
 import ImageCarousel from './components/ImageCarousel';
 import ProductDetailItem from './components/ProductDetailItem';
 import QuantityControlModal from './components/QuantityControlModal';
+import { useProductQuantity } from '../../../../context/ProductQuantityContext'; // Import the context hook
 
 const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
-  const [currentQuantity, setCurrentQuantity] = useState(1); // State for quantity
+  const { getQuantity } = useProductQuantity(); // Get the getQuantity function from context
 
-  if (!isOpen || !productItem) {
+  if (!isOpen || !productItem || !productItem.produkt) {
     return null;
   }
 
   const { produkt, zdjecia } = productItem;
-  const p = produkt || {}; // Fallback for produkt if it's null or undefined
+  const p = produkt; // No need for fallback if productItem.produkt is checked
+  const productId = p.id; // Get product ID
 
   const formatBoolean = (value) => (value === true ? 'Tak' : value === false ? 'Nie' : '-');
 
-  const handleQuantityChange = (newQuantity) => {
-    setCurrentQuantity(newQuantity);
-    console.log(`Quantity changed to: ${newQuantity}`); // Placeholder
-  };
+  // Removed handleQuantityChange as QuantityControlModal now handles its own state via context
 
   const handleAddToCart = () => {
-    console.log(`Adding ${currentQuantity} of ${p.nazwa} to cart.`); // Placeholder
+    const currentQuantity = getQuantity(productId); // Get current quantity from context
+    console.log(`Adding ${currentQuantity} of ${p.nazwa} to cart. Product ID: ${productId}`); // Placeholder
     // Here you would typically dispatch an action to add to cart
     // onClose(); // Optionally close modal after adding to cart
   };
@@ -76,10 +76,8 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
         </div>
         <div className={styles.modalFooter}>
           <div className={styles.cartControlsContainer}>
-            <QuantityControlModal 
-              initialQuantity={currentQuantity} 
-              onQuantityChange={handleQuantityChange} 
-            />
+            {/* Pass productId to QuantityControlModal */}
+            <QuantityControlModal productId={productId} /> 
             <button onClick={handleAddToCart} className={styles.addToCartButton}>Dodaj do koszyka</button>
           </div>
           <button onClick={onClose} className={styles.footerCloseButton}>Zamknij</button>
