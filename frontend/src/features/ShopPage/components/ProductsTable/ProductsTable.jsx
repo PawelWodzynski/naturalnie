@@ -5,6 +5,7 @@ import ProductDetailModal from '../ProductDetailModal'; // Import the modal
 
 const ProductsTable = ({ selectedNadKategoriaId, filters }) => { // Added filters prop
   const [productsData, setProductsData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
   const [pageQuantity, setPageQuantity] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,7 +19,7 @@ const ProductsTable = ({ selectedNadKategoriaId, filters }) => { // Added filter
       setIsLoading(true);
       setError(null);
       setProductsData([]);
-      setPageQuantity(0);
+      // setPageQuantity(0); // Resetting pageQuantity here might be problematic if filters change but page count is still valid
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -29,11 +30,11 @@ const ProductsTable = ({ selectedNadKategoriaId, filters }) => { // Added filter
 
       try {
         const encodedToken = encodeURIComponent(token);
-        const page = 0;
+        // const page = 0; // Will use currentPage state
         const size = 12; // Consider making size configurable or larger
         const sort = "nazwa,asc";
         
-        let url = `http://localhost:8080/api/app-data/produkt/paginated?token=${encodedToken}&page=${page}&size=${size}&sort=${sort}`;
+        let url = `http://localhost:8080/api/app-data/produkt/paginated?token=${encodedToken}&page=${currentPage}&size=${size}&sort=${sort}`;
         
         if (selectedNadKategoriaId !== null && selectedNadKategoriaId !== undefined) {
           url += `&nadKategoriaId=${selectedNadKategoriaId}`;
@@ -86,7 +87,7 @@ const ProductsTable = ({ selectedNadKategoriaId, filters }) => { // Added filter
     };
 
     fetchProducts();
-  }, [selectedNadKategoriaId, filters]); // Added filters to dependency array
+  }, [selectedNadKategoriaId, filters, currentPage]); // Added filters and currentPage to dependency array
 
   const handleProductRowClick = (productItem) => {
     setSelectedProductItem(productItem);
@@ -97,6 +98,10 @@ const ProductsTable = ({ selectedNadKategoriaId, filters }) => { // Added filter
   const handleCloseProductDetailModal = () => {
     setIsProductDetailModalOpen(false);
     setSelectedProductItem(null);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   if (isLoading) {
@@ -143,6 +148,19 @@ const ProductsTable = ({ selectedNadKategoriaId, filters }) => { // Added filter
         onClose={handleCloseProductDetailModal} 
         productItem={selectedProductItem} 
       />
+      {pageQuantity > 1 && (
+        <div className={styles.paginationContainer}>
+          {Array.from({ length: pageQuantity }, (_, index) => (
+            <button
+              key={index}
+              onClick={() => handlePageChange(index)}
+              className={currentPage === index ? styles.activePage : styles.pageButton}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+      )}
     </>
   );
 };

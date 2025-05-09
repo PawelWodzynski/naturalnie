@@ -41,3 +41,37 @@
   border-radius: 4px;
 }
 
+
+
+
+.paginationContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pageButton {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  color: #007bff;
+  padding: 8px 12px;
+  margin: 0 4px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.pageButton:hover {
+  background-color: #e9ecef;
+}
+
+.activePage {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+  padding: 8px 12px;
+  margin: 0 4px;
+  border-radius: 4px;
+}
+
