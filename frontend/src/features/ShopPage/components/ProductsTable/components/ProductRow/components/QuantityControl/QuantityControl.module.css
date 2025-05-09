@@ -22,10 +22,26 @@
   background-color: #d0d0d0;
 }
 
-.quantityDisplay {
-  min-width: 20px; /* Ensure some space for the number */
+/* Styles for the quantity input field */
+.quantityInput {
+  width: 40px; /* Make the input field narrower */
   text-align: center;
   font-weight: bold;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px;
+}
+
+/* Hide spinner arrows for Chrome, Safari, Edge, Opera */
+.quantityInput::-webkit-outer-spin-button,
+.quantityInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide spinner arrows for Firefox */
+.quantityInput[type=number] {
+  -moz-appearance: textfield;
 }
 
 .addToCartButton {
