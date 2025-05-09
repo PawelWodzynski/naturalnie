@@ -65,7 +65,8 @@ public class ProduktController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
             @RequestParam(required = false) Integer nadKategoriaId,
-            @RequestParam(required = false) Integer rodzajProduktuId, // Added new parameter
+            @RequestParam(required = false) Integer rodzajProduktuId,
+            @RequestParam(required = false) String searchTerm, // Added searchTerm parameter
             @RequestParam(required = false, defaultValue = "id,asc") String[] sort) {
         try {
             authUtil.getAuthenticatedUserOrThrow();
@@ -74,7 +75,8 @@ public class ProduktController {
             Sort.Order order = new Sort.Order(direction, sort[0]);
             Pageable pageable = PageRequest.of(page, size, Sort.by(order));
 
-            ProduktAndZdjeciaPaginatedDto produktyPage = produktService.getAllProduktyPaginated(pageable, nadKategoriaId, rodzajProduktuId);
+            // Pass searchTerm to the service method
+            ProduktAndZdjeciaPaginatedDto produktyPage = produktService.getAllProduktyPaginated(pageable, nadKategoriaId, rodzajProduktuId, searchTerm);
 
             return ResponseEntity.ok(responseUtil.createSuccessResponse("Pobrano paginowaną listę produktów.", produktyPage));
         } catch (UserNotAuthenticatedException e) {

@@ -16,8 +16,15 @@ public class Zdjecie {
     @Column(name = "zdjecie_id")
     private Integer id;
 
+    @Column(name = "nazwa", length = 255) // Added field
+    private String nazwa;
+
     @Lob
-    @Column(name = "dane_zdjecia", nullable = false, columnDefinition="LONGBLOB")
+    @Column(name = "base64", columnDefinition="TEXT") // Added field, assuming TEXT for potentially long base64 strings
+    private String base64;
+
+    @Lob
+    @Column(name = "dane_zdjecia", nullable = true, columnDefinition="LONGBLOB") // Made nullable as base64 might be used instead
     private byte[] daneZdjecia;
 
     @Column(name = "opis", length = 255)

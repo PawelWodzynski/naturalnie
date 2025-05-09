@@ -42,11 +42,11 @@ const ProductsTable = ({ selectedNadKategoriaId, filters }) => { // Added filter
 
         // Apply filters if they exist
         if (filters) {
-          if (filters.searchTerm) {
-            url += `&search=${encodeURIComponent(filters.searchTerm)}`;
+          if (filters.searchTerm && filters.searchTerm.trim() !== "") {
+            url += `&searchTerm=${encodeURIComponent(filters.searchTerm.trim())}`;
           }
-          if (filters.productType) {
-            url += `&rodzajProduktuId=${filters.productType}`;
+          if (filters.rodzajProduktuId !== null && filters.rodzajProduktuId !== undefined) {
+             url += `&rodzajProduktuId=${filters.rodzajProduktuId}`;
           }
           if (filters.availability !== undefined) { // Assuming availability is boolean or specific values
             url += `&dostepny=${filters.availability}`;

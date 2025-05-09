@@ -1,5 +1,6 @@
 package com.auth.jwt.data.repository.app_data;
 
+import com.auth.jwt.data.entity.app_data.Produkt; // Added import for Produkt
 import com.auth.jwt.data.entity.app_data.Zdjecie;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -22,7 +23,15 @@ public interface ZdjecieRepository extends JpaRepository<Zdjecie, Integer> {
 
     @Transactional
     @Modifying
-    void deleteAllByProduktId(Integer produktId); // Corrected method name
+    void deleteAllByProduktId(Integer produktId);
 
+    // Added new method to delete by Produkt entity
+    @Transactional
+    @Modifying
+    default void deleteByProdukt(Produkt produkt) {
+        if (produkt != null && produkt.getId() != null) {
+            deleteAllByProduktId(produkt.getId());
+        }
+    }
 }
 
