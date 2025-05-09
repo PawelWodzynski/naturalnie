@@ -129,7 +129,12 @@ public class RodzajProduktuController {
     public ResponseEntity<?> getRodzajeProduktowByNadKategoriaId(@PathVariable Integer nadKategoriaId, @RequestParam(required = true) String token) {
         try {
             authUtil.getAuthenticatedUserOrThrow();
-            List<RodzajProduktu> rodzajeProduktow = rodzajProduktuService.getRodzajeProduktowByNadKategoriaId(nadKategoriaId);
+            List<RodzajProduktu> rodzajeProduktow;
+            if (nadKategoriaId == 0) {
+                rodzajeProduktow = rodzajProduktuService.getAllRodzajeProduktow();
+            } else {
+                rodzajeProduktow = rodzajProduktuService.getRodzajeProduktowByNadKategoriaId(nadKategoriaId);
+            }
             if (rodzajeProduktow.isEmpty()) {
                 return ResponseEntity.ok(responseUtil.createSuccessResponse("Nie znaleziono rodzajów produktów dla podanej nadkategorii.", rodzajeProduktow));
             }
