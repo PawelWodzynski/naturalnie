@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal; 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +27,7 @@ import com.auth.jwt.dto.app_data.ProduktDTO;
 import com.auth.jwt.dto.app_data.ZdjecieDTO;
 import com.auth.jwt.dto.app_data.SkladnikDTO;
 import com.auth.jwt.data.dto.app_data.ProduktAndZdjeciaPaginatedDto;
+
 
 @Slf4j
 @Service
@@ -42,7 +44,7 @@ public class ProduktService {
     private final IdentyfikatorRepository identyfikatorRepository;
     private final SkladnikRepository skladnikRepository;
     private final ZdjecieRepository zdjecieRepository;
-    private final ObjectMapper objectMapper; // For JSON serialization
+    private final ObjectMapper objectMapper;
 
     @Autowired
     public ProduktService(ProduktRepository produktRepository,
@@ -91,7 +93,7 @@ public class ProduktService {
             }
 
             RodzajProduktu rodzajProduktu = null;
-            if (rodzajProduktuId != null && rodzajProduktuId != 0) { // Assuming 0 means "all" or "not specified" for filtering
+            if (rodzajProduktuId != null && rodzajProduktuId != 0) { 
                 Optional<RodzajProduktu> rodzajProduktuOpt = rodzajProduktuRepository.findById(rodzajProduktuId);
                 if (!rodzajProduktuOpt.isPresent()) {
                     log.warn("RodzajProduktu with ID {} not found. Returning empty list.", rodzajProduktuId);
@@ -107,17 +109,17 @@ public class ProduktService {
                     pageResult = produktRepository.findByNazwaContainingIgnoreCaseAndNadKategoria(searchTerm, nadKategoria, pageable);
                 } else if (rodzajProduktu != null) {
                     pageResult = produktRepository.findByNazwaContainingIgnoreCaseAndRodzajProduktu(searchTerm, rodzajProduktu, pageable);
-                } else { // Only searchTerm
+                } else { 
                     pageResult = produktRepository.findByNazwaContainingIgnoreCase(searchTerm, pageable);
                 }
-            } else { // No searchTerm, use logic based on nadKategoria and rodzajProduktu
+            } else { 
                 if (nadKategoria != null && rodzajProduktu != null) {
                     pageResult = produktRepository.findByNadKategoriaAndRodzajProduktu(nadKategoria, rodzajProduktu, pageable);
                 } else if (nadKategoria != null) {
                     pageResult = produktRepository.findByNadKategoria(nadKategoria, pageable);
                 } else if (rodzajProduktu != null) {
                     pageResult = produktRepository.findByRodzajProduktu(rodzajProduktu, pageable);
-                } else { // No filters at all
+                } else { 
                     pageResult = produktRepository.findAll(pageable);
                 }
             }
@@ -125,17 +127,17 @@ public class ProduktService {
             List<Produkt> produkty = pageResult.getContent();
             List<ProduktAndZdjeciaDto> produktAndZdjeciaDtos = new ArrayList<>();
 
-            for (Produkt produkt : produkty) {
-                ProduktDTO produktDto = new ProduktDTO(produkt);
+            for (Produkt produktEntity : produkty) {
+                ProduktDTO produktDto = new ProduktDTO(produktEntity);
                 List<Skladnik> currentSkladnikiEntities = new ArrayList<>();
-                if (produkt.getSkladnikiJson() != null && !produkt.getSkladnikiJson().isEmpty()) {
+                if (produktEntity.getSkladnikiJson() != null && !produktEntity.getSkladnikiJson().isEmpty()) {
                     try {
-                        Integer[] ids = this.objectMapper.readValue(produkt.getSkladnikiJson(), Integer[].class);
-                        for (Integer id : ids) {
-                            skladnikRepository.findById(id).ifPresent(currentSkladnikiEntities::add);
+                        Integer[] ids = this.objectMapper.readValue(produktEntity.getSkladnikiJson(), Integer[].class);
+                        for (Integer idVal : ids) {
+                            skladnikRepository.findById(idVal).ifPresent(currentSkladnikiEntities::add);
                         }
                     } catch (JsonProcessingException e) {
-                        log.error("Błąd parsowania JSON dla składników produktu o ID: " + produkt.getId(), e);
+                        log.error("Błąd parsowania JSON dla składników produktu o ID: " + produktEntity.getId(), e);
                     }
                 }
                 List<SkladnikDTO> skladnikiDtoList = currentSkladnikiEntities.stream()
@@ -144,14 +146,14 @@ public class ProduktService {
                 produktDto.setSkladniki(skladnikiDtoList);
 
                 List<Zdjecie> currentZdjeciaEntitiesForZdjecia = new ArrayList<>();
-                if (produkt.getZdjeciaJson() != null && !produkt.getZdjeciaJson().isEmpty()) {
+                if (produktEntity.getZdjeciaJson() != null && !produktEntity.getZdjeciaJson().isEmpty()) {
                     try {
-                        Integer[] ids = this.objectMapper.readValue(produkt.getZdjeciaJson(), Integer[].class);
-                        for (Integer id : ids) {
-                            zdjecieRepository.findById(id).ifPresent(currentZdjeciaEntitiesForZdjecia::add);
+                        Integer[] ids = this.objectMapper.readValue(produktEntity.getZdjeciaJson(), Integer[].class);
+                        for (Integer idVal : ids) {
+                            zdjecieRepository.findById(idVal).ifPresent(currentZdjeciaEntitiesForZdjecia::add);
                         }
                     } catch (JsonProcessingException e) {
-                        log.error("Błąd parsowania JSON dla zdjęć produktu o ID: " + produkt.getId(), e);
+                        log.error("Błąd parsowania JSON dla zdjęć produktu o ID: " + produktEntity.getId(), e);
                     }
                 }
                 List<ZdjecieDTO> zdjeciaDtoListForOuter = currentZdjeciaEntitiesForZdjecia.stream()
@@ -172,6 +174,7 @@ public class ProduktService {
         }
     }
 
+
     public Optional<Produkt> getProduktById(Integer id) {
         return produktRepository.findById(id);
     }
@@ -179,7 +182,7 @@ public class ProduktService {
     @Transactional("appDataTransactionManager")
     public Produkt createProdukt(ProduktRequestDTO dto) {
         if (produktRepository.findByNazwa(dto.getNazwa()).isPresent()) {
-            throw new IllegalArgumentException("Produkt o nazwie '" + dto.getNazwa() + "' ju	 istnieje.");
+            throw new IllegalArgumentException("Produkt o nazwie '" + dto.getNazwa() + "' już istnieje.");
         }
 
         Produkt produkt = new Produkt();
@@ -222,9 +225,10 @@ public class ProduktService {
                 });
             produkt.setJednostka(jednostka);
         }
-
+        
+        NadKategoria nadKategoriaForProdukt = null;
         if (StringUtils.hasText(dto.getNadKategoriaNazwa())) {
-            NadKategoria nadKategoria = nadKategoriaRepository.findByNazwa(dto.getNadKategoriaNazwa())
+            nadKategoriaForProdukt = nadKategoriaRepository.findByNazwa(dto.getNadKategoriaNazwa())
                 .orElseGet(() -> {
                     NadKategoria newNadKategoria = new NadKategoria();
                     newNadKategoria.setNazwa(dto.getNadKategoriaNazwa());
@@ -232,10 +236,10 @@ public class ProduktService {
                     newNadKategoria.setKolejnosc(dto.getNadKategoriaKolejnosc());
                     return nadKategoriaRepository.save(newNadKategoria);
                 });
-            produkt.setNadKategoria(nadKategoria);
+            produkt.setNadKategoria(nadKategoriaForProdukt);
             if (produkt.getRodzajProduktu() != null && produkt.getRodzajProduktu().getNadKategoria() == null && produkt.getRodzajProduktu().getId() != null) {
                 RodzajProduktu rpToUpdate = produkt.getRodzajProduktu();
-                rpToUpdate.setNadKategoria(nadKategoria);
+                rpToUpdate.setNadKategoria(nadKategoriaForProdukt);
                 rodzajProduktuRepository.save(rpToUpdate);
             }
         }
@@ -292,53 +296,65 @@ public class ProduktService {
 
         Produkt savedProdukt = produktRepository.save(produkt);
 
-        Set<Skladnik> managedSkladniki = new HashSet<>();
         List<Integer> skladnikiIds = new ArrayList<>();
         if (dto.getSkladniki() != null && !dto.getSkladniki().isEmpty()) {
             for (String skladnikNazwa : dto.getSkladniki()) {
-                Skladnik skladnik = skladnikRepository.findByNazwa(skladnikNazwa)
-                    .orElseGet(() -> {
-                        Skladnik newSkladnik = new Skladnik();
-                        newSkladnik.setNazwa(skladnikNazwa);
-                        return skladnikRepository.save(newSkladnik);
-                    });
-                managedSkladniki.add(skladnik);
-                skladnikiIds.add(skladnik.getId());
+                 if (StringUtils.hasText(skladnikNazwa)) {
+                    Skladnik skladnik = skladnikRepository.findByNazwa(skladnikNazwa)
+                        .orElseGet(() -> {
+                            Skladnik newSkladnik = new Skladnik();
+                            newSkladnik.setNazwa(skladnikNazwa);
+                            return skladnikRepository.save(newSkladnik);
+                        });
+                    skladnikiIds.add(skladnik.getId());
+                }
             }
         }
         try {
             savedProdukt.setSkladnikiJson(objectMapper.writeValueAsString(skladnikiIds));
         } catch (JsonProcessingException e) {
-            log.error("Błąd serializacji ID składników do JSON dla produktu: " + savedProdukt.getNazwa(), e);
+            log.error("Error serializing skladniki IDs to JSON for produkt ID: " + savedProdukt.getId(), e);
+            throw new RuntimeException("Błąd podczas przetwarzania składników produktu.", e);
         }
 
         List<Integer> zdjeciaIds = new ArrayList<>();
         if (dto.getZdjecia() != null && !dto.getZdjecia().isEmpty()) {
             for (ZdjecieRequestDTO zdjecieDto : dto.getZdjecia()) {
-                Zdjecie zdjecie = new Zdjecie();
-                zdjecie.setNazwa(zdjecieDto.getNazwa());
-                zdjecie.setBase64(zdjecieDto.getBase64());
-                zdjecie.setProdukt(savedProdukt); // Associate with the saved product
-                Zdjecie savedZdjecie = zdjecieRepository.save(zdjecie);
-                zdjeciaIds.add(savedZdjecie.getId());
+                if (zdjecieDto.getZdjecie() != null && zdjecieDto.getZdjecie().length > 0) {
+                    Zdjecie zdjecie = new Zdjecie();
+                    zdjecie.setProdukt(savedProdukt);
+                    zdjecie.setZdjecie(zdjecieDto.getZdjecie());
+                    zdjecie.setOpis(zdjecieDto.getOpis());
+                    zdjecie.setKolejnosc(zdjecieDto.getKolejnosc());
+                    Zdjecie savedZdjecie = zdjecieRepository.save(zdjecie);
+                    zdjeciaIds.add(savedZdjecie.getId());
+                }
             }
         }
         try {
             savedProdukt.setZdjeciaJson(objectMapper.writeValueAsString(zdjeciaIds));
         } catch (JsonProcessingException e) {
-            log.error("Błąd serializacji ID zdjęć do JSON dla produktu: " + savedProdukt.getNazwa(), e);
+            log.error("Error serializing zdjecia IDs to JSON for produkt ID: " + savedProdukt.getId(), e);
+            throw new RuntimeException("Błąd podczas przetwarzania zdjęć produktu.", e);
         }
-
-        return produktRepository.save(savedProdukt); // Save again to update JSON fields
+        
+        return produktRepository.save(savedProdukt);
     }
 
     @Transactional("appDataTransactionManager")
     public Produkt updateProdukt(Integer id, ProduktRequestDTO dto) {
         Produkt produkt = produktRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony."));
+                .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony."));
 
-        // Update direct fields
+        if (dto.getNazwa() != null && !dto.getNazwa().equals(produkt.getNazwa())) {
+            produktRepository.findByNazwa(dto.getNazwa()).ifPresent(p -> {
+                if (!p.getId().equals(id)) {
+                    throw new IllegalArgumentException("Produkt o nazwie '" + dto.getNazwa() + "' już istnieje.");
+                }
+            });
+        }
         produkt.setNazwa(dto.getNazwa());
+
         produkt.setWaga(dto.getWaga());
         produkt.setCena(dto.getCena());
         produkt.setSuperProdukt(dto.getSuperProdukt() != null ? dto.getSuperProdukt() : false);
@@ -356,19 +372,18 @@ public class ProduktService {
         produkt.setBezglutenowy(dto.getBezglutenowy() != null ? dto.getBezglutenowy() : false);
         produkt.setOpis(dto.getOpis());
 
-        // Handle RodzajProduktu
+        RodzajProduktu rodzajProduktuForProdukt = null;
         if (StringUtils.hasText(dto.getRodzajProduktuNazwa())) {
-            RodzajProduktu rodzajProduktu = rodzajProduktuRepository.findByNazwa(dto.getRodzajProduktuNazwa())
+            rodzajProduktuForProdukt = rodzajProduktuRepository.findByNazwa(dto.getRodzajProduktuNazwa())
                 .orElseGet(() -> {
                     RodzajProduktu newRodzaj = new RodzajProduktu();
                     newRodzaj.setNazwa(dto.getRodzajProduktuNazwa());
                     newRodzaj.setOpis(dto.getRodzajProduktuOpis());
                     return rodzajProduktuRepository.save(newRodzaj);
                 });
-            produkt.setRodzajProduktu(rodzajProduktu);
         }
+        produkt.setRodzajProduktu(rodzajProduktuForProdukt);
 
-        // Handle Jednostka
         if (StringUtils.hasText(dto.getJednostkaNazwa()) && StringUtils.hasText(dto.getJednostkaSkrot())) {
             Jednostka jednostka = jednostkaRepository.findByNazwaAndSkrot(dto.getJednostkaNazwa(), dto.getJednostkaSkrot())
                 .orElseGet(() -> {
@@ -378,27 +393,42 @@ public class ProduktService {
                     return jednostkaRepository.save(newJednostka);
                 });
             produkt.setJednostka(jednostka);
+        } else {
+            produkt.setJednostka(null);
         }
 
-        // Handle NadKategoria
+        NadKategoria nadKategoriaForProduktToSet = null;
         if (StringUtils.hasText(dto.getNadKategoriaNazwa())) {
-            NadKategoria nadKategoria = nadKategoriaRepository.findByNazwa(dto.getNadKategoriaNazwa())
+            nadKategoriaForProduktToSet = nadKategoriaRepository.findByNazwa(dto.getNadKategoriaNazwa())
                 .orElseGet(() -> {
-                    NadKategoria newNadKategoria = new NadKategoria();
-                    newNadKategoria.setNazwa(dto.getNadKategoriaNazwa());
-                    newNadKategoria.setOpis(dto.getNadKategoriaOpis());
-                    newNadKategoria.setKolejnosc(dto.getNadKategoriaKolejnosc());
-                    return nadKategoriaRepository.save(newNadKategoria);
+                    NadKategoria newNadKat = new NadKategoria();
+                    newNadKat.setNazwa(dto.getNadKategoriaNazwa());
+                    newNadKat.setOpis(dto.getNadKategoriaOpis());
+                    newNadKat.setKolejnosc(dto.getNadKategoriaKolejnosc());
+                    return nadKategoriaRepository.save(newNadKat);
                 });
-            produkt.setNadKategoria(nadKategoria);
-            if (produkt.getRodzajProduktu() != null && produkt.getRodzajProduktu().getNadKategoria() == null && produkt.getRodzajProduktu().getId() != null) {
-                RodzajProduktu rpToUpdate = produkt.getRodzajProduktu();
-                rpToUpdate.setNadKategoria(nadKategoria);
+        }
+        produkt.setNadKategoria(nadKategoriaForProduktToSet);
+
+        if (produkt.getRodzajProduktu() != null && produkt.getRodzajProduktu().getId() != null) {
+            RodzajProduktu rpToUpdate = produkt.getRodzajProduktu();
+            boolean needsRpSave = false;
+            if (nadKategoriaForProduktToSet == null) { 
+                if (rpToUpdate.getNadKategoria() != null) {
+                    rpToUpdate.setNadKategoria(null);
+                    needsRpSave = true;
+                }
+            } else { 
+                if (rpToUpdate.getNadKategoria() == null || !rpToUpdate.getNadKategoria().getId().equals(nadKategoriaForProduktToSet.getId())) {
+                    rpToUpdate.setNadKategoria(nadKategoriaForProduktToSet);
+                    needsRpSave = true;
+                }
+            }
+            if (needsRpSave) {
                 rodzajProduktuRepository.save(rpToUpdate);
             }
         }
-
-        // Handle Opakowanie
+        
         if (StringUtils.hasText(dto.getOpakowanieNazwa())) {
             Opakowanie opakowanie = opakowanieRepository.findByNazwa(dto.getOpakowanieNazwa())
                 .orElseGet(() -> {
@@ -409,9 +439,10 @@ public class ProduktService {
                     return opakowanieRepository.save(newOpakowanie);
                 });
             produkt.setOpakowanie(opakowanie);
+        } else {
+            produkt.setOpakowanie(null);
         }
 
-        // Handle StawkaVat
         if (dto.getStawkaVatWartosc() != null) {
             StawkaVat stawkaVat = stawkaVatRepository.findByWartosc(dto.getStawkaVatWartosc())
                 .orElseGet(() -> {
@@ -420,6 +451,8 @@ public class ProduktService {
                     return stawkaVatRepository.save(newStawkaVat);
                 });
             produkt.setStawkaVat(stawkaVat);
+        } else {
+            produkt.setStawkaVat(null);
         }
 
         if (StringUtils.hasText(dto.getKodTowaruKod())) {
@@ -430,7 +463,10 @@ public class ProduktService {
                     return kodTowaruRepository.save(newKt);
                 });
             produkt.setKodTowaru(kt);
+        } else {
+            produkt.setKodTowaru(null);
         }
+
         if (StringUtils.hasText(dto.getKodEanKod())) {
             KodEan ke = kodEanRepository.findByKod(dto.getKodEanKod())
                 .orElseGet(() -> {
@@ -439,7 +475,10 @@ public class ProduktService {
                     return kodEanRepository.save(newKe);
                 });
             produkt.setKodEan(ke);
+        } else {
+            produkt.setKodEan(null);
         }
+        
         if (StringUtils.hasText(dto.getIdentyfikatorWartosc())) {
             Identyfikator idf = identyfikatorRepository.findByWartosc(dto.getIdentyfikatorWartosc())
                 .orElseGet(() -> {
@@ -448,47 +487,51 @@ public class ProduktService {
                     return identyfikatorRepository.save(newIdf);
                 });
             produkt.setIdentyfikator(idf);
+        } else {
+            produkt.setIdentyfikator(null);
         }
 
-        // Update Skladniki
-        Set<Skladnik> managedSkladniki = new HashSet<>();
-        List<Integer> skladnikiIds = new ArrayList<>();
-        if (dto.getSkladniki() != null && !dto.getSkladniki().isEmpty()) {
+        List<Integer> currentSkladnikiIds = new ArrayList<>();
+        if (dto.getSkladniki() != null) {
             for (String skladnikNazwa : dto.getSkladniki()) {
-                Skladnik skladnik = skladnikRepository.findByNazwa(skladnikNazwa)
-                    .orElseGet(() -> {
-                        Skladnik newSkladnik = new Skladnik();
-                        newSkladnik.setNazwa(skladnikNazwa);
-                        return skladnikRepository.save(newSkladnik);
-                    });
-                managedSkladniki.add(skladnik);
-                skladnikiIds.add(skladnik.getId());
+                if (StringUtils.hasText(skladnikNazwa)) {
+                    Skladnik skladnik = skladnikRepository.findByNazwa(skladnikNazwa)
+                        .orElseGet(() -> {
+                            Skladnik newSkladnik = new Skladnik();
+                            newSkladnik.setNazwa(skladnikNazwa);
+                            return skladnikRepository.save(newSkladnik);
+                        });
+                    currentSkladnikiIds.add(skladnik.getId());
+                }
             }
         }
         try {
-            produkt.setSkladnikiJson(objectMapper.writeValueAsString(skladnikiIds));
+            produkt.setSkladnikiJson(objectMapper.writeValueAsString(currentSkladnikiIds));
         } catch (JsonProcessingException e) {
-            log.error("Błąd serializacji ID składników do JSON dla produktu: " + produkt.getNazwa(), e);
+            log.error("Error serializing skladniki IDs to JSON for produkt ID: " + produkt.getId(), e);
+            throw new RuntimeException("Błąd podczas przetwarzania składników produktu.", e);
         }
 
-        // Update Zdjecia - this part might need more complex logic for adding/removing/updating existing photos
-        // For simplicity, this example clears existing and adds new ones. Consider a more nuanced approach.
-        zdjecieRepository.deleteByProdukt(produkt); // Clear existing photos for this product
-        List<Integer> zdjeciaIds = new ArrayList<>();
-        if (dto.getZdjecia() != null && !dto.getZdjecia().isEmpty()) {
+        zdjecieRepository.deleteAllByProduktId(produkt.getId()); 
+        List<Integer> currentZdjeciaIds = new ArrayList<>();
+        if (dto.getZdjecia() != null) { 
             for (ZdjecieRequestDTO zdjecieDto : dto.getZdjecia()) {
-                Zdjecie zdjecie = new Zdjecie();
-                zdjecie.setNazwa(zdjecieDto.getNazwa());
-                zdjecie.setBase64(zdjecieDto.getBase64());
-                zdjecie.setProdukt(produkt);
-                Zdjecie savedZdjecie = zdjecieRepository.save(zdjecie);
-                zdjeciaIds.add(savedZdjecie.getId());
+                if (zdjecieDto.getZdjecie() != null && zdjecieDto.getZdjecie().length > 0) {
+                    Zdjecie zdjecie = new Zdjecie();
+                    zdjecie.setProdukt(produkt); 
+                    zdjecie.setZdjecie(zdjecieDto.getZdjecie());
+                    zdjecie.setOpis(zdjecieDto.getOpis());
+                    zdjecie.setKolejnosc(zdjecieDto.getKolejnosc());
+                    Zdjecie savedZdjecie = zdjecieRepository.save(zdjecie);
+                    currentZdjeciaIds.add(savedZdjecie.getId());
+                }
             }
         }
         try {
-            produkt.setZdjeciaJson(objectMapper.writeValueAsString(zdjeciaIds));
+            produkt.setZdjeciaJson(objectMapper.writeValueAsString(currentZdjeciaIds));
         } catch (JsonProcessingException e) {
-            log.error("Błąd serializacji ID zdjęć do JSON dla produktu: " + produkt.getNazwa(), e);
+            log.error("Error serializing zdjecia IDs to JSON for produkt ID: " + produkt.getId(), e);
+            throw new RuntimeException("Błąd podczas przetwarzania zdjęć produktu.", e);
         }
 
         return produktRepository.save(produkt);
@@ -497,9 +540,10 @@ public class ProduktService {
     @Transactional("appDataTransactionManager")
     public void deleteProdukt(Integer id) {
         Produkt produkt = produktRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony."));
-        // Also delete associated Zdjecia
-        zdjecieRepository.deleteByProdukt(produkt);
+                .orElseThrow(() -> new ResourceNotFoundException("Produkt o ID " + id + " nie znaleziony."));
+        
+        zdjecieRepository.deleteAllByProduktId(id);
+        
         produktRepository.delete(produkt);
     }
 }
