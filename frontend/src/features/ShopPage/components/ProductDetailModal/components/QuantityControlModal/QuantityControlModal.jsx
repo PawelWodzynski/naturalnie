@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'; // Added useEffect
 import styles from './QuantityControlModal.module.css';
-import { useProductQuantity } from '../../../../../../../context/ProductQuantityContext'; // Adjusted path
+import { useProductQuantity } from '../../../../../../context/ProductQuantityContext'; // Adjusted path
 
 const QuantityControlModal = ({ productId }) => {
   // Hooks are called at the top level
