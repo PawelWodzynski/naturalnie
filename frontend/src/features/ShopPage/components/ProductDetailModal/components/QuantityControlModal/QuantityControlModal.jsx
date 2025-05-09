@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './QuantityControlModal.module.css';
-import { useProductQuantity } from '../../../../../../../context/ProductQuantityContext'; // Adjusted path
+import { useProductQuantity } from '../../../../../../context/ProductQuantityContext'; // Adjusted path
 
 const QuantityControlModal = ({ productId }) => {
   // Ensure productId is available before using the context

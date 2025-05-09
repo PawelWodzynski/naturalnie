@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './QuantityControl.module.css';
-import { useProductQuantity } from '../../../../../../../context/ProductQuantityContext'; // Adjusted path
+import { useProductQuantity } from '../../../../../../../../context/ProductQuantityContext'; // Adjusted path
 
 const QuantityControl = ({ productId }) => {
   const { getQuantity, incrementQuantity, decrementQuantity } = useProductQuantity();
