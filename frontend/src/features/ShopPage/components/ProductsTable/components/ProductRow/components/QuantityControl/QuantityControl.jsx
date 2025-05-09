@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './QuantityControl.module.css';
 import { useProductQuantity } from '../../../../../../../../context/ProductQuantityContext';
 
 const QuantityControl = ({ productId }) => {
   const { getQuantity, incrementQuantity, decrementQuantity, updateQuantity } = useProductQuantity();
-  const quantity = getQuantity(productId);
+  const quantityFromContext = getQuantity(productId);
+
+  const [inputValue, setInputValue] = useState(quantityFromContext.toString());
+
+  // Sync inputValue with context quantity if it changes from outside (e.g. +/- buttons)
+  useEffect(() => {
+    setInputValue(quantityFromContext.toString());
+  }, [quantityFromContext]);
 
   const handleDecrement = (event) => {
     event.stopPropagation();
@@ -18,12 +25,33 @@ const QuantityControl = ({ productId }) => {
 
   const handleInputChange = (event) => {
     event.stopPropagation();
-    const value = parseInt(event.target.value, 10);
-    if (!isNaN(value) && value >= 1) {
-      updateQuantity(productId, value);
-    } else if (event.target.value === '') {
-      // If input is cleared, reset to 1 or handle as per desired behavior
-      updateQuantity(productId, 1);
+    const currentDisplayValue = event.target.value;
+    setInputValue(currentDisplayValue); // Allow any input for typing (e.g. empty, "0")
+
+    // If user types a valid number, update context immediately
+    // Otherwise, validation will happen onBlur
+    const numericValue = parseInt(currentDisplayValue, 10);
+    if (!isNaN(numericValue) && numericValue >= 1) {
+      updateQuantity(productId, numericValue);
+    }
+  };
+
+  const handleInputBlur = (event) => {
+    event.stopPropagation();
+    const finalDisplayValue = inputValue; // Use state inputValue as source of truth for blur
+    const numericValue = parseInt(finalDisplayValue, 10);
+
+    if (finalDisplayValue === "" || isNaN(numericValue) || numericValue < 1) {
+      updateQuantity(productId, 1); // This updates context, then useEffect updates inputValue to "1"
+    } else {
+      // It's a valid number (e.g. user typed "20", or "05" which is 5)
+      // Ensure context has the clean numeric value and inputValue reflects it (e.g. remove leading zeros)
+      if (quantityFromContext !== numericValue) {
+         updateQuantity(productId, numericValue);
+      } else {
+        // If context is already correct, but inputValue might be e.g. "05"
+        setInputValue(numericValue.toString());
+      }
     }
   };
 
@@ -33,18 +61,19 @@ const QuantityControl = ({ productId }) => {
 
   const handleAddToCart = (event) => {
     event.stopPropagation();
-    console.log(`Dodano do koszyka: Produkt ID ${productId}, Ilość: ${quantity}`);
+    console.log(`Dodano do koszyka: Produkt ID ${productId}, Ilość: ${quantityFromContext}`);
   };
 
   return (
     <div className={styles.quantityControlContainer} onClick={handleContainerClick}>
       <button onClick={handleDecrement} className={styles.quantityButton}>-</button>
       <input
-        type="number"
-        value={quantity}
+        type="number" // Kept for semantic reasons and potential mobile numeric keyboard
+        value={inputValue}
         onChange={handleInputChange}
-        className={styles.quantityInput} // Use a similar style to the modal's input if available or create a new one
-        min="1"
+        onBlur={handleInputBlur} // Added onBlur handler for final validation
+        className={styles.quantityInput}
+        // min="1" is not strictly enforced here by browser due to custom handling but good for semantics
       />
       <button onClick={handleIncrement} className={styles.quantityButton}>+</button>
       <button onClick={handleAddToCart} className={styles.addToCartButton}>Dodaj</button>
