@@ -11,9 +11,8 @@ const ProductRow = ({ productItem, onRowClick }) => {
     ? `data:image/jpeg;base64,${firstImage.daneZdjecia}` 
     : 'https://via.placeholder.com/80';
 
-  const displayPrice = produkt.jednostkaNazwa 
-    ? `${(produkt.cena / 100).toFixed(2)} / ${produkt.jednostkaNazwa}` 
-    : `${(produkt.cena / 100).toFixed(2)}`;
+  // Display raw price from the database
+  const rawPrice = produkt.cena;
 
   const handleRowClick = () => {
     if (onRowClick) {
@@ -34,7 +33,8 @@ const ProductRow = ({ productItem, onRowClick }) => {
       <td>{produkt.nazwa || '-'}</td>
       <td>{produkt.rodzajProduktuNazwa || '-'}</td>
       <td>{produkt.dostepny ? 'Tak' : 'Nie'}</td>
-      <td>{displayPrice}</td>
+      {/* Display rawPrice here */}
+      <td>{rawPrice !== null && rawPrice !== undefined ? rawPrice : '-'}</td>
       <td>
         <QuantityControl productId={produkt.id} />
       </td>
