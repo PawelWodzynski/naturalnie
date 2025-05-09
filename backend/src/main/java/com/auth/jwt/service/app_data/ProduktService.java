@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal; 
 import java.util.ArrayList;
+import java.util.Base64; // Added for Base64 decoding
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -320,10 +321,26 @@ public class ProduktService {
         List<Integer> zdjeciaIds = new ArrayList<>();
         if (dto.getZdjecia() != null && !dto.getZdjecia().isEmpty()) {
             for (ZdjecieRequestDTO zdjecieDto : dto.getZdjecia()) {
-                if (zdjecieDto.getZdjecie() != null && zdjecieDto.getZdjecie().length > 0) {
+                byte[] imageBytes = null;
+                if (zdjecieDto.getDaneZdjecia() != null && zdjecieDto.getDaneZdjecia().length > 0) {
+                    imageBytes = zdjecieDto.getDaneZdjecia();
+                } else if (StringUtils.hasText(zdjecieDto.getBase64())) {
+                    try {
+                        imageBytes = Base64.getDecoder().decode(zdjecieDto.getBase64());
+                    } catch (IllegalArgumentException e) {
+                        log.error("Error decoding base64 image for produkt: " + savedProdukt.getId() + ", zdjecie nazwa: " + zdjecieDto.getNazwa(), e);
+                        continue; 
+                    }
+                }
+
+                if (imageBytes != null && imageBytes.length > 0) {
                     Zdjecie zdjecie = new Zdjecie();
                     zdjecie.setProdukt(savedProdukt);
-                    zdjecie.setZdjecie(zdjecieDto.getZdjecie());
+                    zdjecie.setNazwa(zdjecieDto.getNazwa());
+                    zdjecie.setDaneZdjecia(imageBytes);
+                    if (StringUtils.hasText(zdjecieDto.getBase64())) {
+                        zdjecie.setBase64(zdjecieDto.getBase64()); // Store original base64 if provided
+                    }
                     zdjecie.setOpis(zdjecieDto.getOpis());
                     zdjecie.setKolejnosc(zdjecieDto.getKolejnosc());
                     Zdjecie savedZdjecie = zdjecieRepository.save(zdjecie);
@@ -516,10 +533,26 @@ public class ProduktService {
         List<Integer> currentZdjeciaIds = new ArrayList<>();
         if (dto.getZdjecia() != null) { 
             for (ZdjecieRequestDTO zdjecieDto : dto.getZdjecia()) {
-                if (zdjecieDto.getZdjecie() != null && zdjecieDto.getZdjecie().length > 0) {
+                byte[] imageBytes = null;
+                if (zdjecieDto.getDaneZdjecia() != null && zdjecieDto.getDaneZdjecia().length > 0) {
+                    imageBytes = zdjecieDto.getDaneZdjecia();
+                } else if (StringUtils.hasText(zdjecieDto.getBase64())) {
+                    try {
+                        imageBytes = Base64.getDecoder().decode(zdjecieDto.getBase64());
+                    } catch (IllegalArgumentException e) {
+                        log.error("Error decoding base64 image for produkt: " + produkt.getId() + ", zdjecie nazwa: " + zdjecieDto.getNazwa(), e);
+                        continue; 
+                    }
+                }
+
+                if (imageBytes != null && imageBytes.length > 0) {
                     Zdjecie zdjecie = new Zdjecie();
                     zdjecie.setProdukt(produkt); 
-                    zdjecie.setZdjecie(zdjecieDto.getZdjecie());
+                    zdjecie.setNazwa(zdjecieDto.getNazwa());
+                    zdjecie.setDaneZdjecia(imageBytes);
+                     if (StringUtils.hasText(zdjecieDto.getBase64())) {
+                        zdjecie.setBase64(zdjecieDto.getBase64());
+                    }
                     zdjecie.setOpis(zdjecieDto.getOpis());
                     zdjecie.setKolejnosc(zdjecieDto.getKolejnosc());
                     Zdjecie savedZdjecie = zdjecieRepository.save(zdjecie);
