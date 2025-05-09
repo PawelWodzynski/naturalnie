@@ -1,15 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react'; // Added useState and useEffect
 import styles from './ProductDetailModal.module.css';
 import ImageCarousel from './components/ImageCarousel';
 import ProductDetailItem from './components/ProductDetailItem';
 import QuantityControlModal from './components/QuantityControlModal';
-import { useProductQuantity } from '../../../../context/ProductQuantityContext';
+import { useProductQuantity } from '../../../../context/ProductQuantityContext'; // Keep for initial quantity if needed, or remove if fully local
 import { useCart } from '../../../../context/CartContext';
 
 const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
-  // Destructure commitFinalQuantity along with getQuantity
-  const { getQuantity, commitFinalQuantity } = useProductQuantity(); 
+  const { getStoredQuantity, commitFinalQuantity } = useProductQuantity(); // For initializing and potentially committing back if desired
   const { addToCart } = useCart();
+  
+  // State for managing quantity within the modal
+  const [modalQuantity, setModalQuantity] = useState(1);
+
+  useEffect(() => {
+    if (isOpen && productItem && productItem.produkt) {
+      // Initialize quantity when modal opens or product changes
+      // Option 1: Always start with 1 for the modal instance
+      setModalQuantity(1);
+      // Option 2: Try to get a stored/default quantity from context (might be less intuitive for a modal)
+      // const initialQty = getStoredQuantity(productItem.produkt.id) || 1;
+      // setModalQuantity(initialQty > 0 ? initialQty : 1);
+    } else if (!isOpen) {
+      setModalQuantity(1); // Reset quantity when modal closes
+    }
+  }, [isOpen, productItem, getStoredQuantity]); // Add getStoredQuantity if using Option 2
 
   if (!isOpen || !productItem || !productItem.produkt) {
     return null;
@@ -21,21 +36,27 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
 
   const formatBoolean = (value) => (value === true ? 'Tak' : value === false ? 'Nie' : '-');
 
+  const handleModalQuantityChange = (newQuantity) => {
+    setModalQuantity(newQuantity);
+    // Optionally, if ProductQuantityContext should also reflect this change immediately:
+    // updateStoredQuantity(productId, newQuantity); // This might be too aggressive or cause conflicts
+  };
+
   const handleAddToCart = () => {
-    // Commit the quantity from QuantityControlModal before getting it
-    commitFinalQuantity(productId);
-    const currentQuantity = getQuantity(productId);
-    
-    if (currentQuantity > 0) {
+    // Before adding to cart, ensure the modal's quantity is committed to ProductQuantityContext
+    // This step ensures that if other parts of the app rely on ProductQuantityContext, it's up-to-date.
+    // However, for addToCart, we will use the modal's local `modalQuantity` for reliability.
+    commitFinalQuantity(productId, modalQuantity); // Commit the current modal quantity to the context
+
+    if (modalQuantity > 0) {
       const productForCart = {
         id: p.id,
         nazwa: p.nazwa,
-        cena: p.cena, // Assuming p.cena is the unit price
-        // zdjecieUrl: (zdjecia && zdjecia.length > 0 && zdjecia[0].daneZdjecia) ? `data:image/jpeg;base64,${zdjecia[0].daneZdjecia}` : undefined // Optional
+        cena: p.cena,
       };
-      addToCart(productForCart, currentQuantity);
-      console.log(`Dodano do koszyka z modala: Produkt ID ${p.id} (${p.nazwa}), Cena: ${p.cena}, Ilość: ${currentQuantity}`);
-      // onClose(); // Optionally close modal after adding to cart
+      addToCart(productForCart, modalQuantity); // Use modalQuantity
+      console.log(`Dodano do koszyka z modala: Produkt ID ${p.id} (${p.nazwa}), Cena: ${p.cena}, Ilość: ${modalQuantity}`);
+      // onClose(); // Optionally close modal
     } else {
       console.log(`Nie dodano do koszyka z modala: Produkt ID ${p.id}, Ilość musi być większa od 0.`);
     }
@@ -53,6 +74,7 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
             <ImageCarousel images={zdjecia || []} />
           </div>
           <div className={styles.detailsSection}>
+            {/* Product details remain the same */}
             <ProductDetailItem label="Nazwa" value={p.nazwa} />
             <ProductDetailItem label="Kod EAN" value={p.kodEanKod} />
             <ProductDetailItem label="Kod towaru" value={p.kodTowaruKod} />
@@ -90,7 +112,12 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
         </div>
         <div className={styles.modalFooter}>
           <div className={styles.cartControlsContainer}>
-            <QuantityControlModal productId={productId} /> 
+            {/* Pass productId, initialQuantity (which is modalQuantity), and onQuantityChange callback */}
+            <QuantityControlModal 
+              productId={productId} 
+              initialQuantity={modalQuantity} 
+              onQuantityChange={handleModalQuantityChange} 
+            /> 
             <button onClick={handleAddToCart} className={styles.addToCartButton}>Dodaj do koszyka</button>
           </div>
           <button onClick={onClose} className={styles.footerCloseButton}>Zamknij</button>
