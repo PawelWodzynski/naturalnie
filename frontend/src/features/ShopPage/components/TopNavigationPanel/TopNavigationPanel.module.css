@@ -3,10 +3,16 @@
   justify-content: space-between; /* Distribute space between buttons */
   gap: 10px; /* Space between buttons */
   padding: 10px;
-  background-color: #ffffff; /* Or match ProductsViewContainer background if preferred */
+  background-color: #ffffff; 
   border-radius: 8px;
-  margin-bottom: 15px; /* Margin between this panel and ProductsViewContainer */
-  /* Width will be controlled by its parent in ShopPage.module.css or inline style to match ProductsViewContainer */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  
+  /* Added for width alignment and centering */
+  max-width: 1200px; /* Match ProductsViewContainer */
+  width: 90%;       /* Match ProductsViewContainer */
+  margin-left: auto;  /* Center the container */
+  margin-right: auto; /* Center the container */
+  margin-bottom: 15px; /* Space below this panel, above ProductsViewContainer */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
