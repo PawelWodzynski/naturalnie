@@ -1,21 +1,19 @@
-import React, { useState, useEffect } from 'react'; // Added useEffect
+import React, { useState, useEffect } from 'react';
 import styles from './QuantityControlModal.module.css';
 import { useProductQuantity } from '../../../../../../context/ProductQuantityContext'; // Adjusted path
 
 const QuantityControlModal = ({ productId }) => {
-  // Hooks are called at the top level
-  const { getQuantity, incrementQuantity, decrementQuantity, updateQuantity } = useProductQuantity();
+  // Use the new context functions
+  const { getStoredQuantity, updateStoredQuantity, commitFinalQuantity, incrementQuantity, decrementQuantity } = useProductQuantity();
   
-  // State for current quantity, initialized from context or 1 if not available
-  const [currentQuantity, setCurrentQuantity] = React.useState(1);
+  const quantityFromContext = getStoredQuantity(productId);
+  const [inputValue, setInputValue] = useState(quantityFromContext.toString());
 
   useEffect(() => {
-    if (productId) {
-      setCurrentQuantity(getQuantity(productId));
-    }
-  }, [productId, getQuantity]);
+    setInputValue(quantityFromContext.toString());
+  }, [quantityFromContext]);
 
-  // Early return if productId is not available
+  // Early return if productId is not available - Hooks are already called above, so this is fine.
   if (!productId) {
     console.warn("QuantityControlModal: productId is undefined. Cannot initialize quantity.");
     return (
@@ -41,12 +39,23 @@ const QuantityControlModal = ({ productId }) => {
   };
 
   const handleInputChange = (event) => {
-    const value = parseInt(event.target.value, 10);
-    if (!isNaN(value) && value >= 1) {
-      updateQuantity(productId, value);
-    } else if (event.target.value === "") { // Fixed syntax error here
-      updateQuantity(productId, 1); // Reset to 1 if input is cleared
+    const currentDisplayValue = event.target.value;
+    setInputValue(currentDisplayValue);
+
+    if (currentDisplayValue === "") {
+      // Allow empty for typing, validation on blur
+    } else {
+      const numericValue = parseInt(currentDisplayValue, 10);
+      if (!isNaN(numericValue)) {
+        updateStoredQuantity(productId, numericValue); // Update context with potentially 0 or positive value
+      }
     }
+  };
+
+  const handleInputBlur = () => {
+    // On blur, commit the final quantity. Context will handle setting to 1 if it's 0.
+    commitFinalQuantity(productId);
+    // useEffect will sync inputValue with the potentially corrected context value.
   };
 
   return (
@@ -54,10 +63,11 @@ const QuantityControlModal = ({ productId }) => {
       <button onClick={handleDecrement} className={styles.quantityButton}>-</button>
       <input 
         type="number" 
-        value={currentQuantity} 
+        value={inputValue} 
         onChange={handleInputChange} 
+        onBlur={handleInputBlur} // Added onBlur handler
         className={styles.quantityInput} 
-        min="1"
+        // min="1" is not strictly enforced by browser due to custom handling
       />
       <button onClick={handleIncrement} className={styles.quantityButton}>+</button>
     </div>

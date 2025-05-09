@@ -1,52 +1,61 @@
 import React, { createContext, useState, useContext, useCallback } from 'react';
 
-// Create the context
 const ProductQuantityContext = createContext();
 
-// Custom hook to use the ProductQuantityContext
 export const useProductQuantity = () => {
   return useContext(ProductQuantityContext);
 };
 
-// Provider component
 export const ProductQuantityProvider = ({ children }) => {
-  const [productQuantities, setProductQuantities] = useState({}); // Stores { productId: quantity }
+  const [productQuantities, setProductQuantities] = useState({}); // Stores { productId: number }
 
-  // Function to get quantity for a specific product, defaults to 1 if not set
-  const getQuantity = useCallback((productId) => {
-    return productQuantities[productId] === undefined ? 1 : productQuantities[productId];
+  // Get the actual stored quantity. Defaults to 1 if product not yet in state (e.g., for initial display).
+  const getStoredQuantity = useCallback((productId) => {
+    if (productId in productQuantities) {
+      return productQuantities[productId];
+    }
+    return 1; // Default for new/untouched products
   }, [productQuantities]);
 
-  // Function to update quantity for a specific product
-  const updateQuantity = useCallback((productId, newQuantity) => {
+  // Update the stored quantity. Allows 0, prevents negatives.
+  const updateStoredQuantity = useCallback((productId, newNumericQuantity) => {
+    const valueToStore = Math.max(0, Number(newNumericQuantity)); // Ensure it's a number and >= 0
     setProductQuantities(prevQuantities => ({
       ...prevQuantities,
-      [productId]: Math.max(1, newQuantity) // Ensure quantity is at least 1
+      [productId]: valueToStore
     }));
   }, []);
 
-  // Function to increment quantity for a specific product
+  // Commit the final quantity. If current stored quantity is 0 (or undefined), set to 1.
+  const commitFinalQuantity = useCallback((productId) => {
+    const currentStoredVal = productQuantities[productId];
+    if (currentStoredVal === 0 || currentStoredVal === undefined) {
+      // Use updateStoredQuantity to ensure consistent state update
+      updateStoredQuantity(productId, 1);
+    }
+    // If already >= 1, no change needed by commit itself.
+  }, [productQuantities, updateStoredQuantity]);
+
   const incrementQuantity = useCallback((productId) => {
-    setProductQuantities(prevQuantities => ({
-      ...prevQuantities,
-      [productId]: (prevQuantities[productId] === undefined ? 1 : prevQuantities[productId]) + 1
-    }));
-  }, []);
+    const currentQuantity = getStoredQuantity(productId);
+    updateStoredQuantity(productId, currentQuantity + 1);
+  }, [getStoredQuantity, updateStoredQuantity]);
 
-  // Function to decrement quantity for a specific product
   const decrementQuantity = useCallback((productId) => {
-    setProductQuantities(prevQuantities => ({
-      ...prevQuantities,
-      [productId]: Math.max(1, (prevQuantities[productId] === undefined ? 1 : prevQuantities[productId]) - 1)
-    }));
-  }, []);
+    const currentQuantity = getStoredQuantity(productId);
+    // updateStoredQuantity will handle Math.max(0, ...)
+    updateStoredQuantity(productId, currentQuantity - 1);
+  }, [getStoredQuantity, updateStoredQuantity]);
 
   const value = {
-    getQuantity,
-    updateQuantity,
+    getStoredQuantity,    // Renamed from getQuantity for clarity
+    updateStoredQuantity, // Renamed from updateQuantity
+    commitFinalQuantity,  // New function
     incrementQuantity,
     decrementQuantity,
-    productQuantities // Exposing this for debugging or complex scenarios if needed
+    // Exposing productQuantities might be useful for debugging or advanced scenarios
+    // but components should primarily use the provided functions.
+    // productQuantities, 
   };
 
   return (
