@@ -4,11 +4,12 @@ import ImageCarousel from './components/ImageCarousel';
 import ProductDetailItem from './components/ProductDetailItem';
 import QuantityControlModal from './components/QuantityControlModal';
 import { useProductQuantity } from '../../../../context/ProductQuantityContext';
-import { useCart } from '../../../../context/CartContext'; // Import useCart
+import { useCart } from '../../../../context/CartContext';
 
 const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
-  const { getQuantity } = useProductQuantity(); 
-  const { addToCart } = useCart(); // Get addToCart from CartContext
+  // Destructure commitFinalQuantity along with getQuantity
+  const { getQuantity, commitFinalQuantity } = useProductQuantity(); 
+  const { addToCart } = useCart();
 
   if (!isOpen || !productItem || !productItem.produkt) {
     return null;
@@ -21,7 +22,10 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
   const formatBoolean = (value) => (value === true ? 'Tak' : value === false ? 'Nie' : '-');
 
   const handleAddToCart = () => {
+    // Commit the quantity from QuantityControlModal before getting it
+    commitFinalQuantity(productId);
     const currentQuantity = getQuantity(productId);
+    
     if (currentQuantity > 0) {
       const productForCart = {
         id: p.id,
@@ -53,7 +57,6 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
             <ProductDetailItem label="Kod EAN" value={p.kodEanKod} />
             <ProductDetailItem label="Kod towaru" value={p.kodTowaruKod} />
             <ProductDetailItem label="Identyfikator" value={p.identyfikatorWartosc} />
-            {/* Ensure price is displayed correctly, assuming p.cena is in the smallest unit (e.g., groszy) if it was /100 before */}
             <ProductDetailItem label="Cena" value={p.cena ? `${p.cena.toFixed(2)} zł` : '-'} />
             <ProductDetailItem label="Waga" value={p.waga ? `${p.waga} kg` : '-'} />
             <ProductDetailItem label="Jednostka" value={p.jednostkaNazwa} />
@@ -98,3 +101,4 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
 };
 
 export default ProductDetailModal;
+
