@@ -1,0 +1,31 @@
+.navigationButton {
+  flex-grow: 1; /* Each button will take up equal space */
+  padding: 15px 10px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  background-color: #e9ecef; /* Light grey, can be changed */
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.navigationButton:hover {
+  background-color: #dee2e6;
+  border-color: #adb5bd;
+}
+
+.navigationButton.active {
+  background-color: #007bff; /* Example active color - blue */
+  color: white;
+  border-color: #0056b3;
+}
+
+/* Remove default button outline on focus, if desired, or style it */
+.navigationButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Focus ring like Bootstrap */
+}
+

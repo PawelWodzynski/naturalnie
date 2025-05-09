@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import styles from './ShopPage.module.css';
 import ShopNavbar from './components/ShopNavbar';
 import AddProductModal from './components/AddProductModal';
-// import ProductsTable from './components/ProductsTable'; // Will be rendered by ProductsViewContainer
-import ProductsViewContainer from './components/ProductsViewContainer'; // Import the new container
+import TopNavigationPanel from './components/TopNavigationPanel'; // Import the new panel
+import ProductsViewContainer from './components/ProductsViewContainer';
 import { NadkategorieProvider } from '../../context/NadkategorieContext';
 import { ProductQuantityProvider } from '../../context/ProductQuantityContext';
 
@@ -33,8 +33,7 @@ const ShopPage = () => {
             onCategoryClick={handleCategoryChange} 
           />
           <main className={styles.shopContent}>
-            {/* Remove the h1 title if the filter panel replaces it or if it's part of ProductsViewContainer design */}
-            {/* <h1>Witaj w sklepie!</h1> */}
+            <TopNavigationPanel /> {/* Add the new navigation panel here */}
             <ProductsViewContainer selectedNadKategoriaId={selectedNadKategoriaId} />
           </main>
           <AddProductModal isOpen={isModalOpen} onClose={handleCloseModal} />
