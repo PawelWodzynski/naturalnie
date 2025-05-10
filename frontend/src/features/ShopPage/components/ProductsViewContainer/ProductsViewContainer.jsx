@@ -3,6 +3,7 @@ import styles from './ProductsViewContainer.module.css';
 import ProductsTable from '../../components/ProductsTable';
 import CartButton from '../CartButton/CartButton';
 import CartView from '../CartView';
+import UserDataForm from '../UserDataForm'; // Import UserDataForm
 
 const ProductsViewContainer = ({ selectedNadKategoriaId, showCartView, onToggleCartView }) => {
   const [rodzajeProduktow, setRodzajeProduktow] = useState([{ id: 0, nazwa: "Wszystko" }]);
@@ -62,7 +63,6 @@ const ProductsViewContainer = ({ selectedNadKategoriaId, showCartView, onToggleC
 
   return (
     <div className={styles.productsViewContainer}>
-      {/* Conditionally render FilterPanel (filterControlsContainer) and CartButton based on !showCartView */}
       {!showCartView && (
         <div className={styles.topControlsContainer}>
           <div className={styles.filterControlsContainer}>
@@ -96,9 +96,15 @@ const ProductsViewContainer = ({ selectedNadKategoriaId, showCartView, onToggleC
           <CartButton onClick={onToggleCartView} /> 
         </div>
       )}
-      {/* Render CartView or ProductsTable based on showCartView */}
       {showCartView ? (
-        <CartView /> 
+        <div className={styles.cartAndUserDataContainer}> {/* New container for side-by-side view */}
+          <div className={styles.userDataFormWrapper}>
+            <UserDataForm />
+          </div>
+          <div className={styles.cartViewWrapper}>
+            <CartView /> 
+          </div>
+        </div>
       ) : (
         <ProductsTable 
           selectedNadKategoriaId={selectedNadKategoriaId} 
