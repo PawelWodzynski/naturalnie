@@ -1,0 +1,39 @@
+.cartViewContainer {
+  /* Add styles to match ProductsTable container if necessary */
+  /* For example, if ProductsTable has specific padding or margins */
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cartTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.cartTable th,
+.cartTable td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.cartTable th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.cartTable tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.cartTable tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.cartTable tfoot tr td {
+  font-weight: bold;
+}
+

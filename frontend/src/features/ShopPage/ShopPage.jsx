@@ -6,11 +6,12 @@ import TopNavigationPanel from './components/TopNavigationPanel';
 import ProductsViewContainer from './components/ProductsViewContainer';
 import { NadkategorieProvider } from '../../context/NadkategorieContext';
 import { ProductQuantityProvider } from '../../context/ProductQuantityContext';
-import { CartProvider } from '../../context/CartContext'; // Import CartProvider
+import { CartProvider } from '../../context/CartContext';
 
 const ShopPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedNadKategoriaId, setSelectedNadKategoriaId] = useState(null);
+  const [showCartView, setShowCartView] = useState(false); // Lifted state
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -25,18 +26,26 @@ const ShopPage = () => {
     setSelectedNadKategoriaId(nadKategoriaId);
   };
 
+  const toggleCartView = () => { // Lifted function
+    setShowCartView(prevState => !prevState);
+  };
+
   return (
     <NadkategorieProvider>
       <ProductQuantityProvider>
-        <CartProvider> {/* Wrap with CartProvider */}
+        <CartProvider>
           <div className={styles.shopPageContainer}>
             <ShopNavbar 
               onAddProductClick={handleOpenModal} 
               onCategoryClick={handleCategoryChange} 
             />
             <main className={styles.shopContent}>
-              <TopNavigationPanel />
-              <ProductsViewContainer selectedNadKategoriaId={selectedNadKategoriaId} />
+              <TopNavigationPanel onToggleCartView={toggleCartView} /> {/* Pass handler */}
+              <ProductsViewContainer 
+                selectedNadKategoriaId={selectedNadKategoriaId} 
+                showCartView={showCartView} /* Pass state */
+                onToggleCartView={toggleCartView} /* Pass handler */
+              />
             </main>
             <AddProductModal isOpen={isModalOpen} onClose={handleCloseModal} />
           </div>
@@ -47,3 +56,4 @@ const ShopPage = () => {
 };
 
 export default ShopPage;
+

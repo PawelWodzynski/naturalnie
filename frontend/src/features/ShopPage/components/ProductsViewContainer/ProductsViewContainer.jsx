@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ProductsViewContainer.module.css';
 import ProductsTable from '../../components/ProductsTable';
-import CartButton from '../CartButton/CartButton'; // Import CartButton
+import CartButton from '../CartButton/CartButton';
+import CartView from '../CartView';
 
-const ProductsViewContainer = ({ selectedNadKategoriaId }) => {
+// Props showCartView and onToggleCartView are now passed from ShopPage
+const ProductsViewContainer = ({ selectedNadKategoriaId, showCartView, onToggleCartView }) => {
   const [rodzajeProduktow, setRodzajeProduktow] = useState([{ id: 0, nazwa: "Wszystko" }]);
-  const [selectedRodzajProduktuId, setSelectedRodzajProduktuId] = useState(0); // Default to 'Wszystko'
-  const [searchTerm, setSearchTerm] = useState(''); // Added for search input
+  const [selectedRodzajProduktuId, setSelectedRodzajProduktuId] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({ rodzajProduktuId: 0, searchTerm: '' });
+
+  // Local showCartView state and toggleCartView function are removed.
+  // Logic is now controlled by ShopPage.
 
   useEffect(() => {
     const fetchRodzajeProduktow = async () => {
@@ -15,7 +20,7 @@ const ProductsViewContainer = ({ selectedNadKategoriaId }) => {
       if (!token) {
         console.error("Brak tokenu autoryzacyjnego.");
         setRodzajeProduktow([{ id: 0, nazwa: "Wszystko" }]);
-        setSelectedRodzajProduktuId(0); // Reset on error or no token
+        setSelectedRodzajProduktuId(0);
         return;
       }
 
@@ -40,14 +45,13 @@ const ProductsViewContainer = ({ selectedNadKategoriaId }) => {
         setRodzajeProduktow([{ id: 0, nazwa: "Wszystko" }]);
       }
       setSelectedRodzajProduktuId(0);
-      setSearchTerm(''); // Reset search term when category changes
+      setSearchTerm('');
     };
 
     fetchRodzajeProduktow();
   }, [selectedNadKategoriaId]);
 
   useEffect(() => {
-    // Update filters when selectedRodzajProduktuId or searchTerm changes
     setFilters({ rodzajProduktuId: selectedRodzajProduktuId, searchTerm: searchTerm });
   }, [selectedRodzajProduktuId, searchTerm]);
 
@@ -62,7 +66,7 @@ const ProductsViewContainer = ({ selectedNadKategoriaId }) => {
 
   return (
     <div className={styles.productsViewContainer}>
-      <div className={styles.topControlsContainer}> {/* Container for filters and cart button */}
+      <div className={styles.topControlsContainer}>
         <div className={styles.filterControlsContainer}>
           <div className={styles.filterItemContainer}>
             <label htmlFor="rodzajProduktuSelect" className={styles.filterLabel}>Rodzaj produktu: </label>
@@ -91,14 +95,21 @@ const ProductsViewContainer = ({ selectedNadKategoriaId }) => {
             />
           </div>
         </div>
-        <CartButton /> {/* Add CartButton here */}
+        {/* Pass onToggleCartView from ShopPage to CartButton */}
+        <CartButton onClick={onToggleCartView} /> 
       </div>
-      <ProductsTable 
-        selectedNadKategoriaId={selectedNadKategoriaId} 
-        filters={filters}
-      />
+      {/* Use showCartView prop from ShopPage for conditional rendering */}
+      {showCartView ? (
+        <CartView /> 
+      ) : (
+        <ProductsTable 
+          selectedNadKategoriaId={selectedNadKategoriaId} 
+          filters={filters}
+        />
+      )}
     </div>
   );
 };
 
 export default ProductsViewContainer;
+
