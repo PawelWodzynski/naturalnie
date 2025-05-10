@@ -8,7 +8,7 @@
 
 .topControlsContainer {
     display: flex;
-    justify-content: space-between; /* Aligns filter group to left, button to right */
+    justify-content: center; /* Changed from space-between to center */
     align-items: center; /* Vertically aligns items in the middle */
     width: 100%;
     margin-bottom: 20px;
@@ -45,10 +45,6 @@
   border-bottom-left-radius: 4px;
 }
 
-/* The CartButton is the last element in the groupedControlsWrapper in the JSX */
-/* We need to target the CartButton component's root element if it's not directly .filterInput or .filterSelect */
-/* Assuming CartButton component might have its own styling, we might need to be more specific or adjust CartButton's internal styles */
-/* For now, let's assume CartButton itself can have its border-radius adjusted */
 .groupedControlsWrapper > *:last-child {
   border-top-right-radius: 4px;
   border-bottom-right-radius: 4px;
