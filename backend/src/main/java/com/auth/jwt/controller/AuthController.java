@@ -2,9 +2,13 @@ package com.auth.jwt.controller;
 
 import com.auth.jwt.data.dto.authorization.CredentialsDto;
 import com.auth.jwt.data.dto.employee.RegisterEmployeeDto;
+import com.auth.jwt.data.entity.app_data.ExampleData;
+import com.auth.jwt.data.entity.auth.employee.Employee;
 import com.auth.jwt.exception.AuthenticationException;
 import com.auth.jwt.exception.RegistrationException;
+import com.auth.jwt.exception.UserNotAuthenticatedException;
 import com.auth.jwt.service.AuthService;
+import com.auth.jwt.util.AuthUtil;
 import com.auth.jwt.util.ResponseUtil; // Import ResponseUtil
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*; // Import GetMapping
 
 import java.util.Collections; // Import Collections
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -22,6 +27,8 @@ public class AuthController {
 
     private final AuthService authService;
     private final ResponseUtil responseUtil; // Inject ResponseUtil
+    private final AuthUtil authUtil;
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody CredentialsDto credentialsDto) {
@@ -83,6 +90,29 @@ public class AuthController {
         }
     }
 
-    // Removed isPasswordValid and isEmailValid methods as they are now in ValidationUtil
+
+    @GetMapping("/get-user")
+    public ResponseEntity<?> getUser(@RequestParam(required = true) String token) {
+        try {
+            // 1. Get authenticated user or throw exception if not authenticated
+            Employee employee = authUtil.getAuthenticatedUserOrThrow();
+
+
+            return ResponseEntity.ok(responseUtil.createSuccessResponse(
+                    "Success", employee));
+
+        } catch (UserNotAuthenticatedException e) {
+            // 4. Handle specific authentication exception
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(responseUtil.createErrorResponse(e.getMessage())); // Use exception message
+        } catch (Exception e) {
+            // 5. Handle potential exceptions from the service layer or other unexpected errors
+            // Log the exception for debugging purposes
+            System.err.println("Error in apiMethodName: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(responseUtil.createErrorResponse("Wystąpił wewnętrzny błąd serwera podczas przetwarzania żądania."));
+        }
+    }
+
 }
 
