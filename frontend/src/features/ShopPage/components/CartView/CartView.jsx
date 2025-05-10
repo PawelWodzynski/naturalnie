@@ -6,14 +6,19 @@ const CartView = () => {
   const { cartItems } = useCart(); // Use cartItems from context
 
   const calculateTotalValue = (item) => {
-    // Assuming item.produkt.cena and item.quantity exist based on CartContext structure
-    // Adjust if the structure is different
-    return (item.quantity * item.produkt.cena).toFixed(2);
+    // Defensive check for item.produkt and item.produkt.cena
+    if (item && item.produkt && typeof item.produkt.cena === 'number' && typeof item.quantity === 'number') {
+      return (item.quantity * item.produkt.cena).toFixed(2);
+    }
+    return '0.00'; // Fallback value
   };
 
   const overallTotal = cartItems.reduce((sum, item) => {
-    // Adjust if the structure is different
-    return sum + (item.quantity * item.produkt.cena);
+    // Defensive check for item.produkt and item.produkt.cena
+    if (item && item.produkt && typeof item.produkt.cena === 'number' && typeof item.quantity === 'number') {
+      return sum + (item.quantity * item.produkt.cena);
+    }
+    return sum; // Continue sum without adding if item is invalid
   }, 0).toFixed(2);
 
   return (
@@ -33,14 +38,25 @@ const CartView = () => {
               </tr>
             </thead>
             <tbody>
-              {cartItems.map(item => (
-                <tr key={item.produkt.id}> {/* Assuming item.produkt.id is unique */}
-                  <td>{item.produkt.nazwa}</td> {/* Assuming item.produkt.nazwa */}
-                  <td>{item.quantity}</td>
-                  <td>{item.produkt.cena.toFixed(2)} zł</td> {/* Assuming item.produkt.cena */}
-                  <td>{calculateTotalValue(item)} zł</td>
-                </tr>
-              ))}
+              {cartItems.map((item, index) => {
+                // Defensive checks for item and item.produkt before rendering a row
+                if (!item || !item.produkt) {
+                  console.warn('Invalid cart item structure:', item);
+                  return (
+                    <tr key={`invalid-item-${index}`}>
+                      <td colSpan="4">Błędny produkt w koszyku</td>
+                    </tr>
+                  );
+                }
+                return (
+                  <tr key={item.produkt.id || `item-${index}`}> {/* Fallback key if id is missing */}
+                    <td>{item.produkt.nazwa || 'Brak nazwy'}</td>
+                    <td>{typeof item.quantity === 'number' ? item.quantity : 0}</td>
+                    <td>{typeof item.produkt.cena === 'number' ? `${item.produkt.cena.toFixed(2)} zł` : 'Brak ceny'}</td>
+                    <td>{calculateTotalValue(item)} zł</td>
+                  </tr>
+                );
+              })}
             </tbody>
             <tfoot>
               <tr>
