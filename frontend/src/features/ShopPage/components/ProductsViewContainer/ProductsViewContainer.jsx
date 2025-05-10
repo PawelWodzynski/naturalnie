@@ -4,15 +4,11 @@ import ProductsTable from '../../components/ProductsTable';
 import CartButton from '../CartButton/CartButton';
 import CartView from '../CartView';
 
-// Props showCartView and onToggleCartView are now passed from ShopPage
 const ProductsViewContainer = ({ selectedNadKategoriaId, showCartView, onToggleCartView }) => {
   const [rodzajeProduktow, setRodzajeProduktow] = useState([{ id: 0, nazwa: "Wszystko" }]);
   const [selectedRodzajProduktuId, setSelectedRodzajProduktuId] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({ rodzajProduktuId: 0, searchTerm: '' });
-
-  // Local showCartView state and toggleCartView function are removed.
-  // Logic is now controlled by ShopPage.
 
   useEffect(() => {
     const fetchRodzajeProduktow = async () => {
@@ -66,39 +62,41 @@ const ProductsViewContainer = ({ selectedNadKategoriaId, showCartView, onToggleC
 
   return (
     <div className={styles.productsViewContainer}>
-      <div className={styles.topControlsContainer}>
-        <div className={styles.filterControlsContainer}>
-          <div className={styles.filterItemContainer}>
-            <label htmlFor="rodzajProduktuSelect" className={styles.filterLabel}>Rodzaj produktu: </label>
-            <select 
-              id="rodzajProduktuSelect" 
-              value={selectedRodzajProduktuId} 
-              onChange={handleRodzajProduktuChange}
-              className={styles.filterSelect}
-            >
-              {rodzajeProduktow.map(typ => (
-                <option key={typ.id} value={typ.id}>
-                  {typ.nazwa}
-                </option>
-              ))}
-            </select>
+      {/* Conditionally render FilterPanel (filterControlsContainer) and CartButton based on !showCartView */}
+      {!showCartView && (
+        <div className={styles.topControlsContainer}>
+          <div className={styles.filterControlsContainer}>
+            <div className={styles.filterItemContainer}>
+              <label htmlFor="rodzajProduktuSelect" className={styles.filterLabel}>Rodzaj produktu: </label>
+              <select 
+                id="rodzajProduktuSelect" 
+                value={selectedRodzajProduktuId} 
+                onChange={handleRodzajProduktuChange}
+                className={styles.filterSelect}
+              >
+                {rodzajeProduktow.map(typ => (
+                  <option key={typ.id} value={typ.id}>
+                    {typ.nazwa}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className={styles.filterItemContainer}>
+              <label htmlFor="searchInput" className={styles.filterLabel}>Wyszukaj: </label>
+              <input 
+                type="text" 
+                id="searchInput" 
+                value={searchTerm} 
+                onChange={handleSearchChange} 
+                placeholder="Wpisz nazwę produktu..." 
+                className={styles.filterInput}
+              />
+            </div>
           </div>
-          <div className={styles.filterItemContainer}>
-            <label htmlFor="searchInput" className={styles.filterLabel}>Wyszukaj: </label>
-            <input 
-              type="text" 
-              id="searchInput" 
-              value={searchTerm} 
-              onChange={handleSearchChange} 
-              placeholder="Wpisz nazwę produktu..." 
-              className={styles.filterInput}
-            />
-          </div>
+          <CartButton onClick={onToggleCartView} /> 
         </div>
-        {/* Pass onToggleCartView from ShopPage to CartButton */}
-        <CartButton onClick={onToggleCartView} /> 
-      </div>
-      {/* Use showCartView prop from ShopPage for conditional rendering */}
+      )}
+      {/* Render CartView or ProductsTable based on showCartView */}
       {showCartView ? (
         <CartView /> 
       ) : (

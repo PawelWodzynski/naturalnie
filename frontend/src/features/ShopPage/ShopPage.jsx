@@ -11,7 +11,7 @@ import { CartProvider } from '../../context/CartContext';
 const ShopPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedNadKategoriaId, setSelectedNadKategoriaId] = useState(null);
-  const [showCartView, setShowCartView] = useState(false); // Lifted state
+  const [showCartView, setShowCartView] = useState(false); // True for CartView, False for ProductsTable
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -24,10 +24,16 @@ const ShopPage = () => {
   const handleCategoryChange = (nadKategoriaId) => {
     console.log("ShopPage - NadKategoria ID selected:", nadKategoriaId);
     setSelectedNadKategoriaId(nadKategoriaId);
+    setShowCartView(false); // Always show products table when category changes
   };
 
-  const toggleCartView = () => { // Lifted function
+  const toggleCartView = () => {
     setShowCartView(prevState => !prevState);
+  };
+
+  // New handler to explicitly show ProductsTable (and thus FilterPanel)
+  const handleShowProductsView = () => {
+    setShowCartView(false);
   };
 
   return (
@@ -40,11 +46,15 @@ const ShopPage = () => {
               onCategoryClick={handleCategoryChange} 
             />
             <main className={styles.shopContent}>
-              <TopNavigationPanel onToggleCartView={toggleCartView} /> {/* Pass handler */}
+              {/* Pass both handlers to TopNavigationPanel */}
+              <TopNavigationPanel 
+                onToggleCartView={toggleCartView} 
+                onShowProductsView={handleShowProductsView} 
+              />
               <ProductsViewContainer 
                 selectedNadKategoriaId={selectedNadKategoriaId} 
-                showCartView={showCartView} /* Pass state */
-                onToggleCartView={toggleCartView} /* Pass handler */
+                showCartView={showCartView} 
+                onToggleCartView={toggleCartView} 
               />
             </main>
             <AddProductModal isOpen={isModalOpen} onClose={handleCloseModal} />

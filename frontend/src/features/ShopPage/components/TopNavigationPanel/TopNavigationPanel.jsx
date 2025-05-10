@@ -2,18 +2,19 @@ import React from 'react';
 import styles from './TopNavigationPanel.module.css';
 import NavigationButton from './components/NavigationButton';
 
-// onToggleCartView prop is now passed from ShopPage
-const TopNavigationPanel = ({ onToggleCartView }) => {
+// onToggleCartView and onShowProductsView props are now passed from ShopPage
+const TopNavigationPanel = ({ onToggleCartView, onShowProductsView }) => {
+  // "Produkty" button now calls onShowProductsView to ensure product table is shown
   const handleProduktyClick = () => {
-    console.log('Produkty button clicked');
-    // This button might need to ensure the cart/order view is hidden
-    // For now, it does nothing with the shared toggle state.
-    // If "Produkty" should always show the product table, it could call onToggleCartView(false) or similar logic.
+    console.log('Produkty button clicked, ensuring product view is active.');
+    if (onShowProductsView) {
+      onShowProductsView();
+    }
   };
 
-  // Use the passed onToggleCartView for the "Formularz zamówienia" button
+  // "Formularz zamówienia" button uses onToggleCartView to show/hide cart/order view
   const handleFormularzClick = () => {
-    console.log('Formularz zamówienia button clicked, toggling view.');
+    console.log('Formularz zamówienia button clicked, toggling cart/order view.');
     if (onToggleCartView) {
       onToggleCartView();
     }
@@ -22,12 +23,13 @@ const TopNavigationPanel = ({ onToggleCartView }) => {
   const handlePotwierdzenieClick = () => {
     console.log('Potwierdzenie button clicked');
     // This button might also interact with the view state or navigate elsewhere.
+    // For now, it could also ensure the product view is active if it's a step after cart/order.
+    // Or, it might be related to a different view entirely.
   };
 
   return (
     <div className={styles.topNavigationPanelContainer}>
       <NavigationButton text="Produkty" onClick={handleProduktyClick} />
-      {/* The "Formularz zamówienia" button now uses the shared toggle logic */}
       <NavigationButton text="Formularz zamówienia" onClick={handleFormularzClick} />
       <NavigationButton text="Potwierdzenie" onClick={handlePotwierdzenieClick} />
     </div>
