@@ -1,11 +1,10 @@
 import React from 'react';
 import styles from './CartView.module.css';
 import { useCart } from '../../../../context/CartContext';
-// Import QuantityControl - adjust path if necessary, assuming it's in the ProductRow components directory
 import QuantityControl from '../ProductsTable/components/ProductRow/components/QuantityControl';
 
 const CartView = () => {
-  const { cartItems } = useCart();
+  const { cartItems, removeFromCart } = useCart(); // Destructure removeFromCart from context
 
   const calculateItemTotalValue = (item) => {
     if (item && typeof item.cena === 'number' && typeof item.ilosc === 'number') {
@@ -35,6 +34,7 @@ const CartView = () => {
                 <th>Ilość</th>
                 <th>Cena jednostkowa</th>
                 <th>Wartość</th>
+                <th>Akcje</th> {/* New column header */}
               </tr>
             </thead>
             <tbody>
@@ -43,26 +43,33 @@ const CartView = () => {
                   console.warn('Invalid cart item structure:', item);
                   return (
                     <tr key={`invalid-item-${index}`}>
-                      <td colSpan="4">Błędny produkt w koszyku (brak danych)</td>
+                      <td colSpan="5">Błędny produkt w koszyku (brak danych)</td> {/* Adjusted colSpan */}
                     </tr>
                   );
                 }
                 return (
-                  <tr key={item.id || `item-${index}`}> 
+                  <tr key={item.id || `item-${index}`}>
                     <td>{item.nazwa}</td>
                     <td>
-                      {/* Integrate QuantityControl here */}
                       <QuantityControl product={item} source="cart" />
                     </td>
                     <td>{`${item.cena.toFixed(2)} zł`}</td>
                     <td>{calculateItemTotalValue(item)} zł</td>
+                    <td> {/* New cell for the remove button */}
+                      <button 
+                        onClick={() => removeFromCart(item.id)} 
+                        className={styles.removeButton} /* Added a class for styling */
+                      >
+                        Usuń
+                      </button>
+                    </td>
                   </tr>
                 );
               })}
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan="3" style={{ textAlign: 'right', fontWeight: 'bold' }}>Łączna wartość:</td>
+                <td colSpan="4" style={{ textAlign: 'right', fontWeight: 'bold' }}>Łączna wartość:</td> {/* Adjusted colSpan */}
                 <td style={{ fontWeight: 'bold' }}>{overallTotal} zł</td>
               </tr>
             </tfoot>
