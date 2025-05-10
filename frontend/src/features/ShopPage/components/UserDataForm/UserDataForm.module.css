@@ -1,69 +1,85 @@
 .userDataFormContainer {
-  padding: 10px; /* Reduced padding */
+  padding: 10px;
   background-color: #f9f9f9;
-  border-radius: 6px; /* Slightly smaller radius */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); /* Softer shadow */
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 15px; /* Reduced gap */
+  gap: 15px;
 }
 
 .userDataFormContainer h2,
 .userDataFormContainer h3 {
   color: #333;
-  margin-bottom: 8px; /* Reduced margin */
-  padding-bottom: 4px; /* Reduced padding */
+  margin-bottom: 8px;
+  padding-bottom: 4px;
   border-bottom: 1px solid #eee;
-  font-size: 1.2em; /* Slightly smaller h2 */
+  font-size: 1.2em;
 }
 
 .userDataFormContainer h3 {
-  font-size: 1.05em; /* Slightly smaller h3 */
+  font-size: 1.05em;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Reduced gap */
+  gap: 10px;
+}
+
+/* New style for rows of input fields */
+.formRow {
+  display: flex;
+  flex-direction: row;
+  gap: 10px; /* Space between the two form groups in a row */
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 4px; /* Reduced gap */
+  gap: 4px;
+  flex: 1; /* Each form group takes up equal space in the row */
 }
+
+/* Ensure that a formGroup not in a row still takes full width */
+.form > .formGroup {
+  flex: none; /* Override flex: 1 if it's a direct child of form and not in a row */
+}
+
 
 .formGroup label {
   font-weight: bold;
   color: #555;
-  font-size: 0.85em; /* Reduced font size */
+  font-size: 0.85em;
 }
 
 .inputField {
-  padding: 8px 10px; /* Reduced padding */
+  padding: 8px 10px;
   border: 1px solid #ccc;
-  border-radius: 3px; /* Slightly smaller radius */
+  border-radius: 3px;
   background-color: #fff;
-  font-size: 0.9em; /* Reduced font size */
+  font-size: 0.9em;
   color: #333;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%; /* Make input field take full width of its formGroup container */
+  box-sizing: border-box; /* Ensure padding and border don't add to the width */
 }
 
 .inputField:focus {
   border-color: #007bff;
-  box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.25); /* Smaller focus shadow */
+  box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.25);
   outline: none;
 }
 
 .formGroupCheckbox {
   display: flex;
   align-items: center;
-  gap: 6px; /* Reduced gap */
-  margin-top: 8px; /* Reduced margin */
+  gap: 6px;
+  margin-top: 8px;
 }
 
 .formGroupCheckbox input[type="checkbox"] {
-  width: 16px; /* Reduced size */
+  width: 16px;
   height: 16px;
   accent-color: #007bff;
 }
@@ -71,16 +87,16 @@
 .formGroupCheckbox label {
   font-weight: normal;
   color: #333;
-  font-size: 0.85em; /* Consistent with other labels */
+  font-size: 0.85em;
 }
 
 .errorMessage {
   color: #d9534f;
   background-color: #f2dede;
   border: 1px solid #ebccd1;
-  padding: 8px; /* Reduced padding */
+  padding: 8px;
   border-radius: 3px;
-  margin-bottom: 10px; /* Reduced margin */
+  margin-bottom: 10px;
   font-size: 0.85em;
 }
 
