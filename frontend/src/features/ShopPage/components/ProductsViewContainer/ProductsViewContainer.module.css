@@ -15,8 +15,8 @@
   border-radius: 8px;
   background-color: #f8f9fa;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  width: auto; /* Adjust width to content */
-  gap: 20px; /* Add space between filter items */
+  width: auto;
+  gap: 20px;
 }
 
 .filterItemContainer {
@@ -35,7 +35,7 @@
   border-radius: 4px;
   border: 1px solid #ced4da;
   background-color: #fff;
-  min-width: 200px; /* Ensure select is not too small */
+  min-width: 200px;
   cursor: pointer;
 }
 
@@ -47,5 +47,51 @@
   border-color: #80bdff;
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+/* Styles for side-by-side UserDataForm and CartView */
+.cartAndUserDataContainer {
+  display: flex;
+  flex-direction: row; /* Arrange children side-by-side */
+  justify-content: space-between; /* Or space-around, or use flex-grow on children */
+  width: 100%;
+  gap: 20px; /* Space between the two containers */
+  padding: 20px;
+  background-color: #e9ecef; /* Common background for the container */
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  align-items: stretch; /* Make children stretch to the same height */
+}
+
+.userDataFormWrapper {
+  flex: 1; /* UserDataForm takes up available space */
+  padding: 15px;
+  background-color: #ffffff; /* Individual background for form */
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  display: flex; /* To allow UserDataForm to stretch if needed */
+  flex-direction: column;
+}
+
+.cartViewWrapper {
+  flex: 1; /* CartView takes up available space */
+  padding: 15px;
+  background-color: #ffffff; /* Individual background for cart */
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  display: flex; /* To allow CartView to stretch if needed */
+  flex-direction: column;
+}
+
+/* Ensure UserDataForm and CartView themselves can stretch if their wrappers are flex containers */
+/* This might require adding height: 100% to the root elements within UserDataForm.jsx and CartView.jsx if they don't naturally fill */
+
+.topControlsContainer {
+    display: flex;
+    justify-content: space-between; /* Aligns filter to left, button to right */
+    align-items: center; /* Vertically aligns items in the middle */
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 0 20px; /* Add some padding if the container itself doesn't have it */
 }
 
