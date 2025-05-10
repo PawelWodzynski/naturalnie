@@ -1,0 +1,80 @@
+.userDataFormContainer {
+  padding: 20px;
+  background-color: #f9f9f9; /* Light background for the form container */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Space between form groups and titles */
+}
+
+.userDataFormContainer h2,
+.userDataFormContainer h3 {
+  color: #333;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eee; /* Separator for titles */
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Space between form groups */
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 5px; /* Space between label and input */
+}
+
+.formGroup label {
+  font-weight: bold;
+  color: #555;
+  font-size: 0.9em;
+}
+
+.inputField {
+  padding: 10px 12px;
+  border: 1px solid #ccc; /* Clear border for visibility */
+  border-radius: 4px;
+  background-color: #fff; /* White background for input */
+  font-size: 1em;
+  color: #333;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.inputField:focus {
+  border-color: #007bff; /* Highlight on focus */
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
+/* Styling for the checkbox group */
+.formGroupCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.formGroupCheckbox input[type="checkbox"] {
+  width: 18px; /* Custom size for checkbox */
+  height: 18px;
+  accent-color: #007bff; /* Consistent accent color */
+}
+
+.formGroupCheckbox label {
+  font-weight: normal; /* Normal weight for checkbox label */
+  color: #333;
+}
+
+.errorMessage {
+  color: #d9534f; /* Red color for error messages */
+  background-color: #f2dede;
+  border: 1px solid #ebccd1;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
