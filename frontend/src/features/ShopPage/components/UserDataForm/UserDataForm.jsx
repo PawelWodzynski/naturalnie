@@ -58,8 +58,6 @@ const UserDataForm = () => {
                 const result = await response.json();
                 if (result.success && result.data) {
                     setUserData(result.data);
-                    // Initial population of formData will be handled in another useEffect
-                    // that depends on userData and useAlternativeAddress
                 } else {
                     throw new Error(result.message || "Nie udało się pobrać danych użytkownika.");
                 }
@@ -72,12 +70,10 @@ const UserDataForm = () => {
         fetchUserData();
     }, []);
 
-    // useEffect to update formData when userData or useAlternativeAddress changes (Step 004)
     useEffect(() => {
         if (userData) {
-            const addressSource = useAlternativeAddress && userData.alternativeAddress ? userData.alternativeAddress : userData.primaryAddress;
-            const altAddressSource = userData.alternativeAddress || {}; // Fallback for alternative if not present
-            const primAddressSource = userData.primaryAddress || {}; // Fallback for primary if not present
+            const primAddressSource = userData.primaryAddress || {};
+            const altAddressSource = userData.alternativeAddress || {};
 
             setFormData({
                 firstName: userData.firstName || '',
@@ -109,7 +105,7 @@ const UserDataForm = () => {
                 alternative_companyName: altAddressSource.companyName || '',
             });
         }
-    }, [userData]); // Removed useAlternativeAddress from dependency array for now, will be handled in next step
+    }, [userData]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -121,8 +117,6 @@ const UserDataForm = () => {
 
     const handleCheckboxChange = (e) => {
         setUseAlternativeAddress(e.target.checked);
-        // Logic to switch displayed address fields will be in the rendering part
-        // or a dedicated useEffect if complex state updates are needed beyond just display
     };
 
     const currentAddressPrefix = useAlternativeAddress ? 'alternative_' : 'primary_';
@@ -132,62 +126,74 @@ const UserDataForm = () => {
             <h2>Dane Użytkownika</h2>
             {error && <p className={styles.errorMessage}>{error}</p>}
             <form className={styles.form}>
-                <div className={styles.formGroup}>
-                    <label htmlFor="firstName">Imię:</label>
-                    <input type="text" id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} className={styles.inputField} />
+                <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="firstName">Imię:</label>
+                        <input type="text" id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} className={styles.inputField} />
+                    </div>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="lastName">Nazwisko:</label>
+                        <input type="text" id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} className={styles.inputField} />
+                    </div>
                 </div>
-                <div className={styles.formGroup}>
-                    <label htmlFor="lastName">Nazwisko:</label>
-                    <input type="text" id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} className={styles.inputField} />
-                </div>
-                <div className={styles.formGroup}>
+                <div className={styles.formGroup}> {/* Email takes full width */}
                     <label htmlFor="email">Email:</label>
                     <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} className={styles.inputField} />
                 </div>
 
                 <h3>Adres {useAlternativeAddress ? 'Alternatywny' : 'Główny'}</h3>
                 
-                <div className={styles.formGroup}>
-                    <label htmlFor="street">Ulica:</label>
-                    <input type="text" id="street" name={`${currentAddressPrefix}street`} value={formData[`${currentAddressPrefix}street`]} onChange={handleChange} className={styles.inputField} />
+                <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="street">Ulica:</label>
+                        <input type="text" id="street" name={`${currentAddressPrefix}street`} value={formData[`${currentAddressPrefix}street`]} onChange={handleChange} className={styles.inputField} />
+                    </div>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="buildingNumber">Numer budynku:</label>
+                        <input type="text" id="buildingNumber" name={`${currentAddressPrefix}buildingNumber`} value={formData[`${currentAddressPrefix}buildingNumber`]} onChange={handleChange} className={styles.inputField} />
+                    </div>
                 </div>
-                <div className={styles.formGroup}>
-                    <label htmlFor="buildingNumber">Numer budynku:</label>
-                    <input type="text" id="buildingNumber" name={`${currentAddressPrefix}buildingNumber`} value={formData[`${currentAddressPrefix}buildingNumber`]} onChange={handleChange} className={styles.inputField} />
+                <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="apartmentNumber">Numer mieszkania:</label>
+                        <input type="text" id="apartmentNumber" name={`${currentAddressPrefix}apartmentNumber`} value={formData[`${currentAddressPrefix}apartmentNumber`]} onChange={handleChange} className={styles.inputField} />
+                    </div>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="postalCode">Kod pocztowy:</label>
+                        <input type="text" id="postalCode" name={`${currentAddressPrefix}postalCode`} value={formData[`${currentAddressPrefix}postalCode`]} onChange={handleChange} className={styles.inputField} />
+                    </div>
                 </div>
-                <div className={styles.formGroup}>
-                    <label htmlFor="apartmentNumber">Numer mieszkania:</label>
-                    <input type="text" id="apartmentNumber" name={`${currentAddressPrefix}apartmentNumber`} value={formData[`${currentAddressPrefix}apartmentNumber`]} onChange={handleChange} className={styles.inputField} />
+                <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="city">Miasto:</label>
+                        <input type="text" id="city" name={`${currentAddressPrefix}city`} value={formData[`${currentAddressPrefix}city`]} onChange={handleChange} className={styles.inputField} />
+                    </div>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="voivodeship">Województwo:</label>
+                        <input type="text" id="voivodeship" name={`${currentAddressPrefix}voivodeship`} value={formData[`${currentAddressPrefix}voivodeship`]} onChange={handleChange} className={styles.inputField} />
+                    </div>
                 </div>
-                <div className={styles.formGroup}>
-                    <label htmlFor="postalCode">Kod pocztowy:</label>
-                    <input type="text" id="postalCode" name={`${currentAddressPrefix}postalCode`} value={formData[`${currentAddressPrefix}postalCode`]} onChange={handleChange} className={styles.inputField} />
+                <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="district">Powiat:</label>
+                        <input type="text" id="district" name={`${currentAddressPrefix}district`} value={formData[`${currentAddressPrefix}district`]} onChange={handleChange} className={styles.inputField} />
+                    </div>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="commune">Gmina:</label>
+                        <input type="text" id="commune" name={`${currentAddressPrefix}commune`} value={formData[`${currentAddressPrefix}commune`]} onChange={handleChange} className={styles.inputField} />
+                    </div>
                 </div>
-                <div className={styles.formGroup}>
-                    <label htmlFor="city">Miasto:</label>
-                    <input type="text" id="city" name={`${currentAddressPrefix}city`} value={formData[`${currentAddressPrefix}city`]} onChange={handleChange} className={styles.inputField} />
+                <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="phoneNumber">Numer telefonu:</label>
+                        <input type="tel" id="phoneNumber" name={`${currentAddressPrefix}phoneNumber`} value={formData[`${currentAddressPrefix}phoneNumber`]} onChange={handleChange} className={styles.inputField} />
+                    </div>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="nip">NIP:</label>
+                        <input type="text" id="nip" name={`${currentAddressPrefix}nip`} value={formData[`${currentAddressPrefix}nip`]} onChange={handleChange} className={styles.inputField} />
+                    </div>
                 </div>
-                <div className={styles.formGroup}>
-                    <label htmlFor="voivodeship">Województwo:</label>
-                    <input type="text" id="voivodeship" name={`${currentAddressPrefix}voivodeship`} value={formData[`${currentAddressPrefix}voivodeship`]} onChange={handleChange} className={styles.inputField} />
-                </div>
-                <div className={styles.formGroup}>
-                    <label htmlFor="district">Powiat:</label>
-                    <input type="text" id="district" name={`${currentAddressPrefix}district`} value={formData[`${currentAddressPrefix}district`]} onChange={handleChange} className={styles.inputField} />
-                </div>
-                <div className={styles.formGroup}>
-                    <label htmlFor="commune">Gmina:</label>
-                    <input type="text" id="commune" name={`${currentAddressPrefix}commune`} value={formData[`${currentAddressPrefix}commune`]} onChange={handleChange} className={styles.inputField} />
-                </div>
-                <div className={styles.formGroup}>
-                    <label htmlFor="phoneNumber">Numer telefonu:</label>
-                    <input type="tel" id="phoneNumber" name={`${currentAddressPrefix}phoneNumber`} value={formData[`${currentAddressPrefix}phoneNumber`]} onChange={handleChange} className={styles.inputField} />
-                </div>
-                <div className={styles.formGroup}>
-                    <label htmlFor="nip">NIP:</label>
-                    <input type="text" id="nip" name={`${currentAddressPrefix}nip`} value={formData[`${currentAddressPrefix}nip`]} onChange={handleChange} className={styles.inputField} />
-                </div>
-                <div className={styles.formGroup}>
+                <div className={styles.formGroup}> {/* Company Name takes full width */}
                     <label htmlFor="companyName">Nazwa firmy:</label>
                     <input type="text" id="companyName" name={`${currentAddressPrefix}companyName`} value={formData[`${currentAddressPrefix}companyName`]} onChange={handleChange} className={styles.inputField} />
                 </div>
