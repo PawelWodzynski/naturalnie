@@ -1,21 +1,20 @@
 package com.auth.jwt.data.dto.employee;
 
-import com.auth.jwt.data.entity.auth.employee.Address;
-import com.auth.jwt.data.entity.auth.employee.AlternativeAddress;
+import com.auth.jwt.data.dto.address.AddressDto; // Import AddressDto
 
 public class EmployeeDetailsDto {
 
     private String firstName;
     private String lastName;
     private String email;
-    private Address primaryAddress;
-    private AlternativeAddress alternativeAddress;
+    private AddressDto primaryAddress; // Changed to AddressDto
+    private AddressDto alternativeAddress; // Changed to AddressDto
 
     // Constructors
     public EmployeeDetailsDto() {
     }
 
-    public EmployeeDetailsDto(String firstName, String lastName, String email, Address primaryAddress, AlternativeAddress alternativeAddress) {
+    public EmployeeDetailsDto(String firstName, String lastName, String email, AddressDto primaryAddress, AddressDto alternativeAddress) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -48,19 +47,19 @@ public class EmployeeDetailsDto {
         this.email = email;
     }
 
-    public Address getPrimaryAddress() {
+    public AddressDto getPrimaryAddress() {
         return primaryAddress;
     }
 
-    public void setPrimaryAddress(Address primaryAddress) {
+    public void setPrimaryAddress(AddressDto primaryAddress) {
         this.primaryAddress = primaryAddress;
     }
 
-    public AlternativeAddress getAlternativeAddress() {
+    public AddressDto getAlternativeAddress() {
         return alternativeAddress;
     }
 
-    public void setAlternativeAddress(AlternativeAddress alternativeAddress) {
+    public void setAlternativeAddress(AddressDto alternativeAddress) {
         this.alternativeAddress = alternativeAddress;
     }
 }

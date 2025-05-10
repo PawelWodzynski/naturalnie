@@ -1,8 +1,11 @@
 package com.auth.jwt.controller;
 
+import com.auth.jwt.data.dto.address.AddressDto; // Import AddressDto
 import com.auth.jwt.data.dto.authorization.CredentialsDto;
-import com.auth.jwt.data.dto.employee.EmployeeDetailsDto; // Import the new DTO
+import com.auth.jwt.data.dto.employee.EmployeeDetailsDto;
 import com.auth.jwt.data.dto.employee.RegisterEmployeeDto;
+import com.auth.jwt.data.entity.auth.employee.Address; // For mapping
+import com.auth.jwt.data.entity.auth.employee.AlternativeAddress; // For mapping
 import com.auth.jwt.data.entity.auth.employee.Employee;
 import com.auth.jwt.exception.AuthenticationException;
 import com.auth.jwt.exception.RegistrationException;
@@ -71,28 +74,75 @@ public class AuthController {
         }
     }
 
+    private AddressDto mapAddressEntityToDto(Address addressEntity) {
+        if (addressEntity == null) {
+            return null;
+        }
+        AddressDto addressDto = new AddressDto();
+        addressDto.setStreet(addressEntity.getStreet());
+        addressDto.setBuildingNumber(addressEntity.getBuildingNumber());
+        addressDto.setApartmentNumber(addressEntity.getApartmentNumber());
+        addressDto.setPostalCode(addressEntity.getPostalCode());
+        addressDto.setCity(addressEntity.getCity());
+        addressDto.setVoivodeship(addressEntity.getVoivodeship());
+        addressDto.setDistrict(addressEntity.getDistrict());
+        addressDto.setCommune(addressEntity.getCommune());
+        addressDto.setPhoneNumber(addressEntity.getPhoneNumber());
+        addressDto.setNip(addressEntity.getNip());
+        addressDto.setCompanyName(addressEntity.getCompanyName());
+        return addressDto;
+    }
+
+    private AddressDto mapAlternativeAddressEntityToDto(AlternativeAddress alternativeAddressEntity) {
+        if (alternativeAddressEntity == null) {
+            return null;
+        }
+        // Assuming AlternativeAddress has the same fields as Address for DTO mapping
+        // If AlternativeAddress has a different structure, a separate DTO or mapping logic might be needed.
+        AddressDto addressDto = new AddressDto();
+        addressDto.setStreet(alternativeAddressEntity.getStreet());
+        addressDto.setBuildingNumber(alternativeAddressEntity.getBuildingNumber());
+        addressDto.setApartmentNumber(alternativeAddressEntity.getApartmentNumber());
+        addressDto.setPostalCode(alternativeAddressEntity.getPostalCode());
+        addressDto.setCity(alternativeAddressEntity.getCity());
+        addressDto.setVoivodeship(alternativeAddressEntity.getVoivodeship());
+        addressDto.setDistrict(alternativeAddressEntity.getDistrict());
+        addressDto.setCommune(alternativeAddressEntity.getCommune());
+        addressDto.setPhoneNumber(alternativeAddressEntity.getPhoneNumber());
+        addressDto.setNip(alternativeAddressEntity.getNip());
+        addressDto.setCompanyName(alternativeAddressEntity.getCompanyName());
+        return addressDto;
+    }
+
     @GetMapping("/get-user")
     public ResponseEntity<?> getUser(@RequestParam(required = true) String token) {
         try {
             Employee employee = authUtil.getAuthenticatedUserOrThrow();
 
-            // Create and populate the DTO
             EmployeeDetailsDto employeeDetailsDto = new EmployeeDetailsDto();
             employeeDetailsDto.setFirstName(employee.getFirstName());
             employeeDetailsDto.setLastName(employee.getLastName());
             employeeDetailsDto.setEmail(employee.getEmail());
-            employeeDetailsDto.setPrimaryAddress(employee.getPrimaryAddress());
-            employeeDetailsDto.setAlternativeAddress(employee.getAlternativeAddress());
+
+            // Map Address entity to AddressDto
+            if (employee.getPrimaryAddress() != null) {
+                employeeDetailsDto.setPrimaryAddress(mapAddressEntityToDto(employee.getPrimaryAddress()));
+            }
+
+            // Map AlternativeAddress entity to AddressDto
+            if (employee.getAlternativeAddress() != null) {
+                employeeDetailsDto.setAlternativeAddress(mapAlternativeAddressEntityToDto(employee.getAlternativeAddress()));
+            }
 
             return ResponseEntity.ok(responseUtil.createSuccessResponse(
-                    "Success", employeeDetailsDto)); // Return the DTO
+                    "Success", employeeDetailsDto));
 
         } catch (UserNotAuthenticatedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(responseUtil.createErrorResponse(e.getMessage()));
         } catch (Exception e) {
             System.err.println("Error in /get-user endpoint: " + e.getMessage());
-            e.printStackTrace(); // Print stack trace for more details
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(responseUtil.createErrorResponse("Wystąpił wewnętrzny błąd serwera podczas przetwarzania żądania."));
         }
