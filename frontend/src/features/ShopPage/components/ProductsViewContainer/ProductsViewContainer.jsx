@@ -65,7 +65,8 @@ const ProductsViewContainer = ({ selectedNadKategoriaId, showCartView, onToggleC
     <div className={styles.productsViewContainer}>
       {!showCartView && (
         <div className={styles.topControlsContainer}>
-          <div className={styles.filterControlsContainer}>
+          {/* New wrapper for tightly grouped controls */}
+          <div className={styles.groupedControlsWrapper}>
             <div className={styles.filterItemContainer}>
               <label htmlFor="rodzajProduktuSelect" className={styles.filterLabel}>Rodzaj produktu: </label>
               <select 
@@ -92,8 +93,8 @@ const ProductsViewContainer = ({ selectedNadKategoriaId, showCartView, onToggleC
                 className={styles.filterInput}
               />
             </div>
+            <CartButton onClick={onToggleCartView} /> 
           </div>
-          <CartButton onClick={onToggleCartView} /> 
         </div>
       )}
       {showCartView ? (

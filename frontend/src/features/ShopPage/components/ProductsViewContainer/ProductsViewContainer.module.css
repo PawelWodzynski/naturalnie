@@ -6,7 +6,57 @@
   margin: 20px 0;
 }
 
-.filterControlsContainer {
+.topControlsContainer {
+    display: flex;
+    justify-content: space-between; /* Aligns filter group to left, button to right */
+    align-items: center; /* Vertically aligns items in the middle */
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 0 20px; /* Add some padding if the container itself doesn't have it */
+}
+
+/* New styles for the tightly grouped controls */
+.groupedControlsWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0; /* Remove gap between items */
+}
+
+.groupedControlsWrapper .filterItemContainer {
+  margin-right: 0; /* Remove right margin if any */
+  padding-right: 0; /* Remove right padding if any */
+}
+
+.groupedControlsWrapper .filterItemContainer:not(:last-child) {
+  /* Optional: if you want a very subtle separator, otherwise keep it 0 */
+  /* border-right: 1px solid #ccc; */ 
+}
+
+.groupedControlsWrapper .filterSelect,
+.groupedControlsWrapper .filterInput {
+  border-radius: 0; /* Remove individual border-radius for a 'stuck together' look */
+  margin-right: -1px; /* Overlap borders slightly to avoid double borders */
+}
+
+/* Adjust first and last child for rounded corners on the group */
+.groupedControlsWrapper .filterItemContainer:first-child .filterSelect,
+.groupedControlsWrapper .filterItemContainer:first-child .filterInput {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+/* The CartButton is the last element in the groupedControlsWrapper in the JSX */
+/* We need to target the CartButton component's root element if it's not directly .filterInput or .filterSelect */
+/* Assuming CartButton component might have its own styling, we might need to be more specific or adjust CartButton's internal styles */
+/* For now, let's assume CartButton itself can have its border-radius adjusted */
+.groupedControlsWrapper > *:last-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  margin-right: 0; /* Ensure no negative margin on the very last item */
+}
+
+/* Original filter styles, some might be overridden or adjusted by groupedControlsWrapper */
+.filterControlsContainer { /* This class might no longer be needed if groupedControlsWrapper replaces its direct function */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -16,7 +66,7 @@
   background-color: #f8f9fa;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   width: auto;
-  gap: 20px;
+  gap: 20px; /* This gap will be overridden by .groupedControlsWrapper */
 }
 
 .filterItemContainer {
@@ -25,17 +75,17 @@
 }
 
 .filterLabel {
-  margin-right: 10px;
+  margin-right: 5px; /* Reduced margin for tighter look */
   font-weight: bold;
   color: #333;
+  padding-left: 5px; /* Add some padding if label is inside the item */
 }
 
 .filterSelect, .filterInput {
   padding: 8px 12px;
-  border-radius: 4px;
   border: 1px solid #ced4da;
   background-color: #fff;
-  min-width: 200px;
+  min-width: 180px; /* Slightly reduced min-width */
   cursor: pointer;
 }
 
@@ -47,51 +97,40 @@
   border-color: #80bdff;
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+  z-index: 2; /* Ensure focused element's border is on top */
+  position: relative; /* Needed for z-index to work on non-positioned elements */
 }
 
-/* Styles for side-by-side UserDataForm and CartView */
 .cartAndUserDataContainer {
   display: flex;
-  flex-direction: row; /* Arrange children side-by-side */
-  justify-content: space-between; /* Or space-around, or use flex-grow on children */
+  flex-direction: row;
+  justify-content: space-between;
   width: 100%;
-  gap: 20px; /* Space between the two containers */
+  gap: 20px;
   padding: 20px;
-  background-color: #e9ecef; /* Common background for the container */
+  background-color: #e9ecef;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  align-items: stretch; /* Make children stretch to the same height */
+  align-items: stretch;
 }
 
 .userDataFormWrapper {
-  flex: 1; /* UserDataForm takes up available space */
+  flex: 1;
   padding: 15px;
-  background-color: #ffffff; /* Individual background for form */
+  background-color: #ffffff;
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  display: flex; /* To allow UserDataForm to stretch if needed */
+  display: flex;
   flex-direction: column;
 }
 
 .cartViewWrapper {
-  flex: 1; /* CartView takes up available space */
+  flex: 1;
   padding: 15px;
-  background-color: #ffffff; /* Individual background for cart */
+  background-color: #ffffff;
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  display: flex; /* To allow CartView to stretch if needed */
+  display: flex;
   flex-direction: column;
-}
-
-/* Ensure UserDataForm and CartView themselves can stretch if their wrappers are flex containers */
-/* This might require adding height: 100% to the root elements within UserDataForm.jsx and CartView.jsx if they don't naturally fill */
-
-.topControlsContainer {
-    display: flex;
-    justify-content: space-between; /* Aligns filter to left, button to right */
-    align-items: center; /* Vertically aligns items in the middle */
-    width: 100%;
-    margin-bottom: 20px;
-    padding: 0 20px; /* Add some padding if the container itself doesn't have it */
 }
 
