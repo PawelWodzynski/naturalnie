@@ -1,20 +1,20 @@
 import React from 'react';
 import styles from './CartView.module.css';
 import { useCart } from '../../../../context/CartContext';
+// Import QuantityControl - adjust path if necessary, assuming it's in the ProductRow components directory
+import QuantityControl from '../ProductsTable/components/ProductRow/components/QuantityControl';
 
 const CartView = () => {
   const { cartItems } = useCart();
 
   const calculateItemTotalValue = (item) => {
-    // Accessing item.cena and item.ilosc directly
     if (item && typeof item.cena === 'number' && typeof item.ilosc === 'number') {
       return (item.ilosc * item.cena).toFixed(2);
     }
-    return '0.00'; // Fallback value
+    return '0.00';
   };
 
   const overallTotal = cartItems.reduce((sum, item) => {
-    // Accessing item.cena and item.ilosc directly
     if (item && typeof item.cena === 'number' && typeof item.ilosc === 'number') {
       return sum + (item.ilosc * item.cena);
     }
@@ -39,7 +39,6 @@ const CartView = () => {
             </thead>
             <tbody>
               {cartItems.map((item, index) => {
-                // Check if item itself and essential properties exist
                 if (!item || typeof item.nazwa === 'undefined' || typeof item.cena === 'undefined' || typeof item.ilosc === 'undefined') {
                   console.warn('Invalid cart item structure:', item);
                   return (
@@ -49,10 +48,12 @@ const CartView = () => {
                   );
                 }
                 return (
-                  // Use item.id directly as key, assuming it's unique from CartContext
                   <tr key={item.id || `item-${index}`}> 
                     <td>{item.nazwa}</td>
-                    <td>{item.ilosc}</td>
+                    <td>
+                      {/* Integrate QuantityControl here */}
+                      <QuantityControl product={item} source="cart" />
+                    </td>
                     <td>{`${item.cena.toFixed(2)} zł`}</td>
                     <td>{calculateItemTotalValue(item)} zł</td>
                   </tr>
