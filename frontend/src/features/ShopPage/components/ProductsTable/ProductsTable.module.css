@@ -3,75 +3,95 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin: 20px 0; /* Marginesy górny i dolny */
+  margin: 20px 0;
 }
 
 .productsTable {
-  width: 90%; /* Tabela zajmuje 90% szerokości kontenera */
-  max-width: 1200px; /* Maksymalna szerokość tabeli */
-  border-collapse: collapse;
-  margin: 0 5%; /* Marginesy boczne 5% z każdej strony */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 1200px;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0 5%;
+  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.15);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff8f0; /* Very light cream background for the table */
 }
 
 .productsTable th,
 .productsTable td {
-  border: 1px solid #ddd;
-  padding: 12px;
+  padding: 14px;
   text-align: left;
+  border-bottom: 1px solid #e6d2b5; /* Light oak color for borders */
 }
 
 .productsTable th {
-  background-color: #f8f9fa;
-  font-weight: bold;
+  background-color: #d2b48c; /* Tan/light brown color for header */
+  color: #5d4037; /* Dark brown text for contrast */
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  border-top: none;
+}
+
+.productsTable tbody tr {
+  transition: all 0.2s ease-in-out;
 }
 
 .productsTable tbody tr:nth-child(even) {
-  background-color: #f2f2f2;
+  background-color: #f5e9d9; /* Lighter oak color for alternating rows */
 }
 
 .productsTable tbody tr:hover {
-  background-color: #e9ecef;
+  background-color: #e6d2b5; /* Light oak color on hover */
+  cursor: pointer;
 }
 
 .productImage {
   max-width: 80px;
   max-height: 80px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(139, 69, 19, 0.2);
+  border: 2px solid #e6d2b5; /* Light oak border */
+  transition: transform 0.2s ease;
 }
 
-
-
+.productImage:hover {
+  transform: scale(1.05);
+}
 
 .paginationContainer {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 20px;
+  margin-top: 24px;
+  gap: 6px;
 }
 
 .pageButton {
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  color: #007bff;
-  padding: 8px 12px;
-  margin: 0 4px;
+  background-color: #f5e9d9; /* Light oak background */
+  border: 1px solid #d2b48c; /* Tan border */
+  color: #8b4513; /* Saddle brown text */
+  padding: 8px 14px;
   cursor: pointer;
   border-radius: 4px;
-  transition: background-color 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+  font-weight: 500;
 }
 
 .pageButton:hover {
-  background-color: #e9ecef;
+  background-color: #e6d2b5; /* Slightly darker on hover */
+  transform: translateY(-2px);
 }
 
 .activePage {
-  background-color: #007bff;
-  border-color: #007bff;
+  background-color: #b38b6d; /* Medium brown */
+  border-color: #8b4513; /* Saddle brown */
   color: white;
-  padding: 8px 12px;
-  margin: 0 4px;
+  padding: 8px 14px;
   border-radius: 4px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(139, 69, 19, 0.3);
 }
-

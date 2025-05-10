@@ -1,14 +1,26 @@
 .productRow td {
-  vertical-align: middle; /* Align content vertically in the middle */
+  vertical-align: middle;
+  transition: all 0.2s ease;
+  color: #5d4037; /* Dark brown text for better readability */
+}
+
+.productRow:hover td {
+  color: #3e2723; /* Darker brown on hover for emphasis */
 }
 
 .productImage {
   max-width: 80px;
   max-height: 80px;
   object-fit: cover;
-  border-radius: 4px;
-  border: 1px solid #eee;
-  display: block; /* Helps with centering if needed */
-  margin: 0 auto; /* Centers the image if its container is wider */
+  border-radius: 6px;
+  border: 2px solid #e6d2b5; /* Light oak border */
+  box-shadow: 0 2px 4px rgba(139, 69, 19, 0.2);
+  display: block;
+  margin: 0 auto;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.productRow:hover .productImage {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(139, 69, 19, 0.3);
+}
