@@ -1,5 +1,6 @@
 package com.auth.jwt.data.entity.auth.employee;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.sql.Timestamp;
 
@@ -12,17 +13,13 @@ public class EmployeeConsent {
     @Column(name = "consent_id")
     private Integer consentId;
 
-    // Relationship back to Employee (ManyToOne or OneToOne based on model)
-    // Using employee_id directly for simplicity here, assuming Employee entity has 'id' field of type Long
-    // If Employee entity uses 'employee_id' as PK, adjust accordingly.
-    // Marked as non-owning side (insertable=false, updatable=false) as Employee might own the primary relationship
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id", nullable = false, insertable = false, updatable = false)
+    @JsonBackReference // Added to break serialization loop
     private Employee employee;
 
-    // Store employee_id separately if needed, or rely on the relationship mapping
     @Column(name = "employee_id", nullable = false)
-    private Long employeeId; // Assuming Employee PK is Long
+    private Long employeeId;
 
     @Column(name = "rodo_consent", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean rodoConsent = false;
