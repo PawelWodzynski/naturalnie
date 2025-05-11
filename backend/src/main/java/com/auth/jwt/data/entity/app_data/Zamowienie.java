@@ -52,6 +52,9 @@ public class Zamowienie {
 
     @Column(name = "zrealizowane")
     private Boolean zrealizowane = false;
+    
+    @Column(name = "numer_transakcji", length = 50)
+    private String numerTransakcji;
 
     @Column(name = "timestamp", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime timestamp;

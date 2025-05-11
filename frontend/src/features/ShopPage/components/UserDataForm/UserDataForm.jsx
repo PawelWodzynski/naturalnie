@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './UserDataForm.module.css';
 import { useAddress } from '../../../../context/AddressContext';
+import DatePicker from './components/DatePicker';
 
 const UserDataForm = () => {
     const { 
@@ -324,6 +325,9 @@ const UserDataForm = () => {
                         <label htmlFor="useAlternativeAddress">Użyj Adres Alternatywny</label>
                     </div>
                 )}
+                
+                {/* Date Picker Component */}
+                <DatePicker />
                 
                 <div className={styles.formActions}>
                     <button 

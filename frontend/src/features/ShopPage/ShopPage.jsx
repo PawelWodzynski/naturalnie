@@ -9,11 +9,56 @@ import { NadkategorieProvider } from '../../context/NadkategorieContext';
 import { ProductQuantityProvider } from '../../context/ProductQuantityContext';
 import { CartProvider } from '../../context/CartContext';
 import { AddressProvider } from '../../context/AddressContext';
+import { DeliveryDateProvider } from '../../context/DeliveryDateContext';
+import { useCart } from '../../context/CartContext';
+import { useDeliveryDate } from '../../context/DeliveryDateContext';
 
-const ShopPage = () => {
+// Component to handle validation before showing payment view
+const ValidationWrapper = ({ children, currentView, setCurrentView }) => {
+  const { cartItems } = useCart();
+  const { isDateSelected } = useDeliveryDate();
+  
+  const [validationError, setValidationError] = useState('');
+  
+  // Function to validate before showing payment view
+  const validateAndShowPaymentView = () => {
+    // Clear any previous error
+    setValidationError('');
+    
+    // Check if cart is empty
+    if (cartItems.length === 0) {
+      setValidationError('Nie można przejść do potwierdzenia zamówienia, koszyk jest pusty.');
+      return false;
+    }
+    
+    // Check if delivery date is selected
+    if (!isDateSelected) {
+      setValidationError('Nie można przejść do potwierdzenia zamówienia, data nie została wybrana.');
+      return false;
+    }
+    
+    // All validations passed
+    setCurrentView('payment');
+    return true;
+  };
+  
+  // Clone children with additional props
+  return React.cloneElement(children, { 
+    validationError,
+    validateAndShowPaymentView,
+    currentView,
+    setCurrentView
+  });
+};
+
+const ShopPageContent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedNadKategoriaId, setSelectedNadKategoriaId] = useState(null);
   const [currentView, setCurrentView] = useState('products'); // 'products', 'cart', or 'payment'
+  const [validationError, setValidationError] = useState('');
+
+  const { cartItems } = useCart();
+  const { isDateSelected } = useDeliveryDate();
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -31,14 +76,31 @@ const ShopPage = () => {
 
   const toggleCartView = () => {
     setCurrentView(currentView === 'cart' ? 'products' : 'cart');
+    // Clear any validation errors when changing views
+    setValidationError('');
   };
 
   const handleShowProductsView = () => {
     setCurrentView('products');
+    // Clear any validation errors when changing views
+    setValidationError('');
   };
 
   const handleShowPaymentView = () => {
+    // Validate before showing payment view
+    if (cartItems.length === 0) {
+      setValidationError('Nie można przejść do potwierdzenia zamówienia, koszyk jest pusty.');
+      return;
+    }
+    
+    if (!isDateSelected) {
+      setValidationError('Nie można przejść do potwierdzenia zamówienia, data nie została wybrana.');
+      return;
+    }
+    
+    // All validations passed
     setCurrentView('payment');
+    setValidationError('');
     console.log('Showing payment confirmation view');
   };
 
@@ -50,42 +112,70 @@ const ShopPage = () => {
   };
 
   const handleShowConfirmationView = () => {
+    // Validate before showing payment view
+    if (cartItems.length === 0) {
+      setValidationError('Nie można przejść do potwierdzenia zamówienia, koszyk jest pusty.');
+      return;
+    }
+    
+    if (!isDateSelected) {
+      setValidationError('Nie można przejść do potwierdzenia zamówienia, data nie została wybrana.');
+      return;
+    }
+    
+    // All validations passed
     setCurrentView('payment');
+    setValidationError('');
     console.log('Showing payment confirmation view from navigation panel');
   };
 
+  return (
+    <div className={styles.shopPageContainer}>
+      <ShopNavbar 
+        onAddProductClick={handleOpenModal} 
+        onCategoryClick={handleCategoryChange} 
+      />
+      <main className={styles.shopContent}>
+        {/* Pass all handlers to TopNavigationPanel */}
+        <TopNavigationPanel 
+          onToggleCartView={toggleCartView} 
+          onShowProductsView={handleShowProductsView}
+          onShowConfirmationView={handleShowConfirmationView}
+          currentView={currentView}
+        />
+        
+        {validationError && (
+          <div className={styles.validationError}>
+            {validationError}
+          </div>
+        )}
+        
+        {currentView === 'payment' ? (
+          <PaymentConfirmationView onConfirm={handlePaymentConfirm} />
+        ) : (
+          <ProductsViewContainer 
+            selectedNadKategoriaId={selectedNadKategoriaId} 
+            showCartView={currentView === 'cart'} 
+            onToggleCartView={toggleCartView}
+            onShowPaymentView={handleShowPaymentView}
+            validationError={validationError}
+          />
+        )}
+      </main>
+      <AddProductModal isOpen={isModalOpen} onClose={handleCloseModal} />
+    </div>
+  );
+};
+
+const ShopPage = () => {
   return (
     <NadkategorieProvider>
       <ProductQuantityProvider>
         <CartProvider>
           <AddressProvider>
-            <div className={styles.shopPageContainer}>
-              <ShopNavbar 
-                onAddProductClick={handleOpenModal} 
-                onCategoryClick={handleCategoryChange} 
-              />
-              <main className={styles.shopContent}>
-                {/* Pass all handlers to TopNavigationPanel */}
-                <TopNavigationPanel 
-                  onToggleCartView={toggleCartView} 
-                  onShowProductsView={handleShowProductsView}
-                  onShowConfirmationView={handleShowConfirmationView}
-                  currentView={currentView}
-                />
-                
-                {currentView === 'payment' ? (
-                  <PaymentConfirmationView onConfirm={handlePaymentConfirm} />
-                ) : (
-                  <ProductsViewContainer 
-                    selectedNadKategoriaId={selectedNadKategoriaId} 
-                    showCartView={currentView === 'cart'} 
-                    onToggleCartView={toggleCartView}
-                    onShowPaymentView={handleShowPaymentView}
-                  />
-                )}
-              </main>
-              <AddProductModal isOpen={isModalOpen} onClose={handleCloseModal} />
-            </div>
+            <DeliveryDateProvider>
+              <ShopPageContent />
+            </DeliveryDateProvider>
           </AddressProvider>
         </CartProvider>
       </ProductQuantityProvider>

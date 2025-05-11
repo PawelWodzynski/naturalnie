@@ -33,4 +33,12 @@ public interface ZamowienieRepository extends JpaRepository<Zamowienie, Long> {
      * @return list of orders for the employee with the specified completion status
      */
     List<Zamowienie> findByEmployeeIdAndZrealizowane(Long employeeId, Boolean zrealizowane);
+    
+    /**
+     * Find order by transaction number
+     * 
+     * @param numerTransakcji the transaction number
+     * @return the order with the specified transaction number, or null if not found
+     */
+    Zamowienie findByNumerTransakcji(String numerTransakcji);
 }
