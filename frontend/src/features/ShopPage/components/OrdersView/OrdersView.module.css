@@ -1,0 +1,102 @@
+.ordersViewContainer {
+  padding: 20px;
+  background-color: #fff8f0; /* Very light cream background matching table */
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(139, 69, 19, 0.1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.ordersViewContainer h2 {
+  color: #5d4037; /* Dark brown text matching table */
+  border-bottom: 2px solid #e6d2b5; /* Light oak border matching table */
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+
+.ordersList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.loadingContainer,
+.errorContainer,
+.emptyContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 20px;
+  background-color: #fff8f0;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(139, 69, 19, 0.1);
+  color: #5d4037;
+}
+
+.errorMessage {
+  color: #d32f2f;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.refreshButton {
+  background-color: #b38b6d; /* Medium brown matching the rest of the site */
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+}
+
+.refreshButton:hover {
+  background-color: #a07a5f; /* Slightly darker brown for hover */
+}
+
+.refreshButton:active {
+  background-color: #8b6b4d; /* Even darker brown when clicked */
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 16px;
+}
+
+.paginationButton {
+  background-color: #b38b6d; /* Medium brown matching the rest of the site */
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+}
+
+.paginationButton:hover {
+  background-color: #a07a5f; /* Slightly darker brown for hover */
+}
+
+.paginationButton:active {
+  background-color: #8b6b4d; /* Even darker brown when clicked */
+}
+
+.paginationButton:disabled {
+  background-color: #d2c2b5;
+  color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  color: #5d4037;
+  font-weight: 500;
+}

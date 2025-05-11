@@ -1,0 +1,174 @@
+.orderItemContainer {
+  background-color: #f5e9d9; /* Lighter oak color for alternating rows */
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(139, 69, 19, 0.1);
+  border: 1px solid #e6d2b5; /* Light oak border */
+}
+
+.orderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  cursor: pointer;
+  background-color: #f5e9d9; /* Lighter oak color */
+  transition: background-color 0.2s ease;
+}
+
+.orderHeader:hover {
+  background-color: #efe0cc; /* Slightly darker on hover */
+}
+
+.orderInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.orderNumber {
+  font-weight: 600;
+  color: #5d4037; /* Dark brown text */
+}
+
+.orderDate, .orderCustomer {
+  color: #5d4037; /* Dark brown text */
+}
+
+.orderStatus {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.statusPending, .statusCompleted {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.statusPending {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+.statusCompleted {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.expandIcon {
+  color: #b38b6d; /* Medium brown */
+  font-size: 0.8em;
+}
+
+.orderDetails {
+  padding: 16px;
+  background-color: #fff8f0; /* Very light cream background */
+  border-top: 1px solid #e6d2b5; /* Light oak border */
+}
+
+.orderSection {
+  margin-bottom: 24px;
+}
+
+.orderSection h3 {
+  color: #5d4037; /* Dark brown text */
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #e6d2b5; /* Light oak border */
+  padding-bottom: 6px;
+}
+
+.orderData {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 8px 16px;
+}
+
+.dataRow {
+  display: flex;
+  margin-bottom: 4px;
+}
+
+.dataLabel {
+  font-weight: 600;
+  color: #5d4037; /* Dark brown text */
+  min-width: 150px;
+  flex-shrink: 0;
+}
+
+.dataValue {
+  color: #5d4037; /* Dark brown text */
+}
+
+.productsTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.productsTable th, .productsTable td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e6d2b5; /* Light oak border */
+}
+
+.productsTable th {
+  background-color: #f5e9d9; /* Lighter oak color */
+  color: #5d4037; /* Dark brown text */
+  font-weight: 600;
+}
+
+.productsTable tr:nth-child(even) {
+  background-color: #f9f3e9; /* Very light alternating row color */
+}
+
+.productsTable tr:hover {
+  background-color: #efe0cc; /* Slightly darker on hover */
+}
+
+.totalLabel {
+  text-align: right;
+  font-weight: 600;
+  color: #5d4037; /* Dark brown text */
+}
+
+.totalValue {
+  font-weight: 700;
+  color: #5d4037; /* Dark brown text */
+}
+
+.orderActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.completeButton {
+  background-color: #b38b6d; /* Medium brown matching the rest of the site */
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+}
+
+.completeButton:hover {
+  background-color: #a07a5f; /* Slightly darker brown for hover */
+}
+
+.completeButton:active {
+  background-color: #8b6b4d; /* Even darker brown when clicked */
+}
+
+.completeButton:disabled {
+  background-color: #d2c2b5;
+  color: #f5f5f5;
+  cursor: not-allowed;
+}
