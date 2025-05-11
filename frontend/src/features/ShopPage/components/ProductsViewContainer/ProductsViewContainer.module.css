@@ -11,11 +11,15 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  margin-bottom: 20px;
-  padding: 0 20px;
+  margin-bottom: 0; /* Remove bottom margin to attach to table */
+  padding: 0;
   background-color: #f5e9d9; /* Light oak background matching table */
-  border-radius: 8px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
   box-shadow: 0 2px 8px rgba(139, 69, 19, 0.1);
+  border-bottom: 1px solid #e6d2b5; /* Add border to separate from table */
 }
 
 /* Styles for the tightly grouped controls */
@@ -23,10 +27,10 @@
   display: flex;
   align-items: center;
   gap: 0;
-  margin: 12px 0;
-  border-radius: 6px;
+  margin: 8px 0; /* Reduced vertical margin */
+  width: 100%; /* Full width */
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: 0 2px 6px rgba(139, 69, 19, 0.15);
 }
 
 .groupedControlsWrapper .filterItemContainer {
@@ -83,15 +87,18 @@
   font-weight: bold;
   color: #5d4037; /* Dark brown text matching table */
   padding-left: 5px;
+  font-size: 0.85rem; /* Smaller font size */
 }
 
 .filterSelect, .filterInput {
-  padding: 8px 12px;
+  padding: 4px 8px; /* Reduced padding for height */
   border: 1px solid #d2b48c; /* Tan border matching table headers */
   background-color: #fff8f0; /* Very light cream background matching table */
   min-width: 180px;
   cursor: pointer;
   color: #5d4037; /* Dark brown text matching table */
+  font-size: 0.85rem; /* Smaller font size */
+  height: 28px; /* Fixed height */
 }
 
 .filterInput {

@@ -59,7 +59,7 @@ services:
       SECURITY_JWT_TOKEN_SECRET_KEY: your_jwt_secret_key_here
       SPRING_MAIN_ALLOW_CIRCULAR_REFERENCES: "true"
     ports:
-      - "8080:8080"
+      - "8081:8080"
     depends_on:
       db:
         condition: service_healthy

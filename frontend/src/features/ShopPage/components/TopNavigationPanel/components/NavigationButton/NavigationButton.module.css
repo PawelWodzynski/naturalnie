@@ -1,39 +1,53 @@
 .navigationButton {
   flex-grow: 1; /* Each button will take up equal space */
-  padding: 10px 12px;
-  font-size: 16px;
+  padding: 6px 20px; /* Reduced height, increased horizontal padding */
+  font-size: 14px; /* Smaller font size */
   font-weight: 600;
   color: #5d4037; /* Dark brown text matching table */
   background-color: #f5e9d9; /* Lighter oak color for alternating rows */
   border: 1px solid #d2b48c; /* Tan border matching table headers */
-  border-radius: 6px;
+  border-right: none; /* Remove right border for connected look */
   cursor: pointer;
   text-align: center;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(139, 69, 19, 0.1);
-  margin: 0 4px;
+  margin: 0;
+  border-radius: 0; /* Remove border radius for middle buttons */
+  position: relative; /* For z-index to work properly */
+}
+
+/* First button in the group */
+.navigationButton:first-child {
+  border-top-left-radius: 20px; /* More rounded corners for first button */
+  border-bottom-left-radius: 20px;
+}
+
+/* Last button in the group */
+.navigationButton:last-child {
+  border-top-right-radius: 20px; /* More rounded corners for last button */
+  border-bottom-right-radius: 20px;
+  border-right: 1px solid #d2b48c; /* Add right border to last button */
 }
 
 .navigationButton:hover {
   background-color: #e6d2b5; /* Light oak color on hover */
   border-color: #b38b6d; /* Medium brown matching active page button */
-  transform: translateY(-1px);
-  box-shadow: 0 2px 5px rgba(139, 69, 19, 0.15);
+  z-index: 1; /* Ensure hover state is visible */
 }
 
 .navigationButton.active {
   background-color: #b38b6d; /* Medium brown matching active page button */
   color: white;
   border-color: #8b6b4d; /* Even darker brown when clicked */
-  box-shadow: 0 2px 4px rgba(139, 69, 19, 0.2);
+  z-index: 2; /* Ensure active state is visible */
 }
 
 .navigationButton:focus {
   outline: none;
   box-shadow: 0 0 0 0.2rem rgba(179, 139, 109, 0.25);
+  z-index: 3; /* Ensure focus state is visible */
 }
 
 .navigationButton:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(139, 69, 19, 0.2);
+  background-color: #a07a5f; /* Slightly darker brown for active state */
+  z-index: 2; /* Ensure active state is visible */
 }

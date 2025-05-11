@@ -3,22 +3,21 @@
   justify-content: center;
   align-items: center;
   height: 100%; /* Should match navbar height */
-  gap: 10px; /* Spacing between buttons */
   overflow-x: auto; /* Allows horizontal scrolling if buttons overflow */
   overflow-y: hidden;
   padding: 0 5px; /* Some padding so buttons don't touch edges if scrolling */
 }
 
 .nadkategoriaButton {
-  height: calc(100% - 10px); /* Adjust to fit within navbar height with some padding */
-  max-height: 40px; /* Example max height, align with navbar visual design */
+  height: calc(100% - 16px); /* Adjust to fit within navbar height with some padding */
+  max-height: 30px; /* Reduced height */
   padding: 0 15px;
   border: 1px solid #a07a5f; /* Darker brown border */
-  border-radius: 4px;
+  border-right: none; /* Remove right border for connected look */
   background-color: #b38b6d; /* Medium brown matching the rest of the site */
   color: #FFFFFF; /* White text color */
   cursor: pointer;
-  font-size: 0.9rem; /* Adjust as needed */
+  font-size: 0.85rem; /* Slightly smaller font */
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -27,20 +26,39 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0; /* Remove margins */
+  border-radius: 0; /* Remove border radius for middle buttons */
+}
+
+/* First button in the group */
+.nadkategoriaButton:first-child {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+/* Last button in the group */
+.nadkategoriaButton:last-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  border-right: 1px solid #a07a5f; /* Add right border to last button */
 }
 
 .nadkategoriaButton:hover {
   background-color: #a07a5f; /* Slightly darker brown for hover */
   border-color: #8b6b4d; /* Even darker brown border on hover */
+  z-index: 1; /* Ensure hover state is visible */
 }
 
 .nadkategoriaButton:active {
   background-color: #8b6b4d; /* Even darker brown when clicked */
+  z-index: 2; /* Ensure active state is visible */
 }
 
 .nadkategoriaButton:focus {
   outline: none;
   box-shadow: 0 0 0 2px #e6d2b5; /* Light oak focus indicator */
+  z-index: 3; /* Ensure focus state is visible */
+  position: relative;
 }
 
 .loadingMessage,
