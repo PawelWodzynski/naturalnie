@@ -2,11 +2,17 @@ import React, { useState } from 'react';
 import styles from './PaymentConfirmationView.module.css';
 import { useCart } from '../../../../context/CartContext';
 import { useAddress } from '../../../../context/AddressContext';
+import { useDeliveryDate } from '../../../../context/DeliveryDateContext';
+import { getToken } from '../../../../utils/tokenUtils';
 
 const PaymentConfirmationView = ({ onConfirm }) => {
-  const { cartItems } = useCart();
-  const { getFormattedAddress } = useAddress();
+  const { cartItems, clearCart } = useCart();
+  const { getFormattedAddress, useAlternativeAddress, formData } = useAddress();
+  const { deliveryDate, formatDate } = useDeliveryDate();
   const [paymentMethod, setPaymentMethod] = useState('online');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   // Get formatted address information
   const addressInfo = getFormattedAddress();
@@ -23,13 +29,82 @@ const PaymentConfirmationView = ({ onConfirm }) => {
     setPaymentMethod(event.target.value);
   };
 
-  const handleConfirmClick = () => {
-    console.log('Order confirmed with payment method:', paymentMethod);
-    if (onConfirm) {
-      onConfirm(paymentMethod);
+  const handleConfirmClick = async () => {
+    if (cartItems.length === 0) {
+      setSubmitError('Koszyk jest pusty. Dodaj produkty przed złożeniem zamówienia.');
+      return;
     }
-    // Here you would typically send the order to the backend
-    alert(`Zamówienie zostało potwierdzone! Metoda płatności: ${getPaymentMethodLabel(paymentMethod)}`);
+
+    setIsSubmitting(true);
+    setSubmitError('');
+    setSubmitSuccess(false);
+
+    try {
+      // Get token for authentication
+      const token = getToken();
+      if (!token) {
+        throw new Error('Brak tokenu uwierzytelniającego. Zaloguj się.');
+      }
+
+      // Format the products object as required by the API
+      const produkty = {};
+      cartItems.forEach(item => {
+        if (item && item.id && item.ilosc) {
+          produkty[item.id] = item.ilosc;
+        }
+      });
+
+      // Generate a transaction number
+      const numerTransakcji = `TXN-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+
+      // Format the delivery date as YYYY-MM-DD
+      const dataDostawy = formatDate(deliveryDate).split('.').reverse().join('-');
+
+      // Prepare the request body
+      const requestBody = {
+        imie: formData.firstName,
+        nazwisko: formData.lastName,
+        mail: formData.email,
+        useAlternativeAddress: useAlternativeAddress,
+        produkty: produkty,
+        dataDostawy: dataDostawy,
+        numerTransakcji: numerTransakcji
+      };
+
+      // Encode the token for the URL
+      const encodedToken = encodeURIComponent(token);
+
+      // Send the request to the backend
+      const response = await fetch(`http://localhost:8080/api/zamowienia?token=${encodedToken}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: `Błąd serwera: ${response.status}` }));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Order confirmed successfully:', result);
+      setSubmitSuccess(true);
+      
+      // Clear the cart after successful order submission
+      clearCart();
+      
+      if (onConfirm) {
+        onConfirm(paymentMethod);
+      }
+    } catch (error) {
+      console.error('Error submitting order:', error);
+      setSubmitError(error.message || 'Wystąpił błąd podczas składania zamówienia.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getPaymentMethodLabel = (method) => {
@@ -127,12 +202,14 @@ const PaymentConfirmationView = ({ onConfirm }) => {
       </div>
       
       <div className={styles.confirmButtonContainer}>
+        {submitError && <p className={styles.errorMessage}>{submitError}</p>}
+        {submitSuccess && <p className={styles.successMessage}>Zamówienie przechodzi do realizacji!</p>}
         <button 
           onClick={handleConfirmClick} 
           className={styles.confirmButton}
-          disabled={cartItems.length === 0}
+          disabled={cartItems.length === 0 || isSubmitting}
         >
-          Potwierdź
+          {isSubmitting ? 'Przetwarzanie...' : 'Potwierdź'}
         </button>
       </div>
     </div>

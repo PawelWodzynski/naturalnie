@@ -175,6 +175,7 @@ CREATE TABLE `zamowienie` (
   `laczna_cena` DECIMAL(10,2) NOT NULL,
   `data_dostawy` DATE,
   `zrealizowane` BOOLEAN DEFAULT FALSE,
+  `numer_transakcji` VARCHAR(50), -- Dodane pole numer_transakcji
   `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`zamowienie_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
