@@ -1,3 +1,4 @@
+# Etap 1: Budowanie aplikacji
 FROM gradle:jdk21 AS build
 
 WORKDIR /app
@@ -12,6 +13,7 @@ COPY src ./src
 RUN chmod +x ./gradlew
 RUN ./gradlew bootJar --no-daemon
 
+# Etap 2: Obraz runtime
 FROM eclipse-temurin:21-jdk
 
 WORKDIR /app
@@ -19,8 +21,15 @@ WORKDIR /app
 # Kopiowanie zbudowanej aplikacji z etapu budowania
 COPY --from=build /app/build/libs/*.jar app.jar
 
-# Ekspozycja portu używanego przez aplikację
+# Dodanie skryptu startowego
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
+# Instalacja klienta MySQL (do testowania połączenia z bazą)
+RUN apt-get update && apt-get install -y default-mysql-client && apt-get clean
+
+# Ekspozycja portu
 EXPOSE 8080
 
-# Uruchamianie aplikacji
-CMD ["java", "-jar", "app.jar"]
+# Uruchomienie aplikacji przez skrypt z pętlą oczekującą na bazę
+ENTRYPOINT ["./entrypoint.sh"]
