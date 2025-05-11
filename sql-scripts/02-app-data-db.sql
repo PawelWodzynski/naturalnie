@@ -162,4 +162,19 @@ VALUES
 (5, 5,'example'),
 (6, 6,'example');
 
-
+-- Tabela: zamowienie
+CREATE TABLE `zamowienie` (
+  `zamowienie_id` BIGINT NOT NULL AUTO_INCREMENT,
+  `employee_id` BIGINT NOT NULL,
+  `imie` VARCHAR(100) NOT NULL,
+  `nazwisko` VARCHAR(100) NOT NULL,
+  `mail` VARCHAR(255) NOT NULL,
+  `primary_address_id` INT,
+  `alternative_address_id` INT,
+  `lista_id_produktow` TEXT, -- Przechowuje listę ID produktów w formacie JSON
+  `laczna_cena` DECIMAL(10,2) NOT NULL,
+  `data_dostawy` DATE,
+  `zrealizowane` BOOLEAN DEFAULT FALSE,
+  `timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`zamowienie_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

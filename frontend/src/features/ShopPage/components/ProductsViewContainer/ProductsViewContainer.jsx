@@ -3,9 +3,14 @@ import styles from './ProductsViewContainer.module.css';
 import ProductsTable from '../../components/ProductsTable';
 import CartButton from '../CartButton/CartButton';
 import CartView from '../CartView';
-import UserDataForm from '../UserDataForm'; // Import UserDataForm
+import UserDataForm from '../UserDataForm';
 
-const ProductsViewContainer = ({ selectedNadKategoriaId, showCartView, onToggleCartView }) => {
+const ProductsViewContainer = ({ 
+  selectedNadKategoriaId, 
+  showCartView, 
+  onToggleCartView,
+  onShowPaymentView
+}) => {
   const [rodzajeProduktow, setRodzajeProduktow] = useState([{ id: 0, nazwa: "Wszystko" }]);
   const [selectedRodzajProduktuId, setSelectedRodzajProduktuId] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
@@ -65,7 +70,6 @@ const ProductsViewContainer = ({ selectedNadKategoriaId, showCartView, onToggleC
     <div className={styles.productsViewContainer}>
       {!showCartView && (
         <div className={styles.topControlsContainer}>
-          {/* New wrapper for tightly grouped controls */}
           <div className={styles.groupedControlsWrapper}>
             <div className={styles.filterItemContainer}>
               <label htmlFor="rodzajProduktuSelect" className={styles.filterLabel}>Rodzaj produktu: </label>
@@ -98,12 +102,12 @@ const ProductsViewContainer = ({ selectedNadKategoriaId, showCartView, onToggleC
         </div>
       )}
       {showCartView ? (
-        <div className={styles.cartAndUserDataContainer}> {/* New container for side-by-side view */}
+        <div className={styles.cartAndUserDataContainer}>
           <div className={styles.userDataFormWrapper}>
             <UserDataForm />
           </div>
           <div className={styles.cartViewWrapper}>
-            <CartView /> 
+            <CartView onShowPaymentView={onShowPaymentView} /> 
           </div>
         </div>
       ) : (
@@ -117,4 +121,3 @@ const ProductsViewContainer = ({ selectedNadKategoriaId, showCartView, onToggleC
 };
 
 export default ProductsViewContainer;
-

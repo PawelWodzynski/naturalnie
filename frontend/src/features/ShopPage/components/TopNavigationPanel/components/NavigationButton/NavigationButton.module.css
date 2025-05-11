@@ -1,31 +1,39 @@
 .navigationButton {
   flex-grow: 1; /* Each button will take up equal space */
-  padding: 8px 10px; /* Reduced vertical padding from 15px to 8px */
+  padding: 10px 12px;
   font-size: 16px;
-  font-weight: bold;
-  color: #333;
-  background-color: #e9ecef; /* Light grey, can be changed */
-  border: 1px solid #ced4da;
+  font-weight: 600;
+  color: #5d4037; /* Dark brown text matching table */
+  background-color: #f5e9d9; /* Lighter oak color for alternating rows */
+  border: 1px solid #d2b48c; /* Tan border matching table headers */
   border-radius: 6px;
   cursor: pointer;
   text-align: center;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(139, 69, 19, 0.1);
+  margin: 0 4px;
 }
 
 .navigationButton:hover {
-  background-color: #dee2e6;
-  border-color: #adb5bd;
+  background-color: #e6d2b5; /* Light oak color on hover */
+  border-color: #b38b6d; /* Medium brown matching active page button */
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(139, 69, 19, 0.15);
 }
 
 .navigationButton.active {
-  background-color: #007bff; /* Example active color - blue */
+  background-color: #b38b6d; /* Medium brown matching active page button */
   color: white;
-  border-color: #0056b3;
+  border-color: #8b6b4d; /* Even darker brown when clicked */
+  box-shadow: 0 2px 4px rgba(139, 69, 19, 0.2);
 }
 
-/* Remove default button outline on focus, if desired, or style it */
 .navigationButton:focus {
   outline: none;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Focus ring like Bootstrap */
+  box-shadow: 0 0 0 0.2rem rgba(179, 139, 109, 0.25);
 }
 
+.navigationButton:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(139, 69, 19, 0.2);
+}
