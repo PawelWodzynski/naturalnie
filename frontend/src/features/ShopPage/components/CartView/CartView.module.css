@@ -1,60 +1,83 @@
 .cartViewContainer {
-  /* Add styles to match ProductsTable container if necessary */
-  /* For example, if ProductsTable has specific padding or margins */
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: #fff8f0; /* Very light cream background matching table */
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(139, 69, 19, 0.1);
+  height: 100%;
+}
+
+.cartViewContainer h2 {
+  color: #5d4037; /* Dark brown text matching table */
+  border-bottom: 2px solid #e6d2b5; /* Light oak border matching table */
+  padding-bottom: 8px;
+  margin-bottom: 16px;
 }
 
 .cartTable {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin-top: 20px;
+  box-shadow: 0 2px 6px rgba(139, 69, 19, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
 }
 
 .cartTable th,
 .cartTable td {
-  border: 1px solid #ddd;
   padding: 12px;
   text-align: left;
+  border-bottom: 1px solid #e6d2b5; /* Light oak color for borders */
 }
 
 .cartTable th {
-  background-color: #f2f2f2;
-  font-weight: bold;
+  background-color: #d2b48c; /* Tan/light brown color for header */
+  color: #5d4037; /* Dark brown text for contrast */
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
 }
 
 .cartTable tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
+  background-color: #f5e9d9; /* Lighter oak color for alternating rows */
 }
 
 .cartTable tbody tr:hover {
-  background-color: #f1f1f1;
+  background-color: #e6d2b5; /* Light oak color on hover */
 }
 
 .cartTable tfoot tr td {
   font-weight: bold;
+  background-color: #f5e9d9; /* Lighter oak color for footer */
+  color: #5d4037; /* Dark brown text */
 }
 
 /* Styles for the remove button */
 .removeButton {
   padding: 6px 12px;
-  background-color: #dc3545; /* Red color for delete/remove actions */
+  background-color: #b38b6d; /* Medium brown matching active page button */
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9em;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(139, 69, 19, 0.2);
 }
 
 .removeButton:hover {
-  background-color: #c82333; /* Darker red on hover */
+  background-color: #a07a5f; /* Slightly darker brown */
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(139, 69, 19, 0.3);
+}
+
+.removeButton:active {
+  background-color: #8b6b4d; /* Even darker brown when clicked */
+  transform: translateY(0);
 }
 
 .removeButton:focus {
   outline: none;
-  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.5); /* Focus ring */
+  box-shadow: 0 0 0 0.2rem rgba(179, 139, 109, 0.4);
 }
-

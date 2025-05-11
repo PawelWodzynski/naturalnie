@@ -1,37 +1,39 @@
 .userDataFormContainer {
-  padding: 10px;
-  background-color: #f9f9f9;
+  padding: 15px;
+  background-color: #fff8f0; /* Very light cream background matching table */
   border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px rgba(139, 69, 19, 0.1);
   display: flex;
   flex-direction: column;
   gap: 15px;
+  height: 100%;
 }
 
 .userDataFormContainer h2,
 .userDataFormContainer h3 {
-  color: #333;
-  margin-bottom: 8px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid #eee;
+  color: #5d4037; /* Dark brown text matching table */
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #e6d2b5; /* Light oak border matching table */
   font-size: 1.2em;
 }
 
 .userDataFormContainer h3 {
   font-size: 1.05em;
+  border-bottom: 1px solid #e6d2b5; /* Thinner border for h3 */
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-/* New style for rows of input fields */
+/* Style for rows of input fields */
 .formRow {
   display: flex;
   flex-direction: row;
-  gap: 10px; /* Space between the two form groups in a row */
+  gap: 12px; /* Space between the two form groups in a row */
 }
 
 .formGroup {
@@ -46,57 +48,56 @@
   flex: none; /* Override flex: 1 if it's a direct child of form and not in a row */
 }
 
-
 .formGroup label {
-  font-weight: bold;
-  color: #555;
+  font-weight: 600;
+  color: #5d4037; /* Dark brown text matching table */
   font-size: 0.85em;
 }
 
 .inputField {
   padding: 8px 10px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  background-color: #fff;
+  border: 1px solid #d2b48c; /* Tan border matching table headers */
+  border-radius: 4px;
+  background-color: #fff8f0; /* Very light cream background matching table */
   font-size: 0.9em;
-  color: #333;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  width: 100%; /* Make input field take full width of its formGroup container */
-  box-sizing: border-box; /* Ensure padding and border don't add to the width */
+  color: #5d4037; /* Dark brown text matching table */
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: inset 0 1px 2px rgba(139, 69, 19, 0.1);
 }
 
 .inputField:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.25);
+  border-color: #b38b6d; /* Medium brown matching active page button */
+  box-shadow: 0 0 0 0.15rem rgba(179, 139, 109, 0.25);
   outline: none;
 }
 
 .formGroupCheckbox {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .formGroupCheckbox input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: #007bff;
+  accent-color: #b38b6d; /* Medium brown matching active page button */
 }
 
 .formGroupCheckbox label {
   font-weight: normal;
-  color: #333;
+  color: #5d4037; /* Dark brown text matching table */
   font-size: 0.85em;
 }
 
 .errorMessage {
-  color: #d9534f;
-  background-color: #f2dede;
-  border: 1px solid #ebccd1;
-  padding: 8px;
-  border-radius: 3px;
-  margin-bottom: 10px;
+  color: #a94442;
+  background-color: #f8eae9;
+  border: 1px solid #e6d2b5; /* Light oak border matching table */
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 12px;
   font-size: 0.85em;
 }
-

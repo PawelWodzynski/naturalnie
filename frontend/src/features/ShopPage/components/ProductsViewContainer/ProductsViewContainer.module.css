@@ -7,35 +7,43 @@
 }
 
 .topControlsContainer {
-    display: flex;
-    justify-content: center; /* Changed from space-between to center */
-    align-items: center; /* Vertically aligns items in the middle */
-    width: 100%;
-    margin-bottom: 20px;
-    padding: 0 20px; /* Add some padding if the container itself doesn't have it */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 0 20px;
+  background-color: #f5e9d9; /* Light oak background matching table */
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(139, 69, 19, 0.1);
 }
 
-/* New styles for the tightly grouped controls */
+/* Styles for the tightly grouped controls */
 .groupedControlsWrapper {
   display: flex;
   align-items: center;
-  gap: 0; /* Remove gap between items */
+  gap: 0;
+  margin: 12px 0;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(139, 69, 19, 0.15);
 }
 
 .groupedControlsWrapper .filterItemContainer {
-  margin-right: 0; /* Remove right margin if any */
-  padding-right: 0; /* Remove right padding if any */
+  margin-right: 0;
+  padding-right: 0;
+  border-right: 1px solid #e6d2b5; /* Light oak border matching table */
 }
 
-.groupedControlsWrapper .filterItemContainer:not(:last-child) {
-  /* Optional: if you want a very subtle separator, otherwise keep it 0 */
-  /* border-right: 1px solid #ccc; */ 
+.groupedControlsWrapper .filterItemContainer:last-child {
+  border-right: none;
 }
 
 .groupedControlsWrapper .filterSelect,
 .groupedControlsWrapper .filterInput {
-  border-radius: 0; /* Remove individual border-radius for a 'stuck together' look */
-  margin-right: -1px; /* Overlap borders slightly to avoid double borders */
+  border-radius: 0;
+  margin-right: -1px;
+  border-color: #d2b48c; /* Tan border matching table headers */
 }
 
 /* Adjust first and last child for rounded corners on the group */
@@ -48,21 +56,21 @@
 .groupedControlsWrapper > *:last-child {
   border-top-right-radius: 4px;
   border-bottom-right-radius: 4px;
-  margin-right: 0; /* Ensure no negative margin on the very last item */
+  margin-right: 0;
 }
 
-/* Original filter styles, some might be overridden or adjusted by groupedControlsWrapper */
-.filterControlsContainer { /* This class might no longer be needed if groupedControlsWrapper replaces its direct function */
+/* Filter styles */
+.filterControlsContainer {
   display: flex;
   justify-content: center;
   align-items: center;
   margin-bottom: 20px;
   padding: 10px;
   border-radius: 8px;
-  background-color: #f8f9fa;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background-color: #f5e9d9; /* Light oak background matching table */
+  box-shadow: 0 2px 6px rgba(139, 69, 19, 0.15);
   width: auto;
-  gap: 20px; /* This gap will be overridden by .groupedControlsWrapper */
+  gap: 20px;
 }
 
 .filterItemContainer {
@@ -71,18 +79,19 @@
 }
 
 .filterLabel {
-  margin-right: 5px; /* Reduced margin for tighter look */
+  margin-right: 5px;
   font-weight: bold;
-  color: #333;
-  padding-left: 5px; /* Add some padding if label is inside the item */
+  color: #5d4037; /* Dark brown text matching table */
+  padding-left: 5px;
 }
 
 .filterSelect, .filterInput {
   padding: 8px 12px;
-  border: 1px solid #ced4da;
-  background-color: #fff;
-  min-width: 180px; /* Slightly reduced min-width */
+  border: 1px solid #d2b48c; /* Tan border matching table headers */
+  background-color: #fff8f0; /* Very light cream background matching table */
+  min-width: 180px;
   cursor: pointer;
+  color: #5d4037; /* Dark brown text matching table */
 }
 
 .filterInput {
@@ -90,11 +99,11 @@
 }
 
 .filterSelect:focus, .filterInput:focus {
-  border-color: #80bdff;
+  border-color: #b38b6d; /* Medium brown matching active page button */
   outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-  z-index: 2; /* Ensure focused element's border is on top */
-  position: relative; /* Needed for z-index to work on non-positioned elements */
+  box-shadow: 0 0 0 0.2rem rgba(179, 139, 109, 0.25);
+  z-index: 2;
+  position: relative;
 }
 
 .cartAndUserDataContainer {
@@ -104,18 +113,19 @@
   width: 100%;
   gap: 20px;
   padding: 20px;
-  background-color: #e9ecef;
+  background-color: #f5e9d9; /* Light oak background matching table */
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.15);
   align-items: stretch;
 }
 
 .userDataFormWrapper {
   flex: 1;
   padding: 15px;
-  background-color: #ffffff;
+  background-color: #fff8f0; /* Very light cream background matching table */
   border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid #e6d2b5; /* Light oak border matching table */
+  box-shadow: 0 2px 6px rgba(139, 69, 19, 0.1);
   display: flex;
   flex-direction: column;
 }
@@ -123,10 +133,10 @@
 .cartViewWrapper {
   flex: 1;
   padding: 15px;
-  background-color: #ffffff;
+  background-color: #fff8f0; /* Very light cream background matching table */
   border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid #e6d2b5; /* Light oak border matching table */
+  box-shadow: 0 2px 6px rgba(139, 69, 19, 0.1);
   display: flex;
   flex-direction: column;
 }
-

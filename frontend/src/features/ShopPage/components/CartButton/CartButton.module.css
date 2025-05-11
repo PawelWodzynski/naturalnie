@@ -1,5 +1,5 @@
 .cartButton {
-  background-color: #4CAF50; /* Green */
+  background-color: #b38b6d; /* Medium brown matching active page button */
   border: none;
   color: white;
   padding: 10px 20px;
@@ -9,11 +9,21 @@
   font-size: 16px;
   margin: 4px 2px;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 6px;
   float: right; /* Align to the right */
   margin-bottom: 10px; /* Space below the button */
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(139, 69, 19, 0.2);
 }
 
 .cartButton:hover {
-  background-color: #45a049;
+  background-color: #a07a5f; /* Slightly darker brown */
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(139, 69, 19, 0.3);
+}
+
+.cartButton:active {
+  background-color: #8b6b4d; /* Even darker brown when clicked */
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(139, 69, 19, 0.2);
 }
