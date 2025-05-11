@@ -4,11 +4,12 @@ import LogoutButton from './components/LogoutButton';
 import AddProductButton from './components/AddProductButton';
 import NadkategorieBar from './components/NadkategorieBar';
 import AddCategoryButton from './components/AddCategoryButton';
+import ShowOrdersButton from './components/ShowOrdersButton';
 import AddNadKategoriaModal from '../AddProductModal/components/ProductForm/components/addOptionModals/AddNadKategoriaModal';
 import { useNadkategorie } from '../../../../context/NadkategorieContext';
 import { addNadKategoria } from '../../../../shared/services/apiService';
 
-const ShopNavbar = ({ onAddProductClick, onCategoryClick }) => {
+const ShopNavbar = ({ onAddProductClick, onCategoryClick, onShowOrdersClick }) => {
   const [apiToken, setApiToken] = useState(null);
   const [isAddCategoryModalOpen, setIsAddCategoryModalOpen] = useState(false);
   const { triggerRefresh: triggerNadkategorieRefresh } = useNadkategorie();
@@ -56,6 +57,7 @@ const ShopNavbar = ({ onAddProductClick, onCategoryClick }) => {
         </div>
         <div className={styles.actionsContainer}>
           {apiToken && <AddProductButton onClick={onAddProductClick} />}
+          {apiToken && <ShowOrdersButton onClick={onShowOrdersClick} />}
           <LogoutButton />
         </div>
       </nav>
@@ -72,4 +74,3 @@ const ShopNavbar = ({ onAddProductClick, onCategoryClick }) => {
 };
 
 export default ShopNavbar;
-

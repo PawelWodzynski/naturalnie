@@ -1,14 +1,18 @@
 .addProductButton {
-  background-color: #4CAF50; /* Green */
+  background-color: #b38b6d; /* Medium brown matching the rest of the site */
   color: white;
   border: none;
   padding: 8px 15px;
   border-radius: 5px;
   cursor: pointer;
   font-size: 0.9em;
+  transition: all 0.2s ease;
 }
 
 .addProductButton:hover {
-  background-color: #45a049; /* Darker Green */
+  background-color: #a07a5f; /* Slightly darker brown for hover */
 }
 
+.addProductButton:active {
+  background-color: #8b6b4d; /* Even darker brown when clicked */
+}

@@ -104,6 +104,9 @@ public class ZamowienieController {
             // Set transaction number
             zamowienie.setNumerTransakcji(zamowienieDto.getNumerTransakcji());
             
+            // Set current timestamp
+            zamowienie.setTimestamp(java.time.LocalDateTime.now());
+            
             // Calculate total price and convert product map to JSON
             BigDecimal totalPrice = calculateTotalPrice(zamowienieDto.getProdukty());
             zamowienie.setLacznaCena(totalPrice);
@@ -378,5 +381,47 @@ public class ZamowienieController {
         }
         
         return totalPrice;
+    }
+    
+    /**
+     * Updates the order status to completed
+     * 
+     * @param token Authentication token
+     * @param zamowienieId Order ID
+     * @return ResponseEntity with success or error message
+     */
+    @PutMapping("/complete/{zamowienieId}")
+    @Transactional("appDataTransactionManager")
+    public ResponseEntity<?> completeZamowienie(
+            @RequestParam(required = true) String token,
+            @PathVariable Long zamowienieId) {
+        try {
+            // Get the authenticated user
+            authUtil.getAuthenticatedUserOrThrow();
+            
+            // Find the order
+            Zamowienie zamowienie = zamowienieRepository.findById(zamowienieId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Zamówienie o ID " + zamowienieId + " nie znalezione."));
+            
+            // Update the status
+            zamowienie.setZrealizowane(true);
+            
+            // Save the updated order
+            Zamowienie updatedZamowienie = zamowienieRepository.save(zamowienie);
+            
+            return ResponseEntity.ok(responseUtil.createSuccessResponse(
+                    "Status zamówienia został zmieniony na zrealizowane.", updatedZamowienie));
+            
+        } catch (UserNotAuthenticatedException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(responseUtil.createErrorResponse(e.getMessage()));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(responseUtil.createErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            log.error("Error completing order: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(responseUtil.createErrorResponse("Wystąpił wewnętrzny błąd serwera podczas aktualizacji statusu zamówienia."));
+        }
     }
 }

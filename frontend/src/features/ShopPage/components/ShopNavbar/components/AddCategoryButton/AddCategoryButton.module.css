@@ -1,5 +1,5 @@
 .addCategoryButton {
-  background-color: #4CAF50; /* Green */
+  background-color: #b38b6d; /* Medium brown matching the rest of the site */
   border: none;
   color: white;
   padding: 8px 16px;
@@ -10,10 +10,13 @@
   margin: 4px 2px;
   cursor: pointer;
   border-radius: 4px;
-  transition-duration: 0.4s;
+  transition: all 0.2s ease;
 }
 
 .addCategoryButton:hover {
-  background-color: #45a049;
+  background-color: #a07a5f; /* Slightly darker brown for hover */
 }
 
+.addCategoryButton:active {
+  background-color: #8b6b4d; /* Even darker brown when clicked */
+}

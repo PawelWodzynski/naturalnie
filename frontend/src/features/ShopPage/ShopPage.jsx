@@ -5,6 +5,7 @@ import AddProductModal from './components/AddProductModal';
 import TopNavigationPanel from './components/TopNavigationPanel';
 import ProductsViewContainer from './components/ProductsViewContainer';
 import PaymentConfirmationView from './components/PaymentConfirmationView';
+import OrdersView from './components/OrdersView';
 import { NadkategorieProvider } from '../../context/NadkategorieContext';
 import { ProductQuantityProvider } from '../../context/ProductQuantityContext';
 import { CartProvider } from '../../context/CartContext';
@@ -54,7 +55,7 @@ const ValidationWrapper = ({ children, currentView, setCurrentView }) => {
 const ShopPageContent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedNadKategoriaId, setSelectedNadKategoriaId] = useState(null);
-  const [currentView, setCurrentView] = useState('products'); // 'products', 'cart', or 'payment'
+  const [currentView, setCurrentView] = useState('products'); // 'products', 'cart', 'payment', or 'orders'
   const [validationError, setValidationError] = useState('');
 
   const { cartItems } = useCart();
@@ -72,6 +73,11 @@ const ShopPageContent = () => {
     console.log("ShopPage - NadKategoria ID selected:", nadKategoriaId);
     setSelectedNadKategoriaId(nadKategoriaId);
     setCurrentView('products'); // Always show products table when category changes
+  };
+  
+  const handleShowOrdersView = () => {
+    setCurrentView('orders');
+    setValidationError('');
   };
 
   const toggleCartView = () => {
@@ -133,7 +139,8 @@ const ShopPageContent = () => {
     <div className={styles.shopPageContainer}>
       <ShopNavbar 
         onAddProductClick={handleOpenModal} 
-        onCategoryClick={handleCategoryChange} 
+        onCategoryClick={handleCategoryChange}
+        onShowOrdersClick={handleShowOrdersView}
       />
       <main className={styles.shopContent}>
         {/* Pass all handlers to TopNavigationPanel */}
@@ -152,6 +159,8 @@ const ShopPageContent = () => {
         
         {currentView === 'payment' ? (
           <PaymentConfirmationView onConfirm={handlePaymentConfirm} />
+        ) : currentView === 'orders' ? (
+          <OrdersView />
         ) : (
           <ProductsViewContainer 
             selectedNadKategoriaId={selectedNadKategoriaId} 

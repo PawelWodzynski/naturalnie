@@ -313,18 +313,16 @@ const UserDataForm = () => {
                     />
                 </div>
 
-                {userData && userData.alternativeAddress && (
-                    <div className={styles.formGroupCheckbox}>
-                        <input 
-                            type="checkbox" 
-                            id="useAlternativeAddress" 
-                            name="useAlternativeAddress" 
-                            checked={useAlternativeAddress} 
-                            onChange={handleCheckboxChange} 
-                        />
-                        <label htmlFor="useAlternativeAddress">Użyj Adres Alternatywny</label>
-                    </div>
-                )}
+                <div className={styles.formGroupCheckbox}>
+                    <input 
+                        type="checkbox" 
+                        id="useAlternativeAddress" 
+                        name="useAlternativeAddress" 
+                        checked={useAlternativeAddress} 
+                        onChange={handleCheckboxChange} 
+                    />
+                    <label htmlFor="useAlternativeAddress">Użyj Adres Alternatywny</label>
+                </div>
                 
                 {/* Date Picker Component */}
                 <DatePicker />
