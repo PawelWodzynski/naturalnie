@@ -69,6 +69,8 @@ const useProductSubmit = (formData, apiToken, onClose) => {
       if (typeof onClose === 'function') {
         onClose();
       }
+      // Refresh the page after successful submission
+      window.location.reload();
     } catch (error) {
       setSubmitError(error.message || "Wystąpił nieoczekiwany błąd.");
     } finally {
@@ -84,4 +86,3 @@ const useProductSubmit = (formData, apiToken, onClose) => {
 };
 
 export default useProductSubmit;
-

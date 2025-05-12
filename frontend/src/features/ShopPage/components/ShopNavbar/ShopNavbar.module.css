@@ -1,8 +1,8 @@
 .navbar {
   background-color: #f5e9d9; /* Light oak color matching the rest of the site */
   padding: 0 20px;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* Three columns: left, center, right */
   align-items: center;
   color: #333;
   height: 60px;
@@ -11,38 +11,36 @@
 .navLeft {
   display: flex;
   align-items: center;
-  flex-shrink: 0; /* Prevent this container from shrinking */
+  justify-self: start; /* Align to the start of the grid cell */
 }
 
 .logoPlaceholder {
   font-size: 1.5em;
   font-weight: bold;
-  /* flex-shrink: 0; Already on navLeft, not strictly needed here but harmless */
+  color: #5d4037; /* Dark brown text matching table */
 }
 
 /* Style for AddCategoryButton when inside navLeft */
-.navLeft > :global(button) { /* Using :global if AddCategoryButton doesn't use styles.addCategoryButton from this module */
+.navLeft > :global(button) {
   margin-left: 10px; /* Space between logo and button */
 }
 
-/* If AddCategoryButton.jsx uses its own CSS module and has a root class like .addCategoryButton */
-/* then you might target it more specifically if needed, or ensure its own styles don't conflict. */
-/* For now, the above :global(button) or a more specific selector if AddCategoryButton has a known class from its own module is fine. */
-
 .nadkategorieBarWrapper {
-  flex-grow: 1;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
   overflow: hidden;
-  margin: 0 20px;
+  grid-column: 2; /* Explicitly place in the center column */
+  justify-self: center; /* Center in the grid cell */
+  width: auto; /* Let it take its natural width */
 }
 
 .actionsContainer {
   display: flex;
   align-items: center;
-  flex-shrink: 0;
+  justify-self: end; /* Align to the end of the grid cell */
+  grid-column: 3; /* Explicitly place in the right column */
 }
 
 .actionsContainer > * {
