@@ -14,8 +14,8 @@ function App() {
         <Route path="/" element={<LandingPage />} /> 
         <Route path="/login-page" element={<LoginPage />} />
         <Route
-          path="/dashboard"
-          element={<ProtectedRoute element={<Dashboard />} />}
+          path="/sklep"
+          element={<ProtectedRoute element={<ShopPage />} />}
         />
         {/* Add the new protected route for ShopPage */}
         <Route

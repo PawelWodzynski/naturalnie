@@ -145,3 +145,58 @@ VALUES
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+
+
+--
+-- Dodanie użytkownika optiq
+--
+INSERT INTO `employee` (username, password, first_name, last_name, email)
+VALUES 
+("optiq", "$2a$12$MzePs703H2OZ/huNjBPEPONrCoYHUA0.UzIlZuGv.00AiJl3tbCPi", "Jakub", "Sniegocki", "jakub.sniegocki@optiq.pl");
+
+-- Zakładamy, że to ID = 4 (bo poprzednie 3 to admin/manager/employee)
+-- Zakładamy też, że ROLE_ADMIN ma ID = 3
+-- Jeśli role się wczytują w tej samej kolejności co wcześniej
+
+--
+-- Przypisanie roli ADMIN do optiq
+--
+INSERT INTO `employee_roles` (user_id, role_id)
+VALUES (4, 3);
+
+--
+-- Dodanie zgód dla optiq
+--
+INSERT INTO `employee_consents` (employee_id, rodo_consent, terms_consent, marketing_consent, consent_details)
+VALUES (4, TRUE, TRUE, FALSE, 'Użytkownik wyraził zgodę na RODO i regulamin.');
+
+-- Pobierz ID zgody
+SET @consent_id := LAST_INSERT_ID();
+
+--
+-- Dodanie adresu głównego dla optiq
+--
+INSERT INTO `addresses` (employee_id, street, building_number, apartment_number, postal_code, city, voivodeship, district, commune, country, phone_number, nip, company_name)
+VALUES (4, 'ul. Przykładowa', '12A', '5', '00-001', 'Warszawa', 'Mazowieckie', 'Warszawski', 'Warszawa', 'Polska', '123456789', NULL, NULL);
+
+-- Pobierz ID adresu głównego
+SET @primary_address_id := LAST_INSERT_ID();
+
+--
+-- Dodanie adresu alternatywnego dla optiq (z NIP i Firmą)
+--
+INSERT INTO `alternative_addresses` (street, building_number, apartment_number, postal_code, city, voivodeship, district, commune, country, phone_number, nip, company_name)
+VALUES ('ul. Zapasowa', '33B', NULL, '00-002', 'Warszawa', 'Mazowieckie', 'Warszawski', 'Warszawa', 'Polska', '987654321', '1234567890', 'Optiq Solutions');
+
+-- Pobierz ID adresu alternatywnego
+SET @alternative_address_id := LAST_INSERT_ID();
+
+--
+-- Uzupełnienie relacji w employee
+--
+UPDATE `employee`
+SET 
+  consent_id = @consent_id,
+  primary_address_id = @primary_address_id,
+  alternative_address_id = @alternative_address_id
+WHERE id = 4;

@@ -54,7 +54,7 @@ const LoginForm = () => {
       }
 
       localStorage.setItem("token", token);
-      navigate("/dashboard");
+      navigate("/sklep");
     } catch (error) {
       console.error("Error logging in:", error);
       

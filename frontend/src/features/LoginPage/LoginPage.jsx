@@ -14,7 +14,7 @@ const LoginPage = () => {
     const isAuthenticated = token !== null;
     
     if (isAuthenticated) {
-      navigate("/dashboard");
+      navigate("/sklep");
     }
   }, [navigate]); // Dodaj navigate jako zależność useEffect
 
