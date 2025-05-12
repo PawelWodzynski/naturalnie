@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -12,24 +12,49 @@
 }
 
 .modalContent {
-  background-color: #fff;
+  background-color: #fff8f0; /* Very light cream background matching table */
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 80%;
-  max-width: 700px; /* Increased max-width for a larger form */
-  max-height: 90vh; /* Limit height and allow scrolling */
-  overflow-y: auto; /* Enable vertical scrolling if content overflows */
-  position: relative;
+  box-shadow: 0 4px 15px rgba(139, 69, 19, 0.2);
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e6d2b5; /* Light oak border matching table */
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e6d2b5; /* Light oak border matching table */
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+  background-color: #f5e9d9; /* Light oak background matching table */
+  margin: -20px -20px 15px -20px;
+  padding: 15px 20px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #5d4037; /* Dark brown text matching table */
 }
 
 .closeButton {
-  position: absolute;
-  top: 10px;
-  right: 10px;
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   cursor: pointer;
+  color: #5d4037; /* Dark brown text matching table */
+  padding: 0;
+  line-height: 1;
 }
 
+.closeButton:hover {
+  color: #9a0000; /* Dark red color for hover */
+}

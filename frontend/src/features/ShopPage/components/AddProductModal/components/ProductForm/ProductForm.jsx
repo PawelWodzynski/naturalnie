@@ -103,116 +103,156 @@ const ProductForm = ({ onClose }) => {
     <>
       <form onSubmit={handleSubmit} className={styles.productForm}>
         {submitError && <div className={styles.errorMessage}>{submitError}</div>}
-        <div className={styles.formGrid}>
-          <BasicProductInfoSection formData={formData} handleInputChange={handleInputChange} />
-
-          <DropdownField
-            label="Rodzaj Produktu"
-            name="rodzajProduktuId"
-            value={formData.rodzajProduktuId}
-            onChange={(e, selectedOption) => handleDropdownChange('rodzajProduktu', selectedOption)}
-            fetchDataFunction={fetchRodzajeProduktu}
-            optionValueKey="id"
-            optionLabelKey="nazwa"
-            required
-            entityType="rodzajProduktu"
-            onOpenAddModal={() => handleOpenAddOptionModal('rodzajProduktu')}
-            onOptionAdded={(refMethods) => { rodzajProduktuDropdownRef.current = refMethods; }}
-            enableDelete={true}
-            deleteApiEndpoint="/api/app-data/rodzaj-produktu"
-            apiToken={apiToken}
-            onItemDeleted={(deletedId) => handleItemDeletedFromDropdown(deletedId, 'rodzajProduktu')}
-          />
-
-          <DropdownField
-            label="Jednostka"
-            name="jednostkaId"
-            value={formData.jednostkaId}
-            onChange={(e, selectedOption) => handleDropdownChange('jednostka', selectedOption)}
-            fetchDataFunction={fetchJednostki}
-            optionValueKey="id"
-            optionLabelKey="nazwa"
-            required
-            entityType="jednostka"
-            onOpenAddModal={() => handleOpenAddOptionModal('jednostka')}
-            onOptionAdded={(refMethods) => { jednostkaDropdownRef.current = refMethods; }}
-            enableDelete={true}
-            deleteApiEndpoint="/api/app-data/jednostka"
-            apiToken={apiToken}
-            onItemDeleted={(deletedId) => handleItemDeletedFromDropdown(deletedId, 'jednostka')}
-          />
-
-          <DropdownField
-            label="Nadkategoria"
-            name="nadKategoriaId"
-            value={formData.nadKategoriaId}
-            onChange={(e, selectedOption) => handleDropdownChange('nadKategoria', selectedOption)}
-            fetchDataFunction={fetchNadKategorie}
-            optionValueKey="id"
-            optionLabelKey="nazwa"
-            required
-            entityType="nadKategoria"
-            onOpenAddModal={() => handleOpenAddOptionModal('nadKategoria')}
-            onOptionAdded={(refMethods) => { nadKategoriaDropdownRef.current = refMethods; }}
-            enableDelete={true}
-            deleteApiEndpoint="/api/app-data/nad-kategoria"
-            apiToken={apiToken}
-            onItemDeleted={(deletedId) => handleItemDeletedFromDropdown(deletedId, 'nadKategoria')}
-          />
-
-          <DropdownField
-            label="Opakowanie"
-            name="opakowanieId"
-            value={formData.opakowanieId}
-            onChange={(e, selectedOption) => handleDropdownChange('opakowanie', selectedOption)}
-            fetchDataFunction={fetchOpakowania}
-            optionValueKey="id"
-            optionLabelKey="nazwa"
-            required
-            entityType="opakowanie"
-            onOpenAddModal={() => handleOpenAddOptionModal('opakowanie')}
-            onOptionAdded={(refMethods) => { opakowanieDropdownRef.current = refMethods; }}
-            enableDelete={true}
-            deleteApiEndpoint="/api/app-data/opakowanie"
-            apiToken={apiToken}
-            onItemDeleted={(deletedId) => handleItemDeletedFromDropdown(deletedId, 'opakowanie')}
-          />
-
-          <DropdownField
-            label="Stawka VAT (%)"
-            name="stawkaVatId"
-            value={formData.stawkaVatId}
-            onChange={(e, selectedOption) => handleDropdownChange('stawkaVat', selectedOption)}
-            fetchDataFunction={fetchStawkiVat}
-            optionValueKey="id"
-            optionLabelKey="wartosc"
-            required
-            entityType="stawkaVat"
-            onOpenAddModal={() => handleOpenAddOptionModal('stawkaVat')}
-            onOptionAdded={(refMethods) => { stawkaVatDropdownRef.current = refMethods; }}
-            enableDelete={true}
-            deleteApiEndpoint="/api/app-data/stawka-vat"
-            apiToken={apiToken}
-            onItemDeleted={(deletedId) => handleItemDeletedFromDropdown(deletedId, 'stawkaVat')}
-          />
-          
-          <ProductOptionsCheckboxesSection formData={formData} handleInputChange={handleInputChange} />
-          <AvailabilityCheckboxesSection formData={formData} handleInputChange={handleInputChange} />
-          <ProductCodesSection formData={formData} handleInputChange={handleInputChange} />
-
-          <IngredientsSection 
-            skladniki={formData.skladniki}
-            apiToken={apiToken} // Pass apiToken if IngredientsSection needs it for SkladnikiDropdownField
-            handleSkladnikSelectedFromDropdown={handleSkladnikSelectedFromDropdown}
-            handleAddNewSkladnikManual={handleAddNewSkladnikManual}
-            handleRemoveSkladnik={handleRemoveSkladnik}
-          />
-
-          <div className={styles.formGroupFullWidth}>
-            <ImageUploadManager images={formData.zdjecia} onImagesChange={handleImagesChange} />
-          </div>
-
+        
+        {/* Image upload moved to the top */}
+        <div className={styles.imageUploadSection}>
+          <h3 className={styles.sectionHeader}>Zdjęcia produktu</h3>
+          <ImageUploadManager images={formData.zdjecia} onImagesChange={handleImagesChange} />
         </div>
+        
+        <div className={styles.formGrid}>
+          <div className={styles.formSection}>
+            <h3 className={styles.sectionHeader}>Informacje podstawowe</h3>
+            <div className={styles.sectionContent}>
+              <BasicProductInfoSection formData={formData} handleInputChange={handleInputChange} />
+            </div>
+          </div>
+          
+          <div className={styles.formSection}>
+            <h3 className={styles.sectionHeader}>Kategorie i klasyfikacja</h3>
+            <div className={styles.sectionContent}>
+              <DropdownField
+                label="Rodzaj Produktu"
+                name="rodzajProduktuId"
+                value={formData.rodzajProduktuId}
+                onChange={(e, selectedOption) => handleDropdownChange('rodzajProduktu', selectedOption)}
+                fetchDataFunction={fetchRodzajeProduktu}
+                optionValueKey="id"
+                optionLabelKey="nazwa"
+                required
+                entityType="rodzajProduktu"
+                onOpenAddModal={() => handleOpenAddOptionModal('rodzajProduktu')}
+                onOptionAdded={(refMethods) => { rodzajProduktuDropdownRef.current = refMethods; }}
+                enableDelete={true}
+                deleteApiEndpoint="/api/app-data/rodzaj-produktu"
+                apiToken={apiToken}
+                onItemDeleted={(deletedId) => handleItemDeletedFromDropdown(deletedId, 'rodzajProduktu')}
+              />
+
+              <DropdownField
+                label="Nadkategoria"
+                name="nadKategoriaId"
+                value={formData.nadKategoriaId}
+                onChange={(e, selectedOption) => handleDropdownChange('nadKategoria', selectedOption)}
+                fetchDataFunction={fetchNadKategorie}
+                optionValueKey="id"
+                optionLabelKey="nazwa"
+                required
+                entityType="nadKategoria"
+                onOpenAddModal={() => handleOpenAddOptionModal('nadKategoria')}
+                onOptionAdded={(refMethods) => { nadKategoriaDropdownRef.current = refMethods; }}
+                enableDelete={true}
+                deleteApiEndpoint="/api/app-data/nad-kategoria"
+                apiToken={apiToken}
+                onItemDeleted={(deletedId) => handleItemDeletedFromDropdown(deletedId, 'nadKategoria')}
+              />
+            </div>
+          </div>
+          
+          <div className={styles.formSection}>
+            <h3 className={styles.sectionHeader}>Jednostki i opakowanie</h3>
+            <div className={styles.sectionContent}>
+              <DropdownField
+                label="Jednostka"
+                name="jednostkaId"
+                value={formData.jednostkaId}
+                onChange={(e, selectedOption) => handleDropdownChange('jednostka', selectedOption)}
+                fetchDataFunction={fetchJednostki}
+                optionValueKey="id"
+                optionLabelKey="nazwa"
+                required
+                entityType="jednostka"
+                onOpenAddModal={() => handleOpenAddOptionModal('jednostka')}
+                onOptionAdded={(refMethods) => { jednostkaDropdownRef.current = refMethods; }}
+                enableDelete={true}
+                deleteApiEndpoint="/api/app-data/jednostka"
+                apiToken={apiToken}
+                onItemDeleted={(deletedId) => handleItemDeletedFromDropdown(deletedId, 'jednostka')}
+              />
+
+              <DropdownField
+                label="Opakowanie"
+                name="opakowanieId"
+                value={formData.opakowanieId}
+                onChange={(e, selectedOption) => handleDropdownChange('opakowanie', selectedOption)}
+                fetchDataFunction={fetchOpakowania}
+                optionValueKey="id"
+                optionLabelKey="nazwa"
+                required
+                entityType="opakowanie"
+                onOpenAddModal={() => handleOpenAddOptionModal('opakowanie')}
+                onOptionAdded={(refMethods) => { opakowanieDropdownRef.current = refMethods; }}
+                enableDelete={true}
+                deleteApiEndpoint="/api/app-data/opakowanie"
+                apiToken={apiToken}
+                onItemDeleted={(deletedId) => handleItemDeletedFromDropdown(deletedId, 'opakowanie')}
+              />
+
+              <DropdownField
+                label="Stawka VAT (%)"
+                name="stawkaVatId"
+                value={formData.stawkaVatId}
+                onChange={(e, selectedOption) => handleDropdownChange('stawkaVat', selectedOption)}
+                fetchDataFunction={fetchStawkiVat}
+                optionValueKey="id"
+                optionLabelKey="wartosc"
+                required
+                entityType="stawkaVat"
+                onOpenAddModal={() => handleOpenAddOptionModal('stawkaVat')}
+                onOptionAdded={(refMethods) => { stawkaVatDropdownRef.current = refMethods; }}
+                enableDelete={true}
+                deleteApiEndpoint="/api/app-data/stawka-vat"
+                apiToken={apiToken}
+                onItemDeleted={(deletedId) => handleItemDeletedFromDropdown(deletedId, 'stawkaVat')}
+              />
+            </div>
+          </div>
+          
+          <div className={styles.formSection}>
+            <h3 className={styles.sectionHeader}>Kody produktu</h3>
+            <div className={styles.sectionContent}>
+              <ProductCodesSection formData={formData} handleInputChange={handleInputChange} />
+            </div>
+          </div>
+          
+          <div className={styles.formSection}>
+            <h3 className={styles.sectionHeader}>Składniki</h3>
+            <div className={styles.sectionContent}>
+              <IngredientsSection 
+                skladniki={formData.skladniki}
+                apiToken={apiToken}
+                handleSkladnikSelectedFromDropdown={handleSkladnikSelectedFromDropdown}
+                handleAddNewSkladnikManual={handleAddNewSkladnikManual}
+                handleRemoveSkladnik={handleRemoveSkladnik}
+              />
+            </div>
+          </div>
+          
+          <div className={styles.formSection}>
+            <h3 className={styles.sectionHeader}>Dostępność</h3>
+            <div className={styles.sectionContent}>
+              <AvailabilityCheckboxesSection formData={formData} handleInputChange={handleInputChange} />
+            </div>
+          </div>
+          
+          <div className={styles.formSection}>
+            <h3 className={styles.sectionHeader}>Opcje produktu</h3>
+            <div className={styles.sectionContent}>
+              <ProductOptionsCheckboxesSection formData={formData} handleInputChange={handleInputChange} />
+            </div>
+          </div>
+        </div>
+        
         <FormActionsSection onClose={onClose} isSubmitting={isSubmitting} />
       </form>
 
@@ -269,4 +309,3 @@ const ProductForm = ({ onClose }) => {
 };
 
 export default ProductForm;
-

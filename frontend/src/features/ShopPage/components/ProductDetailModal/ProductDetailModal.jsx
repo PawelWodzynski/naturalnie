@@ -56,7 +56,7 @@ const ProductDetailModal = ({ isOpen, onClose, productItem }) => {
       };
       addToCart(productForCart, modalQuantity); // Use modalQuantity
       console.log(`Dodano do koszyka z modala: Produkt ID ${p.id} (${p.nazwa}), Cena: ${p.cena}, Ilość: ${modalQuantity}`);
-      // onClose(); // Optionally close modal
+      onClose(); // Close modal after adding to cart
     } else {
       console.log(`Nie dodano do koszyka z modala: Produkt ID ${p.id}, Ilość musi być większa od 0.`);
     }
