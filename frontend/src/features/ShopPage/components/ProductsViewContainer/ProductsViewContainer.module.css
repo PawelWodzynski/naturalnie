@@ -20,6 +20,8 @@
   border-bottom-right-radius: 0;
   box-shadow: 0 2px 8px rgba(139, 69, 19, 0.1);
   border-bottom: 1px solid #e6d2b5; /* Add border to separate from table */
+  display: flex;
+  justify-content: center; /* Ensure horizontal centering */
 }
 
 /* Styles for the tightly grouped controls */
@@ -27,10 +29,13 @@
   display: flex;
   align-items: center;
   gap: 0;
-  margin: 8px 0; /* Reduced vertical margin */
-  width: 100%; /* Full width */
-  border-radius: 0;
+  margin: 8px auto; /* Changed from 8px 0 to 8px auto for horizontal centering */
+  width: fit-content; /* Changed to fit-content for better centering */
+  max-width: 80%; /* Limit maximum width */
+  border-radius: 4px; /* Added border radius for better appearance */
   overflow: hidden;
+  justify-content: center; /* Center the items horizontally */
+  box-shadow: 0 2px 4px rgba(139, 69, 19, 0.15); /* Added subtle shadow for better appearance */
 }
 
 .groupedControlsWrapper .filterItemContainer {

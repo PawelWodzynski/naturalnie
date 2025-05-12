@@ -1,5 +1,5 @@
 .showOrdersButton {
-  background-color: #b38b6d; /* Medium brown matching the rest of the site */
+  background-color: #e53935; /* Red color */
   color: white;
   border: none;
   padding: 8px 15px;
@@ -10,9 +10,9 @@
 }
 
 .showOrdersButton:hover {
-  background-color: #a07a5f; /* Slightly darker brown for hover */
+  background-color: #c62828; /* Darker red for hover */
 }
 
 .showOrdersButton:active {
-  background-color: #8b6b4d; /* Even darker brown when clicked */
+  background-color: #b71c1c; /* Even darker red when clicked */
 }
