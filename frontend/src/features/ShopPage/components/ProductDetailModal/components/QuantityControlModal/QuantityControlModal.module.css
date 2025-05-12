@@ -1,34 +1,48 @@
 .quantityControlContainer {
   display: flex;
   align-items: center;
-  justify-content: center; /* Center the items within the container */
+  justify-content: center;
+  margin: 5px 0;
 }
 
 .quantityButton {
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  color: #333;
+  background-color: #f5e9d9; /* Light oak background matching table */
+  border: 1px solid #e6d2b5; /* Light oak border matching table */
+  color: #5d4037; /* Dark brown text matching table */
   padding: 8px 12px;
   cursor: pointer;
   font-size: 1rem;
   border-radius: 4px;
   margin: 0 5px;
-  min-width: 30px; /* Ensure buttons have a decent size */
+  min-width: 30px;
   text-align: center;
+  transition: all 0.2s ease;
 }
 
 .quantityButton:hover {
-  background-color: #e0e0e0;
+  background-color: #e6d2b5; /* Light oak border as background for hover */
+  color: #9a0000; /* Dark red color for hover */
+}
+
+.quantityButton:active {
+  background-color: #d2b48c; /* Tan border matching table headers */
+}
+
+.quantityButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .quantityInput {
   width: 50px;
   text-align: center;
   padding: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid #e6d2b5; /* Light oak border matching table */
   border-radius: 4px;
   font-size: 1rem;
-  /* Remove spinners for a cleaner look if desired */
+  color: #5d4037; /* Dark brown text matching table */
+  background-color: #fff8f0; /* Very light cream background matching table */
+  /* Remove spinners for a cleaner look */
   -moz-appearance: textfield; /* Firefox */
 }
 
@@ -38,3 +52,8 @@
   margin: 0; /* Safari and Chrome */
 }
 
+.quantityInput:focus {
+  outline: none;
+  border-color: #9a0000; /* Dark red color when focused */
+  box-shadow: 0 0 0 2px rgba(154, 0, 0, 0.2); /* Subtle red glow */
+}

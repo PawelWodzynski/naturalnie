@@ -12,31 +12,37 @@
 }
 
 .modalContent {
-  background-color: white;
+  background-color: #fff8f0; /* Very light cream background matching table */
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(139, 69, 19, 0.2);
   width: 90%;
-  max-width: 800px; /* Adjust as needed */
+  max-width: 800px;
   max-height: 90vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  border: 1px solid #e6d2b5; /* Light oak border matching table */
 }
 
 .modalHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #e6d2b5; /* Light oak border matching table */
   padding-bottom: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
+  background-color: #f5e9d9; /* Light oak background matching table */
+  margin: -20px -20px 15px -20px;
+  padding: 15px 20px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 }
 
 .modalHeader h2 {
   margin: 0;
   font-size: 1.5rem;
-  color: #333;
+  color: #5d4037; /* Dark brown text matching table */
 }
 
 .closeButton {
@@ -44,107 +50,150 @@
   border: none;
   font-size: 1.8rem;
   cursor: pointer;
-  color: #888;
+  color: #5d4037; /* Dark brown text matching table */
   padding: 0;
   line-height: 1;
 }
 
 .closeButton:hover {
-  color: #000;
+  color: #9a0000; /* Dark red color for hover */
 }
 
-.modalBody {
-  display: flex;
-  flex-direction: column; /* Default for smaller screens */
-  gap: 20px;
-}
-
-@media (min-width: 768px) { /* For wider screens, arrange side-by-side */
-  .modalBody {
-    flex-direction: row;
-  }
-}
-
+/* Carousel section at the top */
 .carouselSection {
-  flex: 1; /* Takes up half the space on wider screens */
-  min-width: 0; /* Important for flex items to shrink properly */
-}
-
-.detailsSection {
-  flex: 1; /* Takes up half the space on wider screens */
-  min-width: 0;
+  width: 100%;
+  margin-bottom: 20px;
   display: flex;
-  flex-direction: column;
-  gap: 5px;
+  justify-content: center;
 }
 
-.detailsSection h3 {
-  margin-top: 0;
-  margin-bottom: 15px;
-  color: #444;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 5px;
-}
-
-.subHeader {
-  font-size: 1.1rem;
-  color: #555;
-  margin-top: 15px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid #f0f0f0;
-  padding-bottom: 5px;
-}
-
-.modalFooter {
-  border-top: 1px solid #eee;
-  padding-top: 15px;
-  margin-top: 20px;
+/* Key product info section (price and add to cart) */
+.keyInfoSection {
   display: flex;
-  justify-content: center; /* Changed to center */
-  align-items: center; /* Align items vertically */
-  position: relative; /* Added for absolute positioning of close button */
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f5e9d9; /* Light oak background matching table */
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #e6d2b5; /* Light oak border matching table */
+}
+
+.priceSection {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #5d4037; /* Dark brown text matching table */
+}
+
+.priceSection .detailValue {
+  font-size: 1.2rem;
+  color: #5d4037; /* Dark brown text matching table */
+}
+
+/* Style for the total price */
+.totalPrice {
+  font-size: 1.4rem !important;
+  font-weight: bold;
+  color: #b38b6d !important; /* Medium brown matching the site */
 }
 
 .cartControlsContainer {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center the quantity control and button below it */
-  /* No changes needed here for horizontal centering of the group itself, 
-     as .modalFooter now handles that. */
+  align-items: center;
+  gap: 10px;
 }
 
 .addToCartButton {
-  background-color: #28a745; /* Green color for add to cart */
+  background-color: #b38b6d; /* Medium brown matching the site */
   color: white;
   border: none;
-  padding: 8px 15px; /* Low height, adjust as needed */
+  padding: 8px 15px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
-  margin-top: 8px; /* Space between quantity control and this button */
-  width: 100%; /* Full width of its parent (.cartControlsContainer) */
-  box-sizing: border-box; /* Ensure padding doesn't add to width */
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
 }
 
 .addToCartButton:hover {
-  background-color: #218838;
+  background-color: #a07a5f; /* Slightly darker brown for hover */
+}
+
+.addToCartButton:active {
+  background-color: #8b6b4d; /* Even darker brown when clicked */
+}
+
+/* Main content area */
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .detailsSection {
+    flex-direction: row;
+  }
+}
+
+.detailsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.detailsColumn {
+  flex: 1;
+  min-width: 0;
+  background-color: #f5e9d9; /* Light oak background matching table */
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e6d2b5; /* Light oak border matching table */
+}
+
+.additionalDetailsSection {
+  background-color: #f5e9d9; /* Light oak background matching table */
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e6d2b5; /* Light oak border matching table */
+}
+
+.sectionHeader {
+  font-size: 1.1rem;
+  color: #5d4037; /* Dark brown text matching table */
+  margin-top: 0;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #e6d2b5; /* Light oak border matching table */
+  padding-bottom: 5px;
+}
+
+/* Footer */
+.modalFooter {
+  border-top: 1px solid #e6d2b5; /* Light oak border matching table */
+  padding-top: 15px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .footerCloseButton {
-  background-color: #6c757d;
+  background-color: #b38b6d; /* Medium brown matching the site */
   color: white;
   border: none;
   padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
-  position: absolute; /* Added */
-  right: 20px; /* Added - aligns with modalContent padding */
-  top: 50%; /* Added for vertical centering */
-  transform: translateY(-50%); /* Added for precise vertical centering */
+  transition: all 0.2s ease;
 }
 
 .footerCloseButton:hover {
-  background-color: #5a6268;
+  background-color: #a07a5f; /* Slightly darker brown for hover */
 }
 
+.footerCloseButton:active {
+  background-color: #8b6b4d; /* Even darker brown when clicked */
+}
