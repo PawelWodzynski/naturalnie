@@ -1,5 +1,5 @@
 .addCategoryButton {
-  background-color: #e53935; /* Red color */
+  background-color: #9a0000; /* Darker, less bright red */
   border: none;
   color: white;
   padding: 8px 16px;
@@ -14,9 +14,9 @@
 }
 
 .addCategoryButton:hover {
-  background-color: #c62828; /* Darker red for hover */
+  background-color: #7d0000; /* Darker red for hover */
 }
 
 .addCategoryButton:active {
-  background-color: #b71c1c; /* Even darker red when clicked */
+  background-color: #630000; /* Even darker red when clicked */
 }
