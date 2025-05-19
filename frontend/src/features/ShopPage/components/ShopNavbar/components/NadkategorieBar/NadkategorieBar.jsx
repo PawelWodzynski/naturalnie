@@ -3,6 +3,7 @@ import styles from './NadkategorieBar.module.css';
 import { useNadkategorie } from '../../../../../../context/NadkategorieContext' // Import the context hook
 
 const NadkategorieBar = ({ apiToken, onCategoryClick }) => {
+  const [activeCategory, setActiveCategory] = useState(null);
   const [nadkategorie, setNadkategorie] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -64,13 +65,18 @@ const NadkategorieBar = ({ apiToken, onCategoryClick }) => {
     return <div className={styles.noDataMessage}>Brak nadkategorii do wyświetlenia.</div>;
   }
 
+  const handleCategoryClick = (categoryId) => {
+    setActiveCategory(categoryId);
+    onCategoryClick && onCategoryClick(categoryId);
+  };
+
   return (
     <div className={styles.nadkategorieContainer}>
       {nadkategorie.map((nadkategoria) => (
         <button 
           key={nadkategoria.id} 
-          className={styles.nadkategoriaButton}
-          onClick={() => onCategoryClick && onCategoryClick(nadkategoria.id)}
+          className={`${styles.nadkategoriaButton} ${activeCategory === nadkategoria.id ? styles.activeButton : ''}`}
+          onClick={() => handleCategoryClick(nadkategoria.id)}
         >
           {nadkategoria.nazwa}
         </button>
@@ -80,4 +86,3 @@ const NadkategorieBar = ({ apiToken, onCategoryClick }) => {
 };
 
 export default NadkategorieBar;
-
